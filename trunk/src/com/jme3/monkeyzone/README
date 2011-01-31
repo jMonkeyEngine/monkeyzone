@@ -1,5 +1,15 @@
 MonkeyZone Dev Infos (for true monkeys only)
 
+MonkeyZone is a physics-based networking game. Both clients and server run the
+physics simulation, the clients send input data from the human and AI players
+to the server where they are broadcast. Additionally the server sends sync data
+in intervals for all objects in the game. When a human user or an AI presses
+a button/performs an action the actual logic for shooting or performing actions
+is done on the server and the results are broadcast as data messages for the
+entities. When the entity is controlled by an AI the actual AI code that
+determines where the entity should move and when it should perform an action
+is executed on the client.
+
 When understanding the terms used during the naming of classes, variables etc.
 most of the code should be self-explanatory. Most classes have javadoc descriptions
 on what they do, almost all methods have javadoc too.
