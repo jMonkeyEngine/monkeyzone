@@ -1,0 +1,28 @@
+MonkeyZone Dev Infos (for true monkeys only)
+
+When understanding the terms used during the naming of classes, variables etc.
+most of the code should be self-explanatory. Most classes have javadoc descriptions
+on what they do, almost all methods have javadoc too.
+
+Terminology:
+
+Player
+Logical human or AI player that can enter entities and generally act, uses
+ManualControl or AutonomousControl and sends net data when the AI
+is run on the client. Only exists as PlayerData "database" with long id.
+
+Entity
+Spatial with UserData, a world object like character, vehicle, box or factory.
+The base form is defined only by a String pointing to the j3o which already has
+all userdata like hitpoints, speed etc.
+
+Group
+Group of players that play together (human and AI), for now thats the same as
+client_id of human player for all AIControl'd players originating from that client.
+
+Client
+Computer connected to server
+
+User
+Human player using client
+
