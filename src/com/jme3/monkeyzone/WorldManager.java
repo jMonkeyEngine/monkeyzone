@@ -46,6 +46,7 @@ import com.jme3.monkeyzone.controls.AIControl;
 import com.jme3.monkeyzone.controls.AutonomousCharacterControl;
 import com.jme3.monkeyzone.controls.AutonomousControl;
 import com.jme3.monkeyzone.controls.AutonomousVehicleControl;
+import com.jme3.monkeyzone.controls.CharacterAnimControl;
 import com.jme3.monkeyzone.controls.ManualCharacterControl;
 import com.jme3.monkeyzone.controls.ManualControl;
 import com.jme3.monkeyzone.controls.ManualVehicleControl;
@@ -293,6 +294,7 @@ public class WorldManager {
         } else if (entityModel.getControl(CharacterControl.class) != null) {
             entityModel.getControl(CharacterControl.class).setPhysicsLocation(location);
             entityModel.getControl(CharacterControl.class).setPhysicsRotation(rotation.toRotationMatrix());
+            entityModel.addControl(new CharacterAnimControl());
         } else if (entityModel.getControl(VehicleControl.class) != null) {
             entityModel.getControl(VehicleControl.class).setPhysicsLocation(location);
             entityModel.getControl(VehicleControl.class).setPhysicsRotation(rotation.toRotationMatrix());
