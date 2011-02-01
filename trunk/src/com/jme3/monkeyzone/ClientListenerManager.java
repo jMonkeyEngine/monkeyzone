@@ -35,8 +35,6 @@ import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.control.VehicleControl;
 import com.jme3.bullet.objects.PhysicsRigidBody;
-import com.jme3.math.Quaternion;
-import com.jme3.math.Vector3f;
 import com.jme3.monkeyzone.messages.AutoControlMessage;
 import com.jme3.monkeyzone.messages.ChatMessage;
 import com.jme3.monkeyzone.messages.ClientJoinMessage;
@@ -360,8 +358,7 @@ public class ClientListenerManager {
 
                         public Void call() throws Exception {
                             CharacterControl control = worldManager.getEntity(msg.id).getControl(CharacterControl.class);
-                            control.setPhysicsLocation(msg.location);
-                            control.setPhysicsRotation(msg.rotation);
+                            msg.applyData(control);
                             return null;
                         }
                     });

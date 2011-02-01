@@ -87,7 +87,6 @@ public class ManualVehicleControl extends NetworkedManualControl {
 
     @Override
     public void setSpatial(Spatial spatial) {
-        //TODO: vehicle speed from userdata
         this.spatial = spatial;
         if (spatial == null) {
             return;
@@ -95,6 +94,10 @@ public class ManualVehicleControl extends NetworkedManualControl {
         this.control = spatial.getControl(VehicleControl.class);
         if (this.control == null) {
             throw new IllegalStateException("Cannot add ManualCharacterControl to Spatial without CharacterControl");
+        }
+        Float spatialSpeed = (Float) spatial.getUserData("speed");
+        if (spatialSpeed != null) {
+            speed = spatialSpeed;
         }
     }
 
