@@ -153,6 +153,7 @@ public class ManualCharacterControl extends NetworkedManualControl {
 
         //when we didnt get any new input we get walkDirection from the control,
         //it might have been updated by network sync
+        //TODO: Still sometimes rotating character makes rotation go out of sync..
         if (!gotInput) {
             walkDirection.set(control.getWalkDirection());
         }
