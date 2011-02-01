@@ -59,6 +59,7 @@ public class ServerSyncCharacterMessage extends Message {
         this.id = id;
         character.getPhysicsLocation(location);
         character.getPhysicsRotation(rotation);
+        this.walkDirection.set(character.getWalkDirection());
     }
 
     public void readData(CharacterControl character) {

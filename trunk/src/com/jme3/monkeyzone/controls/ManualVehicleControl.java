@@ -39,8 +39,8 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
 
 /**
- * Manual character control, implements ManualControl interface and controls
- * a character if available on the Spatial.
+ * Manual vehicle control, implements ManualControl interface and controls
+ * a vehicle if available on the Spatial.
  * @author normenhansen
  */
 public class ManualVehicleControl extends NetworkedManualControl {
