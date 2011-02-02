@@ -110,8 +110,7 @@ public class WorldManager {
         syncManager = new PhysicsSyncManager(app, server);
         syncManager.addObject(-1, this);
         syncManager.setMessageTypes(AutoControlMessage.class,
-                ManualControlMessage.class,
-                ClientActionMessage.class);
+                ManualControlMessage.class);
     }
 
     public WorldManager(Application app, Node rootNode, PhysicsSpace space, Client client) {
