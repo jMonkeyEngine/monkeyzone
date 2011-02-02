@@ -105,7 +105,6 @@ public class PhysicsSyncManager implements MessageListener {
     protected void doMessage(AbstractPhysicsSyncMessage message) {
         PhysicsCollisionObject control = physicsObjects.get(message.id);
         if (control != null) {
-//            System.out.println("apply data");
             message.applyData(control);
         } else {
             Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.WARNING, "Cannot find physics object for: {0}", message.id);
@@ -115,17 +114,15 @@ public class PhysicsSyncManager implements MessageListener {
     protected void applyMessageDelay(AbstractPhysicsSyncMessage msg) {
         double thisoffset = msg.time - this.time;
         if (thisoffset > offset) {
-            System.out.println("Set offset to: " + offset);
             offset = thisoffset;
-        }
-        double delayTime = (msg.time + offset);
-        if (delayTime > 0) {
-            msg.delayTime = delayTime;
-            messageQueue.add(msg);
-        } else if (offset < delayTime) {
-            offset = delayTime;
             doMessage(msg);
+            return;
+        } else {
+            offset = offset - .1;
         }
+        double delayTime = time - (msg.time - offset);
+        msg.delayTime = delayTime;
+        messageQueue.add(msg);
     }
 
     protected void sendSyncData() {
@@ -152,7 +149,6 @@ public class PhysicsSyncManager implements MessageListener {
     public void broadcast(AbstractPhysicsSyncMessage msg) {
         msg.time = time;
         try {
-//            System.out.println("boradcast messg!");
             server.broadcast(msg);
         } catch (IOException ex) {
             Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.SEVERE, "Cannot broadcast message: {0}", ex);

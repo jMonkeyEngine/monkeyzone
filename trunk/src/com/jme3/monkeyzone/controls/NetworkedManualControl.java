@@ -36,6 +36,7 @@ import com.jme3.export.JmeImporter;
 import com.jme3.monkeyzone.messages.ClientActionMessage;
 import com.jme3.monkeyzone.messages.ManualControlMessage;
 import com.jme3.network.connection.Client;
+import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.Control;
 import java.io.IOException;
@@ -50,6 +51,7 @@ public abstract class NetworkedManualControl implements ManualControl {
 
     protected boolean enabled = true;
     private Client client;
+    private PhysicsSyncManager server;
     private long entity_id;
     private float lastSteerX = 0;
     private float lastSteerY = 0;
@@ -62,6 +64,11 @@ public abstract class NetworkedManualControl implements ManualControl {
 
     public NetworkedManualControl(Client client, long entity_id) {
         this.client = client;
+        this.entity_id = entity_id;
+    }
+
+    public NetworkedManualControl(PhysicsSyncManager server, long entity_id) {
+        this.server = server;
         this.entity_id = entity_id;
     }
 
@@ -132,11 +139,14 @@ public abstract class NetworkedManualControl implements ManualControl {
 
     private void sendMoveSync() {
         try {
-            System.out.println("send control!");
             client.send(new ManualControlMessage(entity_id, lastSteerX, lastSteerY, lastMoveX, lastMoveY, lastMoveZ));
         } catch (IOException ex) {
             Logger.getLogger(NetworkedManualControl.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public PhysicsSyncManager getSyncManager() {
+        return server;
     }
 
     public void setEnabled(boolean enabled) {

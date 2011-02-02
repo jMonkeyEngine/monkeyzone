@@ -51,7 +51,6 @@ import com.jme3.monkeyzone.controls.CharacterAnimControl;
 import com.jme3.monkeyzone.controls.ManualCharacterControl;
 import com.jme3.monkeyzone.controls.ManualControl;
 import com.jme3.monkeyzone.controls.ManualVehicleControl;
-import com.jme3.monkeyzone.controls.ServerLinkControl;
 import com.jme3.monkeyzone.messages.ManualControlMessage;
 import com.jme3.monkeyzone.messages.ServerAddEntityMessage;
 import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
@@ -314,9 +313,6 @@ public class WorldManager {
             entityModel.setLocalTranslation(location);
             entityModel.setLocalRotation(rotation);
         }
-        if (isServer()) {
-            entityModel.addControl(new ServerLinkControl(syncManager));
-        }
         entities.put(id, entityModel);
         space.addAll(entityModel);
         worldRoot.attachChild(entityModel);
@@ -361,6 +357,7 @@ public class WorldManager {
         }
         Spatial spat = entities.remove(id);
         spat.removeFromParent();
+        syncManager.removeObject(id);
         if (spat.getControl(PhysicsControl.class) != null) {
             space.remove(spat.getControl(PhysicsControl.class));
         }
@@ -440,16 +437,24 @@ public class WorldManager {
             if (spat.getControl(CharacterControl.class) != null) {
                 if (client != null) {
                     //add net sending for users own manual control
-                    spat.addControl(new ManualCharacterControl(client, entityId));
+                    if (entityId == PlayerData.getLongData(myPlayerId, "entity_id")) {
+                        spat.addControl(new ManualCharacterControl(client, entityId));
+                    } else {
+                        spat.addControl(new ManualCharacterControl());
+                    }
                 } else {
-                    spat.addControl(new ManualCharacterControl());
+                    spat.addControl(new ManualCharacterControl(syncManager, entityId));
                 }
             } else if (spat.getControl(VehicleControl.class) != null) {
                 if (client != null) {
                     //add net sending for users own manual control
-                    spat.addControl(new ManualVehicleControl(client, entityId));
+                    if (entityId == PlayerData.getLongData(myPlayerId, "entity_id")) {
+                        spat.addControl(new ManualVehicleControl(client, entityId));
+                    } else {
+                        spat.addControl(new ManualVehicleControl());
+                    }
                 } else {
-                    spat.addControl(new ManualVehicleControl());
+                    spat.addControl(new ManualVehicleControl(syncManager, entityId));
                 }
             }
         }
@@ -570,50 +575,6 @@ public class WorldManager {
     public void playEntityAnimation(long entityId, String animationName, int channel) {
     }
 
-//    /**
-//     * applies an auto control message (AI)
-//     * @param msg
-//     */
-//    public void applyAutoControl(AutoControlMessage msg) {
-//        //TODO: check if call is valid in that the player controls an entity that belongs to him (possible exploit)
-//        //TODO: check of msg amounts <= 1
-//        if (isServer()) {
-//            try {
-//                //broadcasting movement to others only, client sets it itself (maybe change in future?)
-//                //client is synced later via global sync
-//                server.broadcastExcept(msg.getClient(), msg);
-//            } catch (IOException ex) {
-//                Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, "Cant broadcast control message: {0}", ex);
-//            }
-//        }
-//        AutonomousControl control = getEntity(msg.id).getControl(AutonomousControl.class);
-//        control.aimAt(msg.aimAt);
-//        control.moveTo(msg.moveTo);
-//    }
-//
-//    /**
-//     * applies a manual control message (human)
-//     * @param msg
-//     */
-//    public void applyManualControl(ManualControlMessage msg) {
-//        //TODO: check if call is valid in that the player controls an entity that belongs to him (possible exploit)
-//        //TODO: check of msg amounts <= 1
-//        if (isServer()) {
-//            try {
-//                //broadcasting movement to others only, client sets it itself (maybe change in future?)
-//                //client is synced later via global sync
-//                server.broadcastExcept(msg.getClient(), msg);
-//            } catch (IOException ex) {
-//                Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, "Cant broadcast control message: {0}", ex);
-//            }
-//        }
-//        ManualControl control = getEntity(msg.id).getControl(ManualControl.class);
-//        control.steerX(msg.aimX);
-//        control.steerY(msg.aimY);
-//        control.moveX(msg.moveX);
-//        control.moveY(msg.moveY);
-//        control.moveZ(msg.moveZ);
-//    }
     public void update(float tpf) {
         syncManager.update(tpf);
     }
