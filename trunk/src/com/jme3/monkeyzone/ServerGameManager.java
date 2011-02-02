@@ -189,18 +189,17 @@ public class ServerGameManager {
         }
     }
 
-    /**
-     * the update loop, mainly sends out sync infos in intervals
-     * @param tpf
-     */
-    public synchronized void update(float tpf) {
-        if (!running) {
-            return;
-        }
-        syncTimer += tpf;
-        if (syncTimer >= Globals.NETWORK_SYNC_FREQUENCY) {
-            worldManager.sendSyncData();
-            syncTimer = 0;
-        }
-    }
+//    /**
+//     * the update loop, mainly sends out sync infos in intervals
+//     * @param tpf
+//     */
+//    public synchronized void update(float tpf) {
+//        if (!running) {
+//            return;
+//        }
+//        syncTimer += tpf;
+//        if (syncTimer >= Globals.NETWORK_SYNC_FREQUENCY) {
+//            syncTimer = 0;
+//        }
+//    }
 }

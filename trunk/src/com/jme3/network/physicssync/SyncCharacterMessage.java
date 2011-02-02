@@ -29,57 +29,43 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.monkeyzone.messages;
+package com.jme3.network.physicssync;
 
-import com.jme3.bullet.objects.PhysicsRigidBody;
-import com.jme3.math.Matrix3f;
+import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Vector3f;
-import com.jme3.network.message.Message;
 import com.jme3.network.serializing.Serializable;
 
 /**
- * sync message for physics objects (RigidBody + Vehicle)
+ * Sync message for character objects
  * @author normenhansen
  */
 @Serializable()
-public class ServerSyncRigidBodyMessage extends Message {
+public class SyncCharacterMessage extends AbstractPhysicsSyncMessage {
 
-    public long id;
-    public Vector3f location;
-    public Matrix3f rotation;
-    public Vector3f linearVelocity;
-    public Vector3f angularVelocity;
+    public Vector3f location = new Vector3f();
+    public Vector3f walkDirection = new Vector3f();
+    public Vector3f viewDirection = new Vector3f();
 
-    public ServerSyncRigidBodyMessage() {
+    public SyncCharacterMessage() {
     }
 
-    public ServerSyncRigidBodyMessage(long id, PhysicsRigidBody body) {
+    public SyncCharacterMessage(long id, CharacterControl character) {
         setReliable(false);
         this.id = id;
-        location = body.getPhysicsLocation(new Vector3f());
-        rotation = body.getPhysicsRotation(new Matrix3f());
-        linearVelocity = new Vector3f();
-        body.getLinearVelocity(linearVelocity);
-        angularVelocity = new Vector3f();
-        body.getAngularVelocity(angularVelocity);
+        character.getPhysicsLocation(location);
+        this.walkDirection.set(character.getWalkDirection());
+        this.viewDirection.set(character.getViewDirection());
     }
 
-    public void readData(PhysicsRigidBody body) {
-        location = body.getPhysicsLocation(new Vector3f());
-        rotation = body.getPhysicsRotation(new Matrix3f());
-        linearVelocity = new Vector3f();
-        body.getLinearVelocity(linearVelocity);
-        angularVelocity = new Vector3f();
-        body.getAngularVelocity(angularVelocity);
+    public void readData(CharacterControl character) {
+        character.getPhysicsLocation(location);
+        this.walkDirection.set(character.getWalkDirection());
+        this.viewDirection.set(character.getViewDirection());
     }
 
-    public void applyData(PhysicsRigidBody body) {
-        if (body == null) {
-            return;
-        }
-        body.setPhysicsLocation(location);
-        body.setPhysicsRotation(rotation);
-        body.setLinearVelocity(linearVelocity);
-        body.setAngularVelocity(angularVelocity);
+    public void applyData(Object character) {
+        ((CharacterControl)character).setPhysicsLocation(location);
+        ((CharacterControl)character).setWalkDirection(walkDirection);
+        ((CharacterControl)character).setViewDirection(viewDirection);
     }
 }

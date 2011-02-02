@@ -59,29 +59,24 @@ public class ManualVehicleControl extends NetworkedManualControl {
     }
 
     @Override
-    public void steerX(float amount) {
-        super.steerX(amount);
+    public void doSteerX(float amount) {
     }
 
     @Override
-    public void steerY(float amount) {
-        super.steerY(amount);
+    public void doSteerY(float amount) {
     }
 
     @Override
-    public void moveX(float amount) {
-        super.moveX(amount);
+    public void doMoveX(float amount) {
         steer = amount * FastMath.QUARTER_PI * 0.5f;
     }
 
     @Override
-    public void moveY(float amount) {
-        super.moveY(amount);
+    public void doMoveY(float amount) {
     }
 
     @Override
-    public void moveZ(float amount) {
-        super.moveZ(amount);
+    public void doMoveZ(float amount) {
         accelerate = amount * speed;
     }
 

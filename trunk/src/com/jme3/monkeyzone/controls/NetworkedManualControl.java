@@ -69,6 +69,8 @@ public abstract class NetworkedManualControl implements ManualControl {
         if (client != null && amount != lastSteerX) {
             lastSteerX = amount;
             sendMoveSync();
+        } else {
+            doSteerX(amount);
         }
     }
 
@@ -76,6 +78,8 @@ public abstract class NetworkedManualControl implements ManualControl {
         if (client != null && amount != lastSteerY) {
             lastSteerY = amount;
             sendMoveSync();
+        } else {
+            doSteerY(amount);
         }
     }
 
@@ -83,6 +87,8 @@ public abstract class NetworkedManualControl implements ManualControl {
         if (client != null && amount != lastMoveX) {
             lastMoveX = amount;
             sendMoveSync();
+        } else {
+            doMoveX(amount);
         }
     }
 
@@ -90,6 +96,8 @@ public abstract class NetworkedManualControl implements ManualControl {
         if (client != null && amount != lastMoveY) {
             lastMoveY = amount;
             sendMoveSync();
+        } else {
+            doMoveY(amount);
         }
     }
 
@@ -97,8 +105,20 @@ public abstract class NetworkedManualControl implements ManualControl {
         if (client != null && amount != lastMoveZ) {
             lastMoveZ = amount;
             sendMoveSync();
+        } else {
+            doMoveZ(amount);
         }
     }
+
+    public abstract void doSteerX(float amount);
+
+    public abstract void doSteerY(float amount);
+
+    public abstract void doMoveX(float amount);
+
+    public abstract void doMoveY(float amount);
+
+    public abstract void doMoveZ(float amount);
 
     public void button(int button, boolean pressed) {
         if (client != null) {
@@ -110,20 +130,21 @@ public abstract class NetworkedManualControl implements ManualControl {
         }
     }
 
+    private void sendMoveSync() {
+        try {
+            System.out.println("send control!");
+            client.send(new ManualControlMessage(entity_id, lastSteerX, lastSteerY, lastMoveX, lastMoveY, lastMoveZ));
+        } catch (IOException ex) {
+            Logger.getLogger(NetworkedManualControl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
 
     public boolean isEnabled() {
         return enabled;
-    }
-
-    private void sendMoveSync() {
-        try {
-            client.send(new ManualControlMessage(entity_id, lastSteerX, lastSteerY, lastMoveX, lastMoveY, lastMoveZ));
-        } catch (IOException ex) {
-            Logger.getLogger(NetworkedManualControl.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     public Control cloneForSpatial(Spatial spatial) {

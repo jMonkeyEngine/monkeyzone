@@ -29,47 +29,55 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.monkeyzone.messages;
+package com.jme3.network.physicssync;
 
-import com.jme3.bullet.control.CharacterControl;
+import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Matrix3f;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.network.message.Message;
 import com.jme3.network.serializing.Serializable;
 
 /**
- * Sync message for character objects
+ * sync message for physics objects (RigidBody + Vehicle)
  * @author normenhansen
  */
 @Serializable()
-public class ServerSyncCharacterMessage extends Message {
+public class SyncRigidBodyMessage extends AbstractPhysicsSyncMessage {
 
-    public long id;
-    public Vector3f location = new Vector3f();
-    public Vector3f walkDirection = new Vector3f();
-    public Vector3f viewDirection = new Vector3f();
+    public Vector3f location;
+    public Matrix3f rotation;
+    public Vector3f linearVelocity;
+    public Vector3f angularVelocity;
 
-    public ServerSyncCharacterMessage() {
+    public SyncRigidBodyMessage() {
     }
 
-    public ServerSyncCharacterMessage(long id, CharacterControl character) {
+    public SyncRigidBodyMessage(long id, PhysicsRigidBody body) {
         setReliable(false);
         this.id = id;
-        character.getPhysicsLocation(location);
-        this.walkDirection.set(character.getWalkDirection());
-        this.viewDirection.set(character.getViewDirection());
+        location = body.getPhysicsLocation(new Vector3f());
+        rotation = body.getPhysicsRotation(new Matrix3f());
+        linearVelocity = new Vector3f();
+        body.getLinearVelocity(linearVelocity);
+        angularVelocity = new Vector3f();
+        body.getAngularVelocity(angularVelocity);
     }
 
-    public void readData(CharacterControl character) {
-        character.getPhysicsLocation(location);
-        this.walkDirection.set(character.getWalkDirection());
-        this.viewDirection.set(character.getViewDirection());
+    public void readData(PhysicsRigidBody body) {
+        location = body.getPhysicsLocation(new Vector3f());
+        rotation = body.getPhysicsRotation(new Matrix3f());
+        linearVelocity = new Vector3f();
+        body.getLinearVelocity(linearVelocity);
+        angularVelocity = new Vector3f();
+        body.getAngularVelocity(angularVelocity);
     }
 
-    public void applyData(CharacterControl character) {
-        character.setPhysicsLocation(location);
-        character.setWalkDirection(walkDirection);
-        character.setViewDirection(viewDirection);
+    public void applyData(Object body) {
+        if (body == null) {
+            return;
+        }
+        ((PhysicsRigidBody)body).setPhysicsLocation(location);
+        ((PhysicsRigidBody)body).setPhysicsRotation(rotation);
+        ((PhysicsRigidBody)body).setLinearVelocity(linearVelocity);
+        ((PhysicsRigidBody)body).setAngularVelocity(angularVelocity);
     }
 }

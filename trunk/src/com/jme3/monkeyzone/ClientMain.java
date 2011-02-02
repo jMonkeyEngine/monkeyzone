@@ -112,7 +112,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         bulletState.getPhysicsSpace().setAccuracy(Globals.PHYSICS_FPS);
         startNifty();
 
-        worldManager = new WorldManager(rootNode, assetManager, bulletState.getPhysicsSpace(), client);
+        worldManager = new WorldManager(this, rootNode, bulletState.getPhysicsSpace(), client);
         //adding/creating controls later attached to user controlled spatial
         worldManager.addUserControl(chaseCam);
         worldManager.addUserControl(new UserInputControl(inputManager));
@@ -346,6 +346,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
 
     @Override
     public void simpleUpdate(float tpf) {
+        worldManager.update(tpf);
         effectsManager.update(tpf);
     }
 
