@@ -51,6 +51,7 @@ public abstract class NetworkedAutonomousControl implements AutonomousControl {
     private Client client;
     private long entity_id;
     protected boolean enabled = true;
+    protected Spatial spatial;
 
     public NetworkedAutonomousControl() {
     }
@@ -78,24 +79,15 @@ public abstract class NetworkedAutonomousControl implements AutonomousControl {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public boolean isMoving() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    public abstract boolean isMoving();
 
-    public Vector3f getTargetLocation() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    public abstract Vector3f getTargetLocation();
 
-    public Vector3f getCurrentLocation() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    public abstract Vector3f getCurrentLocation();
 
-    public Vector3f getAimDirection() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    public abstract Vector3f getAimDirection();
 
-    public void setSpatial(Spatial spatial) {
-    }
+    public abstract void setSpatial(Spatial spatial);
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;

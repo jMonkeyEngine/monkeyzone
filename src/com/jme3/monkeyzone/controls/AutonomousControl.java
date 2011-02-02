@@ -36,7 +36,8 @@ import com.jme3.scene.control.Control;
 
 /**
  * Basic interface for autonomous controls, these are used by AI to move entities.
- * When a NavigationControl is available on the spatial, it should be used to navigate.
+ * When a NavigationControl is available on the spatial, it should be used by
+ * the AutonomousControl to navigate.
  * @author normenhansen
  */
 public interface AutonomousControl extends Control {

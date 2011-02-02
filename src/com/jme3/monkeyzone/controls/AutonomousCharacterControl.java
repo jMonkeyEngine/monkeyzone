@@ -51,9 +51,10 @@ public class AutonomousCharacterControl extends NetworkedAutonomousControl {
     private Vector3f targetLocation = new Vector3f();
     private Vector3f vector = new Vector3f();
     private Vector3f vector2 = new Vector3f();
+    private Vector3f lookAt = new Vector3f();
     private boolean moving = false;
     private CharacterControl characterControl;
-    private Spatial spatial;
+    private Vector3f aimDirection = new Vector3f(Vector3f.UNIT_Z);
 
     public AutonomousCharacterControl() {
     }
@@ -65,18 +66,17 @@ public class AutonomousCharacterControl extends NetworkedAutonomousControl {
     @Override
     public boolean aimAt(Vector3f direction) {
         super.aimAt(direction);
-        throw new UnsupportedOperationException("Not supported yet.");
+        return true;
     }
 
     @Override
     public Vector3f getAimDirection() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return aimDirection;
     }
 
     @Override
     public void doAction(int action, boolean activate) {
         super.doAction(action, activate);
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -105,7 +105,10 @@ public class AutonomousCharacterControl extends NetworkedAutonomousControl {
         if (navControl != null) {
             checkRadius = navControl.getEntityRadius();
         }
-        speed = (Float) spatial.getUserData("speed");
+        Float spatialSpeed = (Float) spatial.getUserData("speed");
+        if (spatialSpeed != null) {
+            speed = spatialSpeed;
+        }
         characterControl = spatial.getControl(CharacterControl.class);
     }
 
@@ -126,7 +129,7 @@ public class AutonomousCharacterControl extends NetworkedAutonomousControl {
 
     @Override
     public void update(float tpf) {
-        if (!moving) {
+        if (!moving || !enabled) {
             return;
         }
         characterControl.getPhysicsLocation(vector);
@@ -142,6 +145,8 @@ public class AutonomousCharacterControl extends NetworkedAutonomousControl {
             vector2.multLocal(speed);
             characterControl.setWalkDirection(vector2);
         }
+        lookAt.set(spatial.getWorldTranslation()).addLocal(vector2);
+        spatial.lookAt(lookAt, Vector3f.UNIT_Y);
     }
 
     public void render(RenderManager rm, ViewPort vp) {
