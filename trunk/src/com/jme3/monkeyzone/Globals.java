@@ -38,7 +38,7 @@ package com.jme3.monkeyzone;
 public class Globals {
 
     public static final String VERSION = "MonkeyZone v0.1";
-    public static final String DEFAULT_SERVER = "127.0.0.1";//192.168.1.24//127.0.0.1
+    public static final String DEFAULT_SERVER = "192.168.1.24";//192.168.1.24//127.0.0.1
     public static final int PROTOCOL_VERSION = 1;
     public static final int CLIENT_VERSION = 1;
     public static final int SERVER_VERSION = 1;
