@@ -59,12 +59,8 @@ public class ManualCharacterControl extends NetworkedManualControl {
     private float zAmount = 0;
     private float xAmount = 0;
     private float speed = 10f * Globals.PHYSICS_FPS;
-    private boolean backwards = false;
-    private Vector3f lastStrafe = new Vector3f();
-    private Vector3f lastWalk = new Vector3f();
+//    private boolean backwards = false;
     private Vector3f lookAt = new Vector3f();
-    private float lastStrafeValue = 0;
-    private float lastWalkValue = 0;
     private boolean gotInput = false;
 
     public ManualCharacterControl() {
@@ -90,12 +86,8 @@ public class ManualCharacterControl extends NetworkedManualControl {
     public void moveX(float amount) {
         super.moveX(amount);
         xAmount = amount;
-        if (amount != lastStrafeValue) {
-            walkDirection.addLocal(lastStrafe.multLocal(-1));
-            lastStrafe.set(directionLeft.mult(speed * amount));
-            walkDirection.addLocal(lastStrafe);
-            lastStrafeValue = amount;
-        }
+        walkDirection.set(directionForward).multLocal(speed * zAmount);
+        walkDirection.addLocal(directionLeft.mult(speed * xAmount));
         gotInput = true;
     }
 
@@ -108,17 +100,8 @@ public class ManualCharacterControl extends NetworkedManualControl {
     public void moveZ(float amount) {
         super.moveZ(amount);
         zAmount = amount;
-        if (amount < 0) {
-            backwards = true;
-        } else {
-            backwards = false;
-        }
-        if (amount != lastWalkValue) {
-            walkDirection.addLocal(lastWalk.multLocal(-1));
-            lastWalk.set(directionForward.mult(speed * amount));
-            walkDirection.addLocal(lastWalk);
-            lastWalkValue = amount;
-        }
+        walkDirection.set(directionForward).multLocal(speed * zAmount);
+        walkDirection.addLocal(directionLeft.mult(speed * xAmount));
         gotInput = true;
     }
 
@@ -156,31 +139,28 @@ public class ManualCharacterControl extends NetworkedManualControl {
 
         //when we didnt get any new input we get walkDirection from the control,
         //it might have been updated by network sync
-        //TODO: Still sometimes rotating character makes rotation go out of sync..
         if (!gotInput) {
             walkDirection.set(control.getWalkDirection());
-        }
-        if (walkDirection.length() != 0) {
-            if (backwards) {
-                directionForward.set(walkDirection).normalizeLocal().multLocal(-1);
-            } else {
-                directionForward.set(walkDirection).normalizeLocal();
+            if (walkDirection.length() != 0) {
+                //try deriving directionForward..
+                //TODO: fails sometimes
+                directionForward.set(walkDirection);
+                directionForward.addLocal(directionLeft.multLocal(speed * -xAmount)).multLocal(Math.copySign(1, zAmount)).normalizeLocal();
+                directionLeft.set(directionForward).normalizeLocal();
+                ROTATE_90.multLocal(directionLeft);
             }
-            directionLeft.set(walkDirection).normalizeLocal();
-            ROTATE_90.multLocal(directionLeft);
         }
 
-        //rotate all vectors around the rotation amount
-        directionQuat.fromAngleAxis((FastMath.PI) * tpf * rotAmount, Vector3f.UNIT_Y);
-        directionQuat.multLocal(walkDirection);
-        directionQuat.multLocal(directionForward);
-        directionQuat.multLocal(directionLeft);
-        directionQuat.multLocal(lastStrafe);
-        directionQuat.multLocal(lastWalk);
+        if (rotAmount != 0) {
+            //rotate all vectors around the rotation amount
+            directionQuat.fromAngleAxis((FastMath.PI) * tpf * rotAmount, Vector3f.UNIT_Y);
+            directionQuat.multLocal(walkDirection);
+            directionQuat.multLocal(directionForward);
+            directionQuat.multLocal(directionLeft);
+        }
 
         control.setWalkDirection(walkDirection);
-
-        //look in walkDirection
+        //look in directionForward
         lookAt.set(spatial.getWorldTranslation()).addLocal(directionForward);
         spatial.lookAt(lookAt, Vector3f.UNIT_Y);
         gotInput = false;
