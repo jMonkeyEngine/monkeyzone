@@ -32,9 +32,7 @@
 package com.jme3.monkeyzone.messages;
 
 import com.jme3.bullet.collision.PhysicsCollisionObject;
-import com.jme3.monkeyzone.controls.ManualControl;
 import com.jme3.monkeyzone.controls.NetworkedManualControl;
-import com.jme3.monkeyzone.controls.ServerLinkControl;
 import com.jme3.network.physicssync.AbstractPhysicsSyncMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.scene.Spatial;
@@ -75,20 +73,16 @@ public class ManualControlMessage extends AbstractPhysicsSyncMessage {
 
     @Override
     public void applyData(Object object) {
-        System.out.println("got manual");
         NetworkedManualControl netControl = ((Spatial) ((PhysicsCollisionObject) object).getUserObject()).getControl(NetworkedManualControl.class);
         if (netControl != null) {
-            System.out.println("apply manual");
+            if (netControl.getSyncManager() != null) {
+                netControl.getSyncManager().broadcast(this);
+            }
             netControl.doMoveX(moveX);
             netControl.doMoveY(moveY);
             netControl.doMoveZ(moveZ);
             netControl.doSteerX(aimX);
             netControl.doSteerY(aimY);
-            ServerLinkControl serverLink = ((Spatial) ((PhysicsCollisionObject) object).getUserObject()).getControl(ServerLinkControl.class);
-            if (serverLink != null) {
-                System.out.println("send manual");
-                serverLink.getSyncManager().broadcast(this);
-            }
         }
     }
 }

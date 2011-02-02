@@ -34,6 +34,7 @@ package com.jme3.monkeyzone.controls;
 import com.jme3.bullet.control.VehicleControl;
 import com.jme3.math.FastMath;
 import com.jme3.network.connection.Client;
+import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
@@ -56,6 +57,10 @@ public class ManualVehicleControl extends NetworkedManualControl {
 
     public ManualVehicleControl(Client client, long entityId) {
         super(client, entityId);
+    }
+
+    public ManualVehicleControl(PhysicsSyncManager server, long entityId) {
+        super(server, entityId);
     }
 
     @Override
