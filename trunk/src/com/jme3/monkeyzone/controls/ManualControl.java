@@ -39,15 +39,15 @@ import com.jme3.scene.control.Control;
  */
 public interface ManualControl extends Control {
 
-    public void steerX(float amount);
+    public void steerX(float value);
 
-    public void steerY(float amount);
+    public void steerY(float value);
 
-    public void moveX(float amount);
+    public void moveX(float value);
 
-    public void moveY(float amount);
+    public void moveY(float value);
 
-    public void moveZ(float amount);
+    public void moveZ(float value);
 
     public void button(int button, boolean pressed);
 
