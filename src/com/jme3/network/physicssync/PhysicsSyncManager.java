@@ -34,7 +34,7 @@ public class PhysicsSyncManager implements MessageListener {
     HashMap<Long, PhysicsCollisionObject> physicsObjects = new HashMap<Long, PhysicsCollisionObject>();
     double time = 0;
     double offset = Double.MIN_VALUE;
-    double latency = 0;
+//    double latency = 0;
     float syncTimer = 0;
     List<AbstractPhysicsSyncMessage> messageQueue = new LinkedList<AbstractPhysicsSyncMessage>();
     Application app;
@@ -113,12 +113,11 @@ public class PhysicsSyncManager implements MessageListener {
 
     protected void applyMessageDelay(AbstractPhysicsSyncMessage msg) {
         double thisoffset = msg.time - this.time;
+        //TODO: offset only gets bigger -> worst message time = global delay
         if (thisoffset > offset) {
             offset = thisoffset;
             doMessage(msg);
             return;
-        } else {
-            offset = offset - .1;
         }
         double delayTime = time - (msg.time - offset);
         msg.delayTime = delayTime;
