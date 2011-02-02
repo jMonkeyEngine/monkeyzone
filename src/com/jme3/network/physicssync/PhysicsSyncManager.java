@@ -34,7 +34,7 @@ public class PhysicsSyncManager implements MessageListener {
     HashMap<Long, Object> syncObjects = new HashMap<Long, Object>();
     double time = 0;
     double offset = Double.MIN_VALUE;
-    double maxDelay = .075;
+    private double maxDelay = .075;
     double offsetChangeValue = .06;
     float syncTimer = 0;
     List<PhysicsSyncMessage> messageQueue = new LinkedList<PhysicsSyncMessage>();
@@ -116,28 +116,17 @@ public class PhysicsSyncManager implements MessageListener {
     protected void delayMessage(PhysicsSyncMessage message) {
         double thisoffset = this.time - message.time;
         if (thisoffset > offset) {
-            changeOffset(thisoffset - offset);
+            offset = thisoffset;
             Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.INFO, "upping offset {0}", thisoffset);
         }
         double delayTime = (message.time + offset) - time;
         if (delayTime > maxDelay) {
-            if (delayTime > 1) {
-                changeOffset(-1);
-            } else {
-                changeOffset(-offsetChangeValue);
-            }
+            offset -= delayTime - maxDelay;
+            delayTime = maxDelay;
             Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.INFO, "downing high delaytime", delayTime);
         }
         message.delayTime = delayTime;
         messageQueue.add(message);
-    }
-
-    private void changeOffset(double amount) {
-        offset += amount;
-        for (Iterator<PhysicsSyncMessage> it = messageQueue.iterator(); it.hasNext();) {
-            PhysicsSyncMessage physicsSyncMessage = it.next();
-            physicsSyncMessage.delayTime += amount;
-        }
     }
 
     protected void sendSyncData() {
@@ -216,5 +205,13 @@ public class PhysicsSyncManager implements MessageListener {
 
     public Client getClient() {
         return client;
+    }
+
+    public double getMaxDelay() {
+        return maxDelay;
+    }
+
+    public void setMaxDelay(double maxDelay) {
+        this.maxDelay = maxDelay;
     }
 }
