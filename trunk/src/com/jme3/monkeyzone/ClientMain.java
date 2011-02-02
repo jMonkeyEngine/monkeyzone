@@ -89,7 +89,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
     private NiftyJmeDisplay niftyDisplay;
     private TextRenderer statusText;
     private Client client;
-    private ClientListenerManager listenerManager;
+    private ClientNetListener listenerManager;
     private BulletAppState bulletState;
     private ChaseCamera chaseCam;
 
@@ -117,7 +117,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         worldManager.addUserControl(chaseCam);
         worldManager.addUserControl(new UserInputControl(inputManager));
         effectsManager = new ClientEffectsManager(assetManager, worldManager);
-        listenerManager = new ClientListenerManager(this, client, worldManager, effectsManager);
+        listenerManager = new ClientNetListener(this, client, worldManager, effectsManager);
     }
 
     /**

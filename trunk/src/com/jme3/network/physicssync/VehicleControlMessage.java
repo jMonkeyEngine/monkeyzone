@@ -12,7 +12,7 @@ import com.jme3.network.serializing.Serializable;
  * @author normenhansen
  */
 @Serializable()
-public class VehicleControlMessage extends AbstractPhysicsSyncMessage {
+public class VehicleControlMessage extends PhysicsSyncMessage {
 
     public float steer;
     public float accelerate;

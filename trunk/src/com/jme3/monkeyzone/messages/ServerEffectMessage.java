@@ -33,7 +33,9 @@ package com.jme3.monkeyzone.messages;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.network.message.Message;
+import com.jme3.monkeyzone.ClientEffectsManager;
+import com.jme3.monkeyzone.WorldManager;
+import com.jme3.network.physicssync.PhysicsSyncMessage;
 import com.jme3.network.serializing.Serializable;
 
 /**
@@ -41,26 +43,33 @@ import com.jme3.network.serializing.Serializable;
  * @author normenhansen
  */
 @Serializable()
-public class ServerEffectMessage extends Message {
+public class ServerEffectMessage extends PhysicsSyncMessage {
 
-    public long id;
+    public long effectId;
     public String name;
     public Vector3f location;
     public Quaternion rotation;
     public Vector3f endLocation;
     public Quaternion endRotation;
-    public float time;
+    public float playTime;
 
     public ServerEffectMessage() {
     }
 
     public ServerEffectMessage(long id, String name, Vector3f location, Quaternion rotation, Vector3f endLocation, Quaternion endRotation, float time) {
-        this.id = id;
+        this.syncId = -2;
+        this.effectId = id;
         this.name = name;
         this.location = location;
         this.rotation = rotation;
         this.endLocation = endLocation;
         this.endRotation = endRotation;
-        this.time = time;
+        this.playTime = time;
+    }
+
+    @Override
+    public void applyData(Object object) {
+        ClientEffectsManager manager = (ClientEffectsManager) object;
+        manager.playEffect(effectId, name, location, endLocation, rotation, endRotation, playTime);
     }
 }

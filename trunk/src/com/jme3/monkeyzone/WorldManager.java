@@ -51,19 +51,19 @@ import com.jme3.monkeyzone.controls.CharacterAnimControl;
 import com.jme3.monkeyzone.controls.ManualCharacterControl;
 import com.jme3.monkeyzone.controls.ManualControl;
 import com.jme3.monkeyzone.controls.ManualVehicleControl;
+import com.jme3.monkeyzone.messages.AutoControlMessage;
+import com.jme3.monkeyzone.messages.ClientActionMessage;
 import com.jme3.monkeyzone.messages.ManualControlMessage;
 import com.jme3.monkeyzone.messages.ServerAddEntityMessage;
 import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
 import com.jme3.monkeyzone.messages.ServerEnterEntityMessage;
 import com.jme3.monkeyzone.messages.ServerRemoveEntityMessage;
+import com.jme3.monkeyzone.messages.ServerRemovePlayerMessage;
 import com.jme3.network.connection.Client;
 import com.jme3.network.connection.Server;
 import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.network.physicssync.SyncCharacterMessage;
 import com.jme3.network.physicssync.SyncRigidBodyMessage;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import jme3tools.navmesh.NavMesh;
 import jme3tools.navmesh.util.NavMeshGenerator;
 import com.jme3.scene.Geometry;
@@ -108,7 +108,10 @@ public class WorldManager {
         this.space = space;
         this.server = server;
         syncManager = new PhysicsSyncManager(app, server);
-        syncManager.setMessageTypes(ManualControlMessage.class);
+        syncManager.addObject(-1, this);
+        syncManager.setMessageTypes(AutoControlMessage.class,
+                ManualControlMessage.class,
+                ClientActionMessage.class);
     }
 
     public WorldManager(Application app, Node rootNode, PhysicsSpace space, Client client) {
@@ -118,7 +121,16 @@ public class WorldManager {
         this.space = space;
         this.client = client;
         syncManager = new PhysicsSyncManager(app, client);
-        syncManager.setMessageTypes(ManualControlMessage.class, SyncCharacterMessage.class, SyncRigidBodyMessage.class);
+        syncManager.addObject(-1, this);
+        syncManager.setMessageTypes(ManualControlMessage.class,
+                SyncCharacterMessage.class,
+                SyncRigidBodyMessage.class,
+                ServerEnterEntityMessage.class,
+                ServerAddEntityMessage.class,
+                ServerAddPlayerMessage.class,
+                //ServerEffectMessage.class,
+                ServerRemoveEntityMessage.class,
+                ServerRemovePlayerMessage.class);
     }
 
     public boolean isServer() {
@@ -260,11 +272,7 @@ public class WorldManager {
      */
     public void addPlayer(long id, int groupId, String name, int aiId) {
         if (isServer()) {
-            try {
-                server.broadcast(new ServerAddPlayerMessage(id, name, groupId, aiId));
-            } catch (IOException ex) {
-                Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            syncManager.broadcast(new ServerAddPlayerMessage(id, name, groupId, aiId));
         }
         PlayerData player = null;
         player = new PlayerData(id, groupId, name, aiId);
@@ -290,11 +298,7 @@ public class WorldManager {
      */
     public void addEntity(long id, String modelIdentifier, Vector3f location, Quaternion rotation) {
         if (isServer()) {
-            try {
-                server.broadcast(new ServerAddEntityMessage(id, modelIdentifier, location, rotation));
-            } catch (IOException ex) {
-                Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            syncManager.broadcast(new ServerAddEntityMessage(id, modelIdentifier, location, rotation));
         }
         Node entityModel = (Node) assetManager.loadModel(modelIdentifier);
         if (entityModel.getControl(RigidBodyControl.class) != null) {
@@ -349,11 +353,7 @@ public class WorldManager {
      */
     public void removeEntity(long id) {
         if (isServer()) {
-            try {
-                server.broadcast(new ServerRemoveEntityMessage(id));
-            } catch (IOException ex) {
-                Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            syncManager.broadcast(new ServerRemoveEntityMessage(id));
         }
         Spatial spat = entities.remove(id);
         spat.removeFromParent();
@@ -385,11 +385,7 @@ public class WorldManager {
      */
     public void enterEntity(long playerId, long entityId) {
         if (isServer()) {
-            try {
-                server.broadcast(new ServerEnterEntityMessage(playerId, entityId));
-            } catch (IOException ex) {
-                Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, "Cant broadcast enter entity: {0}", ex);
-            }
+            syncManager.broadcast(new ServerEnterEntityMessage(playerId, entityId));
         }
         long curEntity = PlayerData.getLongData(playerId, "entity_id");
         if (curEntity != -1) {
@@ -577,6 +573,10 @@ public class WorldManager {
 
     public void update(float tpf) {
         syncManager.update(tpf);
+    }
+
+    public PhysicsSyncManager getSyncManager() {
+        return syncManager;
     }
 
     public static class AIControlFactory {

@@ -31,7 +31,8 @@
  */
 package com.jme3.monkeyzone.messages;
 
-import com.jme3.network.message.Message;
+import com.jme3.monkeyzone.WorldManager;
+import com.jme3.network.physicssync.PhysicsSyncMessage;
 import com.jme3.network.serializing.Serializable;
 
 /**
@@ -39,13 +40,21 @@ import com.jme3.network.serializing.Serializable;
  * @author normenhansen
  */
 @Serializable()
-public class ServerRemovePlayerMessage extends Message {
-    public long id;
+public class ServerRemovePlayerMessage extends PhysicsSyncMessage {
+
+    public long playerId;
 
     public ServerRemovePlayerMessage() {
     }
 
     public ServerRemovePlayerMessage(long id) {
-        this.id = id;
+        id = -1;
+        this.playerId = id;
+    }
+
+    @Override
+    public void applyData(Object object) {
+        WorldManager manager = (WorldManager) object;
+        manager.removePlayer(playerId);
     }
 }

@@ -49,7 +49,6 @@ import com.jme3.monkeyzone.messages.ServerPlayerDataMessage;
 import com.jme3.monkeyzone.messages.ServerRemoveEntityMessage;
 import com.jme3.monkeyzone.messages.ServerRemovePlayerMessage;
 import com.jme3.monkeyzone.messages.StartGameMessage;
-import com.jme3.monkeyzone.messages.StatusMessage;
 import com.jme3.network.serializing.Serializer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -95,7 +94,6 @@ public class Util {
         Serializer.registerClass(ServerRemoveEntityMessage.class);
         Serializer.registerClass(ServerRemovePlayerMessage.class);
         Serializer.registerClass(StartGameMessage.class);
-        Serializer.registerClass(StatusMessage.class);
     }
 
 }

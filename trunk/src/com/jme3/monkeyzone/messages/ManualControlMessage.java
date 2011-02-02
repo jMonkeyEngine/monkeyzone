@@ -33,7 +33,7 @@ package com.jme3.monkeyzone.messages;
 
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.monkeyzone.controls.NetworkedManualControl;
-import com.jme3.network.physicssync.AbstractPhysicsSyncMessage;
+import com.jme3.network.physicssync.PhysicsSyncMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.scene.Spatial;
 
@@ -42,7 +42,7 @@ import com.jme3.scene.Spatial;
  * @author normenhansen
  */
 @Serializable()
-public class ManualControlMessage extends AbstractPhysicsSyncMessage {
+public class ManualControlMessage extends PhysicsSyncMessage {
 
     public float aimX;
     public float aimY;
@@ -54,7 +54,7 @@ public class ManualControlMessage extends AbstractPhysicsSyncMessage {
     }
 
     public ManualControlMessage(ManualControlMessage msg) {
-        this.id = msg.id;
+        this.syncId = msg.syncId;
         this.aimX = msg.aimX;
         this.aimY = msg.aimY;
         this.moveX = msg.moveX;
@@ -63,7 +63,7 @@ public class ManualControlMessage extends AbstractPhysicsSyncMessage {
     }
 
     public ManualControlMessage(long id, float aimX, float aimY, float moveX, float moveY, float moveZ) {
-        this.id = id;
+        this.syncId = id;
         this.aimX = aimX;
         this.aimY = aimY;
         this.moveX = moveX;
