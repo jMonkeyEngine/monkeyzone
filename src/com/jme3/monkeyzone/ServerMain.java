@@ -52,7 +52,7 @@ public class ServerMain extends SimpleApplication {
     public static void main(String[] args) {
         AppSettings settings = new AppSettings(true);
         settings.setFrameRate(Globals.SCENE_FPS);
-        settings.setRenderer("NULL");
+//        settings.setRenderer("NULL");
         for (int i = 0; i < args.length; i++) {
             String string = args[i];
             if ("-display".equals(string)) {
@@ -85,14 +85,14 @@ public class ServerMain extends SimpleApplication {
         getStateManager().attach(bulletState);
         bulletState.getPhysicsSpace().setDeterministic(Globals.PHYSICS_DETERMINISTIC);
         bulletState.getPhysicsSpace().setAccuracy(Globals.PHYSICS_FPS);
-        worldManager = new WorldManager(rootNode, assetManager, bulletState.getPhysicsSpace(), server);
+        worldManager = new WorldManager(this, rootNode, bulletState.getPhysicsSpace(), server);
         gameManager = new ServerGameManager(server, worldManager, bulletState.getPhysicsSpace());
         listenerManager = new ServerListenerManager(this, server, worldManager, gameManager);
     }
 
     @Override
     public void simpleUpdate(float tpf) {
-        gameManager.update(tpf);
+        worldManager.update(tpf);
     }
 
     @Override

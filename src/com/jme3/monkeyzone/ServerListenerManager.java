@@ -266,25 +266,26 @@ public class ServerListenerManager {
                 if (!checkClient(message)) {
                     return;
                 }
-                if (message instanceof ManualControlMessage) {
-                    final ManualControlMessage msg = (ManualControlMessage) message;
-                    app.enqueue(new Callable<Void>() {
-
-                        public Void call() throws Exception {
-                            worldManager.applyManualControl(msg);
-                            return null;
-                        }
-                    });
-                } else if (message instanceof AutoControlMessage) {
-                    final AutoControlMessage msg = (AutoControlMessage) message;
-                    app.enqueue(new Callable<Void>() {
-
-                        public Void call() throws Exception {
-                            worldManager.applyAutoControl(msg);
-                            return null;
-                        }
-                    });
-                } else if (message instanceof ClientActionMessage) {
+//                if (message instanceof ManualControlMessage) {
+//                    final ManualControlMessage msg = (ManualControlMessage) message;
+//                    app.enqueue(new Callable<Void>() {
+//
+//                        public Void call() throws Exception {
+//                            worldManager.applyManualControl(msg);
+//                            return null;
+//                        }
+//                    });
+//                } else if (message instanceof AutoControlMessage) {
+//                    final AutoControlMessage msg = (AutoControlMessage) message;
+//                    app.enqueue(new Callable<Void>() {
+//
+//                        public Void call() throws Exception {
+//                            worldManager.applyAutoControl(msg);
+//                            return null;
+//                        }
+//                    });
+//                } else
+                if (message instanceof ClientActionMessage) {
                     final ClientActionMessage msg = (ClientActionMessage) message;
                     app.enqueue(new Callable<Void>() {
 

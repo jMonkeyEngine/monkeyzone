@@ -31,16 +31,21 @@
  */
 package com.jme3.monkeyzone.messages;
 
-import com.jme3.network.message.Message;
+import com.jme3.bullet.collision.PhysicsCollisionObject;
+import com.jme3.monkeyzone.controls.ManualControl;
+import com.jme3.monkeyzone.controls.NetworkedManualControl;
+import com.jme3.monkeyzone.controls.ServerLinkControl;
+import com.jme3.network.physicssync.AbstractPhysicsSyncMessage;
 import com.jme3.network.serializing.Serializable;
+import com.jme3.scene.Spatial;
 
 /**
  * Manual (human) control message, used bidirectional
  * @author normenhansen
  */
 @Serializable()
-public class ManualControlMessage extends Message{
-    public long id;
+public class ManualControlMessage extends AbstractPhysicsSyncMessage {
+
     public float aimX;
     public float aimY;
     public float moveX;
@@ -68,4 +73,22 @@ public class ManualControlMessage extends Message{
         this.moveZ = moveZ;
     }
 
+    @Override
+    public void applyData(Object object) {
+        System.out.println("got manual");
+        NetworkedManualControl netControl = ((Spatial) ((PhysicsCollisionObject) object).getUserObject()).getControl(NetworkedManualControl.class);
+        if (netControl != null) {
+            System.out.println("apply manual");
+            netControl.doMoveX(moveX);
+            netControl.doMoveY(moveY);
+            netControl.doMoveZ(moveZ);
+            netControl.doSteerX(aimX);
+            netControl.doSteerY(aimY);
+            ServerLinkControl serverLink = ((Spatial) ((PhysicsCollisionObject) object).getUserObject()).getControl(ServerLinkControl.class);
+            if (serverLink != null) {
+                System.out.println("send manual");
+                serverLink.getSyncManager().broadcast(this);
+            }
+        }
+    }
 }

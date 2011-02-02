@@ -43,11 +43,11 @@ import com.jme3.monkeyzone.messages.ManualControlMessage;
 import com.jme3.monkeyzone.messages.ServerAddEntityMessage;
 import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
 import com.jme3.monkeyzone.messages.ServerEffectMessage;
-import com.jme3.monkeyzone.messages.ServerSyncCharacterMessage;
+import com.jme3.network.physicssync.SyncCharacterMessage;
 import com.jme3.monkeyzone.messages.ServerEnterEntityMessage;
 import com.jme3.monkeyzone.messages.ServerEntityDataMessage;
 import com.jme3.monkeyzone.messages.ServerJoinMessage;
-import com.jme3.monkeyzone.messages.ServerSyncRigidBodyMessage;
+import com.jme3.network.physicssync.SyncRigidBodyMessage;
 import com.jme3.monkeyzone.messages.ServerPlayerDataMessage;
 import com.jme3.monkeyzone.messages.ServerRemoveEntityMessage;
 import com.jme3.monkeyzone.messages.ServerRemovePlayerMessage;
@@ -82,8 +82,8 @@ public class ClientListenerManager {
         this.effectsManager = effectsManager;
         createLoginListeners();
         createWorldListeners();
-        createControlListeners();
-        createSyncListeners();
+//        createControlListeners();
+//        createSyncListeners();
         createEffectListeners();
     }
 
@@ -299,98 +299,98 @@ public class ClientListenerManager {
         }, StartGameMessage.class, ServerAddPlayerMessage.class, ServerAddEntityMessage.class, ServerRemoveEntityMessage.class, ServerRemovePlayerMessage.class, ServerPlayerDataMessage.class, ServerEntityDataMessage.class, ServerEnterEntityMessage.class);
     }
 
-    /**
-     * listens to entity control messages
-     */
-    private void createControlListeners() {
-        client.addMessageListener(new MessageListener() {
+//    /**
+//     * listens to entity control messages
+//     */
+//    private void createControlListeners() {
+//        client.addMessageListener(new MessageListener() {
+//
+//            public void messageReceived(Message message) {
+//                /*
+//                 * manual keypress/control
+//                 */
+//                if (message instanceof ManualControlMessage) {
+//                    final ManualControlMessage msg = (ManualControlMessage) message;
+//                    app.enqueue(new Callable<Void>() {
+//
+//                        public Void call() throws Exception {
+//                            worldManager.applyManualControl(msg);
+//                            return null;
+//                        }
+//                    });
+//                }/*
+//                 * autonomous control message
+//                 */ else if (message instanceof AutoControlMessage) {
+//                    final AutoControlMessage msg = (AutoControlMessage) message;
+//                    app.enqueue(new Callable<Void>() {
+//
+//                        public Void call() throws Exception {
+//                            worldManager.applyAutoControl(msg);
+//                            return null;
+//                        }
+//                    });
+//                }
+//            }
+//
+//            public void messageSent(Message message) {
+//            }
+//
+//            public void objectReceived(Object object) {
+//            }
+//
+//            public void objectSent(Object object) {
+//            }
+//        }, ManualControlMessage.class, AutoControlMessage.class);
+//    }
 
-            public void messageReceived(Message message) {
-                /*
-                 * manual keypress/control
-                 */
-                if (message instanceof ManualControlMessage) {
-                    final ManualControlMessage msg = (ManualControlMessage) message;
-                    app.enqueue(new Callable<Void>() {
-
-                        public Void call() throws Exception {
-                            worldManager.applyManualControl(msg);
-                            return null;
-                        }
-                    });
-                }/*
-                 * autonomous control message
-                 */ else if (message instanceof AutoControlMessage) {
-                    final AutoControlMessage msg = (AutoControlMessage) message;
-                    app.enqueue(new Callable<Void>() {
-
-                        public Void call() throws Exception {
-                            worldManager.applyAutoControl(msg);
-                            return null;
-                        }
-                    });
-                }
-            }
-
-            public void messageSent(Message message) {
-            }
-
-            public void objectReceived(Object object) {
-            }
-
-            public void objectSent(Object object) {
-            }
-        }, ManualControlMessage.class, AutoControlMessage.class);
-    }
-
-    /**
-     * listens sync messages
-     */
-    private void createSyncListeners() {
-        client.addMessageListener(new MessageListener() {
-
-            public void messageReceived(Message message) {
-                /*
-                 * character sync
-                 */
-                if (message instanceof ServerSyncCharacterMessage) {
-                    final ServerSyncCharacterMessage msg = (ServerSyncCharacterMessage) message;
-                    app.enqueue(new Callable<Void>() {
-
-                        public Void call() throws Exception {
-                            CharacterControl control = worldManager.getEntity(msg.id).getControl(CharacterControl.class);
-                            msg.applyData(control);
-                            return null;
-                        }
-                    });
-                }/*
-                 * physics sync
-                 */ else if (message instanceof ServerSyncRigidBodyMessage) {
-                    final ServerSyncRigidBodyMessage msg = (ServerSyncRigidBodyMessage) message;
-                    app.enqueue(new Callable<Void>() {
-
-                        public Void call() throws Exception {
-                            PhysicsRigidBody control = worldManager.getEntity(msg.id).getControl(RigidBodyControl.class);
-                            if (control == null) {
-                                control = worldManager.getEntity(msg.id).getControl(VehicleControl.class);
-                            }
-                            msg.applyData(control);
-                            return null;
-                        }
-                    });
-                }
-            }
-
-            public void messageSent(Message message) {
-            }
-
-            public void objectReceived(Object object) {
-            }
-
-            public void objectSent(Object object) {
-            }
-        }, ServerSyncRigidBodyMessage.class, ServerSyncCharacterMessage.class);
-    }
+//    /**
+//     * listens sync messages
+//     */
+//    private void createSyncListeners() {
+//        client.addMessageListener(new MessageListener() {
+//
+//            public void messageReceived(Message message) {
+//                /*
+//                 * character sync
+//                 */
+//                if (message instanceof SyncCharacterMessage) {
+//                    final SyncCharacterMessage msg = (SyncCharacterMessage) message;
+//                    app.enqueue(new Callable<Void>() {
+//
+//                        public Void call() throws Exception {
+//                            CharacterControl control = worldManager.getEntity(msg.id).getControl(CharacterControl.class);
+//                            msg.applyData(control);
+//                            return null;
+//                        }
+//                    });
+//                }/*
+//                 * physics sync
+//                 */ else if (message instanceof SyncRigidBodyMessage) {
+//                    final SyncRigidBodyMessage msg = (SyncRigidBodyMessage) message;
+//                    app.enqueue(new Callable<Void>() {
+//
+//                        public Void call() throws Exception {
+//                            PhysicsRigidBody control = worldManager.getEntity(msg.id).getControl(RigidBodyControl.class);
+//                            if (control == null) {
+//                                control = worldManager.getEntity(msg.id).getControl(VehicleControl.class);
+//                            }
+//                            msg.applyData(control);
+//                            return null;
+//                        }
+//                    });
+//                }
+//            }
+//
+//            public void messageSent(Message message) {
+//            }
+//
+//            public void objectReceived(Object object) {
+//            }
+//
+//            public void objectSent(Object object) {
+//            }
+//        }, SyncRigidBodyMessage.class, SyncCharacterMessage.class);
+//    }
 
     /**
      * listens to effect messages

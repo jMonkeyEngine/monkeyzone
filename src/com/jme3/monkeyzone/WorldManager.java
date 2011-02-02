@@ -31,6 +31,7 @@
  */
 package com.jme3.monkeyzone;
 
+import com.jme3.app.Application;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.DesktopAssetManager;
 import com.jme3.bullet.PhysicsSpace;
@@ -50,16 +51,17 @@ import com.jme3.monkeyzone.controls.CharacterAnimControl;
 import com.jme3.monkeyzone.controls.ManualCharacterControl;
 import com.jme3.monkeyzone.controls.ManualControl;
 import com.jme3.monkeyzone.controls.ManualVehicleControl;
-import com.jme3.monkeyzone.messages.AutoControlMessage;
+import com.jme3.monkeyzone.controls.ServerLinkControl;
 import com.jme3.monkeyzone.messages.ManualControlMessage;
 import com.jme3.monkeyzone.messages.ServerAddEntityMessage;
 import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
-import com.jme3.monkeyzone.messages.ServerSyncCharacterMessage;
 import com.jme3.monkeyzone.messages.ServerEnterEntityMessage;
-import com.jme3.monkeyzone.messages.ServerSyncRigidBodyMessage;
 import com.jme3.monkeyzone.messages.ServerRemoveEntityMessage;
 import com.jme3.network.connection.Client;
 import com.jme3.network.connection.Server;
+import com.jme3.network.physicssync.PhysicsSyncManager;
+import com.jme3.network.physicssync.SyncCharacterMessage;
+import com.jme3.network.physicssync.SyncRigidBodyMessage;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -93,23 +95,31 @@ public class WorldManager {
     private Node rootNode;
     private Node worldRoot;
     private HashMap<Long, Spatial> entities = new HashMap<Long, Spatial>();
+    private Application app;
     private AssetManager assetManager;
     private NavMeshGenerator generator = new NavMeshGenerator();
     private PhysicsSpace space;
     private List<Control> userControls = new LinkedList<Control>();
+    private PhysicsSyncManager syncManager;
 
-    public WorldManager(Node rootNode, AssetManager manager, PhysicsSpace space, Server server) {
+    public WorldManager(Application app, Node rootNode, PhysicsSpace space, Server server) {
+        this.app = app;
         this.rootNode = rootNode;
-        this.assetManager = manager;
+        this.assetManager = app.getAssetManager();
         this.space = space;
         this.server = server;
+        syncManager = new PhysicsSyncManager(app, server);
+        syncManager.setMessageTypes(ManualControlMessage.class);
     }
 
-    public WorldManager(Node rootNode, AssetManager manager, PhysicsSpace space, Client client) {
+    public WorldManager(Application app, Node rootNode, PhysicsSpace space, Client client) {
+        this.app = app;
         this.rootNode = rootNode;
-        this.assetManager = manager;
+        this.assetManager = app.getAssetManager();
         this.space = space;
         this.client = client;
+        syncManager = new PhysicsSyncManager(app, client);
+        syncManager.setMessageTypes(ManualControlMessage.class, SyncCharacterMessage.class, SyncRigidBodyMessage.class);
     }
 
     public boolean isServer() {
@@ -291,15 +301,21 @@ public class WorldManager {
         if (entityModel.getControl(RigidBodyControl.class) != null) {
             entityModel.getControl(RigidBodyControl.class).setPhysicsLocation(location);
             entityModel.getControl(RigidBodyControl.class).setPhysicsRotation(rotation.toRotationMatrix());
+            syncManager.addObject(id, entityModel.getControl(RigidBodyControl.class));
         } else if (entityModel.getControl(CharacterControl.class) != null) {
             entityModel.getControl(CharacterControl.class).setPhysicsLocation(location);
             entityModel.addControl(new CharacterAnimControl());
+            syncManager.addObject(id, entityModel.getControl(CharacterControl.class));
         } else if (entityModel.getControl(VehicleControl.class) != null) {
             entityModel.getControl(VehicleControl.class).setPhysicsLocation(location);
             entityModel.getControl(VehicleControl.class).setPhysicsRotation(rotation.toRotationMatrix());
+            syncManager.addObject(id, entityModel.getControl(VehicleControl.class));
         } else {
             entityModel.setLocalTranslation(location);
             entityModel.setLocalRotation(rotation);
+        }
+        if (isServer()) {
+            entityModel.addControl(new ServerLinkControl(syncManager));
         }
         entities.put(id, entityModel);
         space.addAll(entityModel);
@@ -554,79 +570,52 @@ public class WorldManager {
     public void playEntityAnimation(long entityId, String animationName, int channel) {
     }
 
-    /**
-     * applies an auto control message (AI)
-     * @param msg
-     */
-    public void applyAutoControl(AutoControlMessage msg) {
-        //TODO: check if call is valid in that the player controls an entity that belongs to him (possible exploit)
-        //TODO: check of msg amounts <= 1
-        if (isServer()) {
-            try {
-                //broadcasting movement to others only, client sets it itself (maybe change in future?)
-                //client is synced later via global sync
-                server.broadcastExcept(msg.getClient(), msg);
-            } catch (IOException ex) {
-                Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, "Cant broadcast control message: {0}", ex);
-            }
-        }
-        AutonomousControl control = getEntity(msg.id).getControl(AutonomousControl.class);
-        control.aimAt(msg.aimAt);
-        control.moveTo(msg.moveTo);
-    }
-
-    /**
-     * applies a manual control message (human)
-     * @param msg
-     */
-    public void applyManualControl(ManualControlMessage msg) {
-        //TODO: check if call is valid in that the player controls an entity that belongs to him (possible exploit)
-        //TODO: check of msg amounts <= 1
-        if (isServer()) {
-            try {
-                //broadcasting movement to others only, client sets it itself (maybe change in future?)
-                //client is synced later via global sync
-                server.broadcastExcept(msg.getClient(), msg);
-            } catch (IOException ex) {
-                Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, "Cant broadcast control message: {0}", ex);
-            }
-        }
-        ManualControl control = getEntity(msg.id).getControl(ManualControl.class);
-        control.steerX(msg.aimX);
-        control.steerY(msg.aimY);
-        control.moveX(msg.moveX);
-        control.moveY(msg.moveY);
-        control.moveZ(msg.moveZ);
-    }
-
-    /**
-     * sends info about all entities
-     */
-    public void sendSyncData() {
-        try {
-            for (Iterator<Entry<Long, Spatial>> it = entities.entrySet().iterator(); it.hasNext();) {
-                Entry<Long, Spatial> entry = it.next();
-                if (entry.getValue().getControl(VehicleControl.class) != null) {
-                    VehicleControl control = entry.getValue().getControl(VehicleControl.class);
-                    if (control.isActive()) {
-                        ServerSyncRigidBodyMessage msg = new ServerSyncRigidBodyMessage(entry.getKey(), control);
-                        server.broadcast(msg);
-                    }
-                } else if (entry.getValue().getControl(RigidBodyControl.class) != null) {
-                    RigidBodyControl control = entry.getValue().getControl(RigidBodyControl.class);
-                    if (control.isActive()) {
-                        ServerSyncRigidBodyMessage msg = new ServerSyncRigidBodyMessage(entry.getKey(), control);
-                        server.broadcast(msg);
-                    }
-                } else if (entry.getValue().getControl(CharacterControl.class) != null) {
-                    CharacterControl control = entry.getValue().getControl(CharacterControl.class);
-                    ServerSyncCharacterMessage msg = new ServerSyncCharacterMessage(entry.getKey(), control);
-                    server.broadcast(msg);
-                }
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//    /**
+//     * applies an auto control message (AI)
+//     * @param msg
+//     */
+//    public void applyAutoControl(AutoControlMessage msg) {
+//        //TODO: check if call is valid in that the player controls an entity that belongs to him (possible exploit)
+//        //TODO: check of msg amounts <= 1
+//        if (isServer()) {
+//            try {
+//                //broadcasting movement to others only, client sets it itself (maybe change in future?)
+//                //client is synced later via global sync
+//                server.broadcastExcept(msg.getClient(), msg);
+//            } catch (IOException ex) {
+//                Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, "Cant broadcast control message: {0}", ex);
+//            }
+//        }
+//        AutonomousControl control = getEntity(msg.id).getControl(AutonomousControl.class);
+//        control.aimAt(msg.aimAt);
+//        control.moveTo(msg.moveTo);
+//    }
+//
+//    /**
+//     * applies a manual control message (human)
+//     * @param msg
+//     */
+//    public void applyManualControl(ManualControlMessage msg) {
+//        //TODO: check if call is valid in that the player controls an entity that belongs to him (possible exploit)
+//        //TODO: check of msg amounts <= 1
+//        if (isServer()) {
+//            try {
+//                //broadcasting movement to others only, client sets it itself (maybe change in future?)
+//                //client is synced later via global sync
+//                server.broadcastExcept(msg.getClient(), msg);
+//            } catch (IOException ex) {
+//                Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, "Cant broadcast control message: {0}", ex);
+//            }
+//        }
+//        ManualControl control = getEntity(msg.id).getControl(ManualControl.class);
+//        control.steerX(msg.aimX);
+//        control.steerY(msg.aimY);
+//        control.moveX(msg.moveX);
+//        control.moveY(msg.moveY);
+//        control.moveZ(msg.moveZ);
+//    }
+    public void update(float tpf) {
+        syncManager.update(tpf);
     }
 
     public static class AIControlFactory {
