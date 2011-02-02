@@ -33,7 +33,8 @@ package com.jme3.monkeyzone.messages;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.network.message.Message;
+import com.jme3.monkeyzone.WorldManager;
+import com.jme3.network.physicssync.PhysicsSyncMessage;
 import com.jme3.network.serializing.Serializable;
 
 /**
@@ -41,9 +42,9 @@ import com.jme3.network.serializing.Serializable;
  * @author normenhansen
  */
 @Serializable()
-public class ServerAddEntityMessage extends Message {
+public class ServerAddEntityMessage extends PhysicsSyncMessage {
 
-    public long id;
+    public long entityId;
     public String modelIdentifier;
     public Vector3f location;
     public Quaternion rotation;
@@ -52,10 +53,15 @@ public class ServerAddEntityMessage extends Message {
     }
 
     public ServerAddEntityMessage(long id, String modelIdentifier, Vector3f location, Quaternion rotation) {
-        this.id = id;
+        this.syncId = -1;
+        this.entityId = id;
         this.modelIdentifier = modelIdentifier;
         this.location = location;
         this.rotation = rotation;
     }
-    
+
+    public void applyData(Object obj) {
+        WorldManager manager = (WorldManager) obj;
+        manager.addEntity(entityId, modelIdentifier, location, rotation);
+    }
 }

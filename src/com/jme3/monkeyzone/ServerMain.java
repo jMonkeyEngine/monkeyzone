@@ -76,7 +76,7 @@ public class ServerMain extends SimpleApplication {
     }
     private WorldManager worldManager;
     private ServerGameManager gameManager;
-    private ServerListenerManager listenerManager;
+    private ServerNetListener listenerManager;
     private BulletAppState bulletState;
 
     @Override
@@ -86,8 +86,8 @@ public class ServerMain extends SimpleApplication {
         bulletState.getPhysicsSpace().setDeterministic(Globals.PHYSICS_DETERMINISTIC);
         bulletState.getPhysicsSpace().setAccuracy(Globals.PHYSICS_FPS);
         worldManager = new WorldManager(this, rootNode, bulletState.getPhysicsSpace(), server);
-        gameManager = new ServerGameManager(server, worldManager, bulletState.getPhysicsSpace());
-        listenerManager = new ServerListenerManager(this, server, worldManager, gameManager);
+        gameManager = new ServerGameManager(worldManager.getSyncManager(), worldManager, bulletState.getPhysicsSpace());
+        listenerManager = new ServerNetListener(this, server, worldManager, gameManager);
     }
 
     @Override

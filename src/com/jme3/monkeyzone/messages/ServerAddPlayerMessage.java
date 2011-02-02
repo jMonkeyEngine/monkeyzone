@@ -31,7 +31,8 @@
  */
 package com.jme3.monkeyzone.messages;
 
-import com.jme3.network.message.Message;
+import com.jme3.monkeyzone.WorldManager;
+import com.jme3.network.physicssync.PhysicsSyncMessage;
 import com.jme3.network.serializing.Serializable;
 
 /**
@@ -39,8 +40,8 @@ import com.jme3.network.serializing.Serializable;
  * @author normenhansen
  */
 @Serializable()
-public class ServerAddPlayerMessage extends Message{
-    public long id;
+public class ServerAddPlayerMessage extends PhysicsSyncMessage{
+    public long playerId;
     public String name;
     public int group_id;
     public int ai_id;
@@ -49,10 +50,17 @@ public class ServerAddPlayerMessage extends Message{
     }
 
     public ServerAddPlayerMessage(long id, String name, int group_id, int ai_id) {
-        this.id = id;
+        this.syncId = -1;
+        this.playerId = id;
         this.name = name;
         this.group_id = group_id;
         this.ai_id = ai_id;
+    }
+
+    @Override
+    public void applyData(Object object) {
+        WorldManager manager = (WorldManager) object;
+        manager.addPlayer(playerId, group_id, name, ai_id);
     }
 
 }

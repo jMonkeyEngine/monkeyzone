@@ -12,18 +12,20 @@ import com.jme3.network.serializing.Serializable;
  * @author normenhansen
  */
 @Serializable()
-public abstract class AbstractPhysicsSyncMessage extends Message {
+public abstract class PhysicsSyncMessage extends Message {
 
-    public long id = -1;
+    public long syncId = -1;
     public double time;
     //TODO: dont dync delayTime somehow? -> not needed
     public double delayTime = 0;
 
-    public AbstractPhysicsSyncMessage() {
+    public PhysicsSyncMessage() {
+        setReliable(false);
     }
 
-    public AbstractPhysicsSyncMessage(long id) {
-        this.id = id;
+    public PhysicsSyncMessage(long id) {
+        this.syncId = id;
+        setReliable(false);
     }
 
     public abstract void applyData(Object object);

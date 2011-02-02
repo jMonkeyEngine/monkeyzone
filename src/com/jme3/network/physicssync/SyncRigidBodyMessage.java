@@ -41,7 +41,7 @@ import com.jme3.network.serializing.Serializable;
  * @author normenhansen
  */
 @Serializable()
-public class SyncRigidBodyMessage extends AbstractPhysicsSyncMessage {
+public class SyncRigidBodyMessage extends PhysicsSyncMessage {
 
     public Vector3f location;
     public Matrix3f rotation;
@@ -53,7 +53,7 @@ public class SyncRigidBodyMessage extends AbstractPhysicsSyncMessage {
 
     public SyncRigidBodyMessage(long id, PhysicsRigidBody body) {
         setReliable(false);
-        this.id = id;
+        this.syncId = id;
         location = body.getPhysicsLocation(new Vector3f());
         rotation = body.getPhysicsRotation(new Matrix3f());
         linearVelocity = new Vector3f();

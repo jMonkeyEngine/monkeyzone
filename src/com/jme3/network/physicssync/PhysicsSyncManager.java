@@ -27,16 +27,14 @@ import java.util.logging.Logger;
  * @author normenhansen
  */
 public class PhysicsSyncManager implements MessageListener {
-
-    Server server;
-    Client client;
+    private Server server;
+    private Client client;
     float syncFrequency = 0.25f;
-    HashMap<Long, PhysicsCollisionObject> physicsObjects = new HashMap<Long, PhysicsCollisionObject>();
+    HashMap<Long, Object> syncObjects = new HashMap<Long, Object>();
     double time = 0;
     double offset = Double.MIN_VALUE;
-//    double latency = 0;
     float syncTimer = 0;
-    List<AbstractPhysicsSyncMessage> messageQueue = new LinkedList<AbstractPhysicsSyncMessage>();
+    List<PhysicsSyncMessage> messageQueue = new LinkedList<PhysicsSyncMessage>();
     Application app;
 
     public PhysicsSyncManager(Application app, Server server) {
@@ -58,8 +56,8 @@ public class PhysicsSyncManager implements MessageListener {
             time = 0;
         }
         if (client != null) {
-            for (Iterator<AbstractPhysicsSyncMessage> it = messageQueue.iterator(); it.hasNext();) {
-                AbstractPhysicsSyncMessage message = it.next();
+            for (Iterator<PhysicsSyncMessage> it = messageQueue.iterator(); it.hasNext();) {
+                PhysicsSyncMessage message = it.next();
                 if (message.delayTime <= 0) {
                     doMessage(message);
                     it.remove();
@@ -76,21 +74,22 @@ public class PhysicsSyncManager implements MessageListener {
         }
     }
 
-    public void addObject(PhysicsCollisionObject object) {
+    public long addObject(PhysicsCollisionObject object) {
         long id = 0;
-        while (physicsObjects.containsKey(id)) {
+        while (syncObjects.containsKey(id)) {
             id++;
         }
-        physicsObjects.put(id, object);
+        syncObjects.put(id, object);
+        return id;
     }
 
-    public void addObject(long id, PhysicsCollisionObject object) {
-        physicsObjects.put(id, object);
+    public void addObject(long id, Object object) {
+        syncObjects.put(id, object);
     }
 
-    public void removeObject(PhysicsCollisionObject object) {
-        for (Iterator<Entry<Long, PhysicsCollisionObject>> it = physicsObjects.entrySet().iterator(); it.hasNext();) {
-            Entry<Long, PhysicsCollisionObject> entry = it.next();
+    public void removeObject(Object object) {
+        for (Iterator<Entry<Long, Object>> it = syncObjects.entrySet().iterator(); it.hasNext();) {
+            Entry<Long, Object> entry = it.next();
             if (entry.getValue() == object) {
                 it.remove();
                 return;
@@ -99,34 +98,34 @@ public class PhysicsSyncManager implements MessageListener {
     }
 
     public void removeObject(long id) {
-        physicsObjects.remove(id);
+        syncObjects.remove(id);
     }
 
-    protected void doMessage(AbstractPhysicsSyncMessage message) {
-        PhysicsCollisionObject control = physicsObjects.get(message.id);
-        if (control != null) {
-            message.applyData(control);
+    protected void doMessage(PhysicsSyncMessage message) {
+        Object object = syncObjects.get(message.syncId);
+        if (object != null) {
+            message.applyData(object);
         } else {
-            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.WARNING, "Cannot find physics object for: {0}", message.id);
+            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.WARNING, "Cannot find physics object for: ({0}){1}", new Object[]{message.syncId, message});
         }
     }
 
-    protected void applyMessageDelay(AbstractPhysicsSyncMessage msg) {
-        double thisoffset = msg.time - this.time;
+    protected void delayMessage(PhysicsSyncMessage message) {
+        double thisoffset = message.time - this.time;
         //TODO: offset only gets bigger -> worst message time = global delay
         if (thisoffset > offset) {
             offset = thisoffset;
-            doMessage(msg);
+            doMessage(message);
             return;
         }
-        double delayTime = time - (msg.time - offset);
-        msg.delayTime = delayTime;
-        messageQueue.add(msg);
+        double delayTime = time - (message.time - offset);
+        message.delayTime = delayTime;
+        messageQueue.add(message);
     }
 
     protected void sendSyncData() {
-        for (Iterator<Entry<Long, PhysicsCollisionObject>> it = physicsObjects.entrySet().iterator(); it.hasNext();) {
-            Entry<Long, PhysicsCollisionObject> entry = it.next();
+        for (Iterator<Entry<Long, Object>> it = syncObjects.entrySet().iterator(); it.hasNext();) {
+            Entry<Long, Object> entry = it.next();
             if (entry.getValue() instanceof PhysicsRigidBody) {
                 PhysicsRigidBody control = (PhysicsRigidBody) entry.getValue();
                 if (control.isActive()) {
@@ -142,10 +141,10 @@ public class PhysicsSyncManager implements MessageListener {
     }
 
     /**
-     * use to broadcast physics control messages, call from OpenGL thread!
+     * use to broadcast physics control messages if server, call from OpenGL thread!
      * @param msg
      */
-    public void broadcast(AbstractPhysicsSyncMessage msg) {
+    public void broadcast(PhysicsSyncMessage msg) {
         msg.time = time;
         try {
             server.broadcast(msg);
@@ -164,15 +163,14 @@ public class PhysicsSyncManager implements MessageListener {
         }
     }
 
-    protected void broadcastExcept(Client client, AbstractPhysicsSyncMessage msg) {
-        msg.time = time;
-        try {
-            server.broadcastExcept(client, msg);
-        } catch (IOException ex) {
-            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.SEVERE, "Cannot broadcast message: {0}", ex);
-        }
-    }
-
+//    protected void broadcastExcept(Client client, PhysicsSyncMessage msg) {
+//        msg.time = time;
+//        try {
+//            server.broadcastExcept(client, msg);
+//        } catch (IOException ex) {
+//            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.SEVERE, "Cannot broadcast message: {0}", ex);
+//        }
+//    }
     public void messageSent(Message message) {
     }
 
@@ -187,7 +185,7 @@ public class PhysicsSyncManager implements MessageListener {
             app.enqueue(new Callable<Void>() {
 
                 public Void call() throws Exception {
-                    applyMessageDelay((AbstractPhysicsSyncMessage) message);
+                    delayMessage((PhysicsSyncMessage) message);
                     return null;
                 }
             });
@@ -195,10 +193,18 @@ public class PhysicsSyncManager implements MessageListener {
             app.enqueue(new Callable<Void>() {
 
                 public Void call() throws Exception {
-                    doMessage((AbstractPhysicsSyncMessage) message);
+                    doMessage((PhysicsSyncMessage) message);
                     return null;
                 }
             });
         }
+    }
+
+    public Server getServer() {
+        return server;
+    }
+
+    public Client getClient() {
+        return client;
     }
 }

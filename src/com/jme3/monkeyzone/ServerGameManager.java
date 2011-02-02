@@ -39,7 +39,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.monkeyzone.messages.ClientActionMessage;
 import com.jme3.monkeyzone.messages.ServerEffectMessage;
 import com.jme3.monkeyzone.messages.StartGameMessage;
-import com.jme3.network.connection.Server;
+import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.scene.Spatial;
 import java.io.IOException;
 import java.util.Iterator;
@@ -53,7 +53,7 @@ import java.util.logging.Logger;
  */
 public class ServerGameManager {
 
-    Server server;
+    PhysicsSyncManager server;
     WorldManager worldManager;
     private boolean running;
     String mapName;
@@ -61,7 +61,7 @@ public class ServerGameManager {
     float syncTimer = 0;
     PhysicsSpace space;
 
-    public ServerGameManager(Server server, WorldManager worldManager, PhysicsSpace space) {
+    public ServerGameManager(PhysicsSyncManager server, WorldManager worldManager, PhysicsSpace space) {
         this.server = server;
         this.worldManager = worldManager;
         this.space = space;
@@ -79,9 +79,9 @@ public class ServerGameManager {
         mapName = map;
         modelNames = new String[]{"Models/HoverTank/HoverTank.j3o", "Models/Sinbad/Sinbad.j3o", "Models/Ferrari/Car.j3o", "Models/Buggy/Buggy.j3o"};
         try {
-            server.broadcast(new StartGameMessage(mapName, modelNames));
+            server.getServer().broadcast(new StartGameMessage(mapName, modelNames));
         } catch (IOException ex) {
-            Logger.getLogger(ServerGameManager.class.getName()).log(Level.SEVERE, "{0}", ex);
+            Logger.getLogger(ServerGameManager.class.getName()).log(Level.SEVERE, "Cannot broadcast startgame: {0}", ex);
         }
         worldManager.loadLevel(mapName);
         worldManager.createNavMesh();
@@ -110,9 +110,9 @@ public class ServerGameManager {
         mapName = "null";
         modelNames = new String[]{};
         try {
-            server.broadcast(new StartGameMessage(mapName, modelNames));
+            server.getServer().broadcast(new StartGameMessage(mapName, modelNames));
         } catch (IOException ex) {
-            Logger.getLogger(ServerGameManager.class.getName()).log(Level.SEVERE, "{0}", ex);
+            Logger.getLogger(ServerGameManager.class.getName()).log(Level.SEVERE, null, ex);
         }
         worldManager.closeLevel();
         running = false;
@@ -163,13 +163,9 @@ public class ServerGameManager {
                 return;
             }
             System.out.println("shoot!");
-            try {
-                //FIXME: client crashes with NPE in ParticleEmitter.render() when using particles..
-                //TODO: use generated id for effect, not entity id..
-                server.broadcast(new ServerEffectMessage(entity, "Effects/ExplosionB.j3o", myEntity.getWorldTranslation(), myEntity.getWorldRotation(), myEntity.getWorldTranslation(), myEntity.getWorldRotation(), 2.0f));
-            } catch (IOException ex) {
-                Logger.getLogger(ServerGameManager.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            //FIXME: client crashes with NPE in ParticleEmitter.render() when using particles..
+            //TODO: use generated id for effect, not entity id..
+            server.broadcast(new ServerEffectMessage(entity, "Effects/ExplosionB.j3o", myEntity.getWorldTranslation(), myEntity.getWorldRotation(), myEntity.getWorldTranslation(), myEntity.getWorldRotation(), 2.0f));
             //TODO: doing raytest for shooting.. 
             List<PhysicsRayTestResult> list = space.rayTest(control.getPhysicsLocation(), control.getPhysicsLocation().add(control.getWalkDirection().mult(10)));
             for (Iterator<PhysicsRayTestResult> it = list.iterator(); it.hasNext();) {
@@ -189,17 +185,4 @@ public class ServerGameManager {
         }
     }
 
-//    /**
-//     * the update loop, mainly sends out sync infos in intervals
-//     * @param tpf
-//     */
-//    public synchronized void update(float tpf) {
-//        if (!running) {
-//            return;
-//        }
-//        syncTimer += tpf;
-//        if (syncTimer >= Globals.NETWORK_SYNC_FREQUENCY) {
-//            syncTimer = 0;
-//        }
-//    }
 }

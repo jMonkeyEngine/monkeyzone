@@ -31,7 +31,8 @@
  */
 package com.jme3.monkeyzone.messages;
 
-import com.jme3.network.message.Message;
+import com.jme3.monkeyzone.WorldManager;
+import com.jme3.network.physicssync.PhysicsSyncMessage;
 import com.jme3.network.serializing.Serializable;
 
 /**
@@ -39,7 +40,7 @@ import com.jme3.network.serializing.Serializable;
  * @author normenhansen
  */
 @Serializable()
-public class ServerEnterEntityMessage extends Message{
+public class ServerEnterEntityMessage extends PhysicsSyncMessage{
 
     public long player_id;
     public long entity_id;
@@ -48,8 +49,14 @@ public class ServerEnterEntityMessage extends Message{
     }
 
     public ServerEnterEntityMessage(long player_id, long entity_id) {
+        syncId = -1;
         this.player_id = player_id;
         this.entity_id = entity_id;
     }
     
+    @Override
+    public void applyData(Object object) {
+        WorldManager manager = (WorldManager) object;
+        manager.enterEntity(player_id, entity_id);
+    }
 }

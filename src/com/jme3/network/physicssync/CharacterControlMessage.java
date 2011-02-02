@@ -13,7 +13,7 @@ import com.jme3.network.serializing.Serializable;
  * @author normenhansen
  */
 @Serializable()
-public class CharacterControlMessage extends AbstractPhysicsSyncMessage {
+public class CharacterControlMessage extends PhysicsSyncMessage {
 
     public Vector3f walkDirection = new Vector3f();
     public Vector3f viewDirection = new Vector3f();

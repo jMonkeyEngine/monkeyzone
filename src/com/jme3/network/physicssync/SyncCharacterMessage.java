@@ -40,7 +40,7 @@ import com.jme3.network.serializing.Serializable;
  * @author normenhansen
  */
 @Serializable()
-public class SyncCharacterMessage extends AbstractPhysicsSyncMessage {
+public class SyncCharacterMessage extends PhysicsSyncMessage {
 
     public Vector3f location = new Vector3f();
     public Vector3f walkDirection = new Vector3f();
@@ -51,7 +51,7 @@ public class SyncCharacterMessage extends AbstractPhysicsSyncMessage {
 
     public SyncCharacterMessage(long id, CharacterControl character) {
         setReliable(false);
-        this.id = id;
+        this.syncId = id;
         character.getPhysicsLocation(location);
         this.walkDirection.set(character.getWalkDirection());
         this.viewDirection.set(character.getViewDirection());
