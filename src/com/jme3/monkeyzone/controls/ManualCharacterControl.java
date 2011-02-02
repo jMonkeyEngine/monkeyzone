@@ -56,8 +56,8 @@ public class ManualCharacterControl extends NetworkedManualControl {
     private Quaternion directionQuat = new Quaternion();
     private Quaternion ROTATE_90 = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y);
     private float rotAmount = 0;
-    private float zAmount = 0;
-    private float xAmount = 0;
+    private float walkAmount = 0;
+    private float strafeAmount = 0;
     private float speed = 10f * Globals.PHYSICS_FPS;
 //    private boolean backwards = false;
     private Vector3f lookAt = new Vector3f();
@@ -80,14 +80,17 @@ public class ManualCharacterControl extends NetworkedManualControl {
     @Override
     public void steerY(float amount) {
         super.steerY(amount);
+        walkAmount = amount;
+        walkDirection.set(directionForward).multLocal(speed * walkAmount);
+        walkDirection.addLocal(directionLeft.mult(speed * strafeAmount));
     }
 
     @Override
     public void moveX(float amount) {
         super.moveX(amount);
-        xAmount = amount;
-        walkDirection.set(directionForward).multLocal(speed * zAmount);
-        walkDirection.addLocal(directionLeft.mult(speed * xAmount));
+        strafeAmount = amount;
+        walkDirection.set(directionForward).multLocal(speed * walkAmount);
+        walkDirection.addLocal(directionLeft.mult(speed * strafeAmount));
         gotInput = true;
     }
 
@@ -99,9 +102,9 @@ public class ManualCharacterControl extends NetworkedManualControl {
     @Override
     public void moveZ(float amount) {
         super.moveZ(amount);
-        zAmount = amount;
-        walkDirection.set(directionForward).multLocal(speed * zAmount);
-        walkDirection.addLocal(directionLeft.mult(speed * xAmount));
+        walkAmount = amount;
+        walkDirection.set(directionForward).multLocal(speed * walkAmount);
+        walkDirection.addLocal(directionLeft.mult(speed * strafeAmount));
         gotInput = true;
     }
 
@@ -145,7 +148,7 @@ public class ManualCharacterControl extends NetworkedManualControl {
                 //try deriving directionForward..
                 //TODO: fails sometimes
                 directionForward.set(walkDirection);
-                directionForward.addLocal(directionLeft.multLocal(speed * -xAmount)).multLocal(Math.copySign(1, zAmount)).normalizeLocal();
+                directionForward.addLocal(directionLeft.multLocal(speed * -strafeAmount)).multLocal(Math.copySign(1, walkAmount)).normalizeLocal();
                 directionLeft.set(directionForward).normalizeLocal();
                 ROTATE_90.multLocal(directionLeft);
             }
