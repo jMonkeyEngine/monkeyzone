@@ -27,6 +27,7 @@ import java.util.logging.Logger;
  * @author normenhansen
  */
 public class PhysicsSyncManager implements MessageListener {
+
     private Server server;
     private Client client;
     float syncFrequency = 0.25f;
@@ -111,16 +112,26 @@ public class PhysicsSyncManager implements MessageListener {
     }
 
     protected void delayMessage(PhysicsSyncMessage message) {
-        double thisoffset = message.time - this.time;
-        //TODO: offset only gets bigger -> worst message time = global delay
+        double thisoffset = this.time - message.time;
         if (thisoffset > offset) {
-            offset = thisoffset;
-            doMessage(message);
-            return;
+            changeOffset(thisoffset - offset);
+            System.out.println("upping offset " + thisoffset);
         }
-        double delayTime = time - (message.time - offset);
+        double delayTime = time - (message.time + offset);
+        if (delayTime > 1) {
+            changeOffset(-1);
+            System.out.println("downing high delaytime " + delayTime);
+        }
         message.delayTime = delayTime;
         messageQueue.add(message);
+    }
+
+    private void changeOffset(double amount) {
+        offset += amount;
+        for (Iterator<PhysicsSyncMessage> it = messageQueue.iterator(); it.hasNext();) {
+            PhysicsSyncMessage physicsSyncMessage = it.next();
+            physicsSyncMessage.delayTime += amount;
+        }
     }
 
     protected void sendSyncData() {
@@ -163,14 +174,6 @@ public class PhysicsSyncManager implements MessageListener {
         }
     }
 
-//    protected void broadcastExcept(Client client, PhysicsSyncMessage msg) {
-//        msg.time = time;
-//        try {
-//            server.broadcastExcept(client, msg);
-//        } catch (IOException ex) {
-//            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.SEVERE, "Cannot broadcast message: {0}", ex);
-//        }
-//    }
     public void messageSent(Message message) {
     }
 
@@ -186,6 +189,7 @@ public class PhysicsSyncManager implements MessageListener {
 
                 public Void call() throws Exception {
                     delayMessage((PhysicsSyncMessage) message);
+//                    doMessage((PhysicsSyncMessage) message);
                     return null;
                 }
             });
