@@ -82,6 +82,7 @@ public class ManualCharacterControl extends NetworkedManualControl {
         walkAmount = amount;
         walkDirection.set(viewDirection).multLocal(speed * walkAmount);
         walkDirection.addLocal(directionLeft.mult(speed * strafeAmount));
+        gotInput = true;
     }
 
     @Override

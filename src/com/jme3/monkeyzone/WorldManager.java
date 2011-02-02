@@ -293,7 +293,6 @@ public class WorldManager {
             entityModel.getControl(RigidBodyControl.class).setPhysicsRotation(rotation.toRotationMatrix());
         } else if (entityModel.getControl(CharacterControl.class) != null) {
             entityModel.getControl(CharacterControl.class).setPhysicsLocation(location);
-            entityModel.getControl(CharacterControl.class).setPhysicsRotation(rotation.toRotationMatrix());
             entityModel.addControl(new CharacterAnimControl());
         } else if (entityModel.getControl(VehicleControl.class) != null) {
             entityModel.getControl(VehicleControl.class).setPhysicsLocation(location);
