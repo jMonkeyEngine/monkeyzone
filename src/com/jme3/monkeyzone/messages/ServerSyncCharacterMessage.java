@@ -47,9 +47,8 @@ public class ServerSyncCharacterMessage extends Message {
 
     public long id;
     public Vector3f location = new Vector3f();
-    //TODO: rotation is not used in character, sync character spatial rotation instead?
-    public Matrix3f rotation = new Matrix3f();
     public Vector3f walkDirection = new Vector3f();
+    public Vector3f viewDirection = new Vector3f();
 
     public ServerSyncCharacterMessage() {
     }
@@ -58,19 +57,19 @@ public class ServerSyncCharacterMessage extends Message {
         setReliable(false);
         this.id = id;
         character.getPhysicsLocation(location);
-        character.getPhysicsRotation(rotation);
         this.walkDirection.set(character.getWalkDirection());
+        this.viewDirection.set(character.getViewDirection());
     }
 
     public void readData(CharacterControl character) {
         character.getPhysicsLocation(location);
-        character.getPhysicsRotation(rotation);
         this.walkDirection.set(character.getWalkDirection());
+        this.viewDirection.set(character.getViewDirection());
     }
 
     public void applyData(CharacterControl character) {
         character.setPhysicsLocation(location);
-        character.setPhysicsRotation(rotation);
         character.setWalkDirection(walkDirection);
+        character.setViewDirection(viewDirection);
     }
 }

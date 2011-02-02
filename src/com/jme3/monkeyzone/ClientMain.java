@@ -104,6 +104,9 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         flyCam.setEnabled(false);
         //FIXME: why does ChaseCam need a spatial in the constructor??
         chaseCam = new ChaseCamera(cam, rootNode);
+        chaseCam.setSmoothMotion(true);
+        chaseCam.setChasingSensitivity(100);
+        chaseCam.setTrailingEnabled(true);
         getStateManager().attach(bulletState);
         bulletState.getPhysicsSpace().setDeterministic(Globals.PHYSICS_DETERMINISTIC);
         bulletState.getPhysicsSpace().setAccuracy(Globals.PHYSICS_FPS);

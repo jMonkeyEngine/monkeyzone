@@ -51,15 +51,14 @@ public class ManualCharacterControl extends NetworkedManualControl {
     private Spatial spatial;
     private CharacterControl control;
     private Vector3f walkDirection = new Vector3f(Vector3f.ZERO);
+    private Vector3f viewDirection = new Vector3f(Vector3f.UNIT_Z);
     private Vector3f directionLeft = new Vector3f(Vector3f.UNIT_X);
-    private Vector3f directionForward = new Vector3f(Vector3f.UNIT_Z);
     private Quaternion directionQuat = new Quaternion();
     private Quaternion ROTATE_90 = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y);
     private float rotAmount = 0;
     private float walkAmount = 0;
     private float strafeAmount = 0;
     private float speed = 10f * Globals.PHYSICS_FPS;
-//    private boolean backwards = false;
     private Vector3f lookAt = new Vector3f();
     private boolean gotInput = false;
 
@@ -81,7 +80,7 @@ public class ManualCharacterControl extends NetworkedManualControl {
     public void steerY(float amount) {
         super.steerY(amount);
         walkAmount = amount;
-        walkDirection.set(directionForward).multLocal(speed * walkAmount);
+        walkDirection.set(viewDirection).multLocal(speed * walkAmount);
         walkDirection.addLocal(directionLeft.mult(speed * strafeAmount));
     }
 
@@ -89,7 +88,7 @@ public class ManualCharacterControl extends NetworkedManualControl {
     public void moveX(float amount) {
         super.moveX(amount);
         strafeAmount = amount;
-        walkDirection.set(directionForward).multLocal(speed * walkAmount);
+        walkDirection.set(viewDirection).multLocal(speed * walkAmount);
         walkDirection.addLocal(directionLeft.mult(speed * strafeAmount));
         gotInput = true;
     }
@@ -103,7 +102,7 @@ public class ManualCharacterControl extends NetworkedManualControl {
     public void moveZ(float amount) {
         super.moveZ(amount);
         walkAmount = amount;
-        walkDirection.set(directionForward).multLocal(speed * walkAmount);
+        walkDirection.set(viewDirection).multLocal(speed * walkAmount);
         walkDirection.addLocal(directionLeft.mult(speed * strafeAmount));
         gotInput = true;
     }
@@ -140,32 +139,25 @@ public class ManualCharacterControl extends NetworkedManualControl {
             return;
         }
 
-        //when we didnt get any new input we get walkDirection from the control,
-        //it might have been updated by network sync
+        //when we didnt get any new input we get directions from the control,
+        //they might have been updated by network sync
         if (!gotInput) {
             walkDirection.set(control.getWalkDirection());
-            if (walkDirection.length() != 0) {
-                //try deriving directionForward..
-                //TODO: fails sometimes
-                directionForward.set(walkDirection);
-                directionForward.addLocal(directionLeft.multLocal(speed * -strafeAmount)).multLocal(Math.copySign(1, walkAmount)).normalizeLocal();
-                directionLeft.set(directionForward).normalizeLocal();
-                ROTATE_90.multLocal(directionLeft);
-            }
+            viewDirection.set(control.getViewDirection());
+            directionLeft.set(viewDirection).normalizeLocal();
+            ROTATE_90.multLocal(directionLeft);
         }
 
         if (rotAmount != 0) {
             //rotate all vectors around the rotation amount
             directionQuat.fromAngleAxis((FastMath.PI) * tpf * rotAmount, Vector3f.UNIT_Y);
             directionQuat.multLocal(walkDirection);
-            directionQuat.multLocal(directionForward);
+            directionQuat.multLocal(viewDirection);
+            directionQuat.multLocal(viewDirection);
             directionQuat.multLocal(directionLeft);
         }
-
         control.setWalkDirection(walkDirection);
-        //look in directionForward
-        lookAt.set(spatial.getWorldTranslation()).addLocal(directionForward);
-        spatial.lookAt(lookAt, Vector3f.UNIT_Y);
+        control.setViewDirection(viewDirection);
         gotInput = false;
     }
 
