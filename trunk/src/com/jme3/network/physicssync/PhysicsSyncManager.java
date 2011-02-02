@@ -34,6 +34,8 @@ public class PhysicsSyncManager implements MessageListener {
     HashMap<Long, Object> syncObjects = new HashMap<Long, Object>();
     double time = 0;
     double offset = Double.MIN_VALUE;
+    double maxDelay = .075;
+    double offsetChangeValue = .06;
     float syncTimer = 0;
     List<PhysicsSyncMessage> messageQueue = new LinkedList<PhysicsSyncMessage>();
     Application app;
@@ -115,12 +117,16 @@ public class PhysicsSyncManager implements MessageListener {
         double thisoffset = this.time - message.time;
         if (thisoffset > offset) {
             changeOffset(thisoffset - offset);
-            System.out.println("upping offset " + thisoffset);
+            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.INFO, "upping offset {0}", thisoffset);
         }
-        double delayTime = time - (message.time + offset);
-        if (delayTime > 1) {
-            changeOffset(-1);
-            System.out.println("downing high delaytime " + delayTime);
+        double delayTime = (message.time + offset) - time;
+        if (delayTime > maxDelay) {
+            if (delayTime > 1) {
+                changeOffset(-1);
+            } else {
+                changeOffset(-offsetChangeValue);
+            }
+            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.INFO, "downing high delaytime", delayTime);
         }
         message.delayTime = delayTime;
         messageQueue.add(message);
