@@ -178,7 +178,7 @@ public class WorldManager {
     public void closeLevel() {
         //TODO: remove AI players
         removeUserControls(myPlayerId);
-        for (Iterator<Long> et = entities.keySet().iterator(); et.hasNext();) {
+        for (Iterator<Long> et = new LinkedList(entities.keySet()).iterator(); et.hasNext();) {
             Long entry = et.next();
             syncManager.removeObject(entry);
         }
