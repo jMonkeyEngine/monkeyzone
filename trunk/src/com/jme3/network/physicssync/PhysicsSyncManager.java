@@ -153,6 +153,7 @@ public class PhysicsSyncManager implements MessageListener {
     public void broadcast(PhysicsSyncMessage msg) {
         if(server==null){
             Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.SEVERE, "Broadcasting message on client {0}",msg);
+            return;
         }
         msg.time = time;
         try {
