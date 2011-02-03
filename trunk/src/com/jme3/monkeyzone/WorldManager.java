@@ -52,7 +52,6 @@ import com.jme3.monkeyzone.controls.ManualCharacterControl;
 import com.jme3.monkeyzone.controls.ManualControl;
 import com.jme3.monkeyzone.controls.ManualVehicleControl;
 import com.jme3.monkeyzone.messages.AutoControlMessage;
-import com.jme3.monkeyzone.messages.ClientActionMessage;
 import com.jme3.monkeyzone.messages.ManualControlMessage;
 import com.jme3.monkeyzone.messages.ServerAddEntityMessage;
 import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
@@ -286,6 +285,9 @@ public class WorldManager {
      * @param id
      */
     public void removePlayer(long id) {
+        if (isServer()) {
+            syncManager.broadcast(new ServerRemovePlayerMessage(id));
+        }
         //TODO: remove other (AI) entities of his group..
         PlayerData.remove(id);
     }
