@@ -37,7 +37,6 @@ import com.jme3.monkeyzone.messages.ClientJoinMessage;
 import com.jme3.monkeyzone.messages.HandshakeMessage;
 import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
 import com.jme3.monkeyzone.messages.ServerJoinMessage;
-import com.jme3.monkeyzone.messages.ServerRemovePlayerMessage;
 import com.jme3.monkeyzone.messages.StartGameMessage;
 import com.jme3.network.connection.Client;
 import com.jme3.network.connection.Server;
@@ -96,7 +95,7 @@ public class ServerNetListener implements MessageListener, ConnectionListener {
                 } catch (IOException ex) {
                     Logger.getLogger(ServerNetListener.class.getName()).log(Level.SEVERE, "{0}", ex);
                 }
-                if (PlayerData.getPlayers().size() == 0) {
+                if (PlayerData.getPlayers().isEmpty()) {
                     gameManager.stopGame();
                 }
                 return null;

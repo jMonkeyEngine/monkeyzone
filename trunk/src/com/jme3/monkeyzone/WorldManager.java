@@ -287,12 +287,12 @@ public class WorldManager {
     public void removePlayer(long id) {
         if (isServer()) {
             syncManager.broadcast(new ServerRemovePlayerMessage(id));
+            long entityId = PlayerData.getLongData(id, "entity_id");
+            if (entityId != -1) {
+                removeEntity(id);
+            }
         }
         //TODO: remove other (AI) entities of his group..
-        long entityId=PlayerData.getLongData(id, "entity_id");
-        if(entityId!=-1){
-            removeEntity(id);
-        }
         PlayerData.remove(id);
     }
 
@@ -398,10 +398,13 @@ public class WorldManager {
         long curEntity = PlayerData.getLongData(playerId, "entity_id");
         if (curEntity != -1) {
             Spatial curEntitySpat = getEntity(curEntity);
-            curEntitySpat.setUserData("player_id", -1);
+            curEntitySpat.setUserData("player_id", -1l);
+            curEntitySpat.setUserData("group_id", -1l);
         }
         Spatial spat = getEntity(entityId);
         spat.setUserData("player_id", playerId);
+        int groupId = PlayerData.getIntData(playerId, "group_id");
+        spat.setUserData("group_id", groupId);
         PlayerData.setData(playerId, "entity_id", entityId);
         removeMovementControls(curEntity);
         if (PlayerData.isHuman(playerId)) {
