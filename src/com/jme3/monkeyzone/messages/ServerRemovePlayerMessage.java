@@ -48,7 +48,7 @@ public class ServerRemovePlayerMessage extends PhysicsSyncMessage {
     }
 
     public ServerRemovePlayerMessage(long id) {
-        id = -1;
+        this.syncId = -1;
         this.playerId = id;
     }
 
