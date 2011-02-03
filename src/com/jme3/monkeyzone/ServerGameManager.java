@@ -136,12 +136,12 @@ public class ServerGameManager {
     public void performAction(long entity, int action, boolean pressed) {
         Spatial myEntity = worldManager.getEntity(entity);
         if (myEntity == null) {
-            Logger.getLogger(ServerGameManager.class.getName()).log(Level.SEVERE, "Cannot find entity peroforming action!");
+            Logger.getLogger(ServerGameManager.class.getName()).log(Level.WARNING, "Cannot find entity performing action!");
             return;
         }
         long player_id = (Long) myEntity.getUserData("player_id");
         if (player_id == -1) {
-            Logger.getLogger(ServerGameManager.class.getName()).log(Level.SEVERE, "Cannot find player id for entity peroforming action!");
+            Logger.getLogger(ServerGameManager.class.getName()).log(Level.WARNING, "Cannot find player id for entity performing action!");
             return;
         }
         //switch car and character on pressing enter
@@ -162,23 +162,17 @@ public class ServerGameManager {
                 Logger.getLogger(ServerGameManager.class.getName()).log(Level.WARNING, "Cannot shoot when not character!");
                 return;
             }
-            System.out.println("shoot!");
-            //FIXME: client crashes with NPE in ParticleEmitter.render() when using particles..
-            //TODO: use generated id for effect, not entity id..
-            server.broadcast(new ServerEffectMessage(entity, "Effects/ExplosionB.j3o", myEntity.getWorldTranslation(), myEntity.getWorldRotation(), myEntity.getWorldTranslation(), myEntity.getWorldRotation(), 2.0f));
+
             //TODO: doing raytest for shooting.. 
-            List<PhysicsRayTestResult> list = space.rayTest(control.getPhysicsLocation(), control.getPhysicsLocation().add(control.getWalkDirection().mult(10)));
+            List<PhysicsRayTestResult> list = space.rayTest(control.getPhysicsLocation(), control.getPhysicsLocation().add(control.getViewDirection().mult(10)));
             for (Iterator<PhysicsRayTestResult> it = list.iterator(); it.hasNext();) {
                 PhysicsRayTestResult physicsRayTestResult = it.next();
                 Object obj = physicsRayTestResult.getCollisionObject().getUserObject();
-                System.out.println("collide!");
                 if (obj instanceof Spatial) {
-                    System.out.println("spatial!");
                     Spatial spatial = (Spatial) obj;
                     long entityId = worldManager.getEntityId(spatial);
                     if (entityId != -1 && entityId != entity) {
-                        System.out.println("entity!");
-                        //TODO: we hit something!
+                        server.broadcast(new ServerEffectMessage(-1, "Effects/ExplosionA.j3o", spatial.getWorldTranslation(), spatial.getWorldRotation(), spatial.getWorldTranslation(), spatial.getWorldRotation(), 2.0f));
                     }
                 }
             }

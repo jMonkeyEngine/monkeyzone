@@ -102,7 +102,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         }
         inputManager.setCursorVisible(true);
         flyCam.setEnabled(false);
-        chaseCam = new ChaseCamera(cam,inputManager);
+        chaseCam = new ChaseCamera(cam, inputManager);
         chaseCam.setSmoothMotion(true);
         chaseCam.setChasingSensitivity(100);
         chaseCam.setTrailingEnabled(true);
@@ -116,6 +116,8 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         worldManager.addUserControl(chaseCam);
         worldManager.addUserControl(new UserInputControl(inputManager));
         effectsManager = new ClientEffectsManager(assetManager, worldManager);
+        //register effects manager with sync manager so that messages can apply their data
+        worldManager.getSyncManager().addObject(-2, effectsManager);
         listenerManager = new ClientNetListener(this, client, worldManager, effectsManager);
     }
 

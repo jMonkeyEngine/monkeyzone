@@ -36,7 +36,6 @@ import com.jme3.asset.AssetManager;
 import com.jme3.asset.DesktopAssetManager;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.control.CharacterControl;
-import com.jme3.bullet.control.PhysicsControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.control.VehicleControl;
 import com.jme3.material.Material;
@@ -55,6 +54,7 @@ import com.jme3.monkeyzone.messages.AutoControlMessage;
 import com.jme3.monkeyzone.messages.ManualControlMessage;
 import com.jme3.monkeyzone.messages.ServerAddEntityMessage;
 import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
+import com.jme3.monkeyzone.messages.ServerEffectMessage;
 import com.jme3.monkeyzone.messages.ServerEnterEntityMessage;
 import com.jme3.monkeyzone.messages.ServerRemoveEntityMessage;
 import com.jme3.monkeyzone.messages.ServerRemovePlayerMessage;
@@ -128,7 +128,7 @@ public class WorldManager {
                 ServerEnterEntityMessage.class,
                 ServerAddEntityMessage.class,
                 ServerAddPlayerMessage.class,
-                //ServerEffectMessage.class,
+                ServerEffectMessage.class,
                 ServerRemoveEntityMessage.class,
                 ServerRemovePlayerMessage.class);
     }
@@ -164,6 +164,26 @@ public class WorldManager {
 
     public void setMyGroupId(long myGroupId) {
         this.myGroupId = myGroupId;
+    }
+
+    /**
+     * get the NavMesh of the currently loaded level
+     * @return
+     */
+    public NavMesh getNavMesh() {
+        return navMesh;
+    }
+
+    /**
+     * get the world root node (not necessarily the application rootNode!)
+     * @return
+     */
+    public Node getWorldRoot() {
+        return worldRoot;
+    }
+
+    public PhysicsSyncManager getSyncManager() {
+        return syncManager;
     }
 
     /**
@@ -251,22 +271,6 @@ public class WorldManager {
     }
 
     /**
-     * get the NavMesh of the currently loaded level
-     * @return
-     */
-    public NavMesh getNavMesh() {
-        return navMesh;
-    }
-
-    /**
-     * get the world root node (not necessarily the application rootNode!)
-     * @return
-     */
-    public Node getWorldRoot() {
-        return worldRoot;
-    }
-
-    /**
      * adds a player (sends message if server)
      * @param id
      * @param groupId
@@ -301,40 +305,6 @@ public class WorldManager {
     }
 
     /**
-     * add an entity (vehicle, immobile house etc), always related to a spatial
-     * with specific userdata like hp, maxhp etc. (sends message if server)
-     * @param id
-     * @param modelIdentifier
-     * @param location
-     * @param rotation
-     */
-    public void addEntity(long id, String modelIdentifier, Vector3f location, Quaternion rotation) {
-        if (isServer()) {
-            syncManager.broadcast(new ServerAddEntityMessage(id, modelIdentifier, location, rotation));
-        }
-        Node entityModel = (Node) assetManager.loadModel(modelIdentifier);
-        if (entityModel.getControl(RigidBodyControl.class) != null) {
-            entityModel.getControl(RigidBodyControl.class).setPhysicsLocation(location);
-            entityModel.getControl(RigidBodyControl.class).setPhysicsRotation(rotation.toRotationMatrix());
-            syncManager.addObject(id, entityModel.getControl(RigidBodyControl.class));
-        } else if (entityModel.getControl(CharacterControl.class) != null) {
-            entityModel.getControl(CharacterControl.class).setPhysicsLocation(location);
-            entityModel.addControl(new CharacterAnimControl());
-            syncManager.addObject(id, entityModel.getControl(CharacterControl.class));
-        } else if (entityModel.getControl(VehicleControl.class) != null) {
-            entityModel.getControl(VehicleControl.class).setPhysicsLocation(location);
-            entityModel.getControl(VehicleControl.class).setPhysicsRotation(rotation.toRotationMatrix());
-            syncManager.addObject(id, entityModel.getControl(VehicleControl.class));
-        } else {
-            entityModel.setLocalTranslation(location);
-            entityModel.setLocalRotation(rotation);
-        }
-        entities.put(id, entityModel);
-        space.addAll(entityModel);
-        worldRoot.attachChild(entityModel);
-    }
-
-    /**
      * gets the entity with the specified id
      * @param id
      * @return
@@ -360,11 +330,49 @@ public class WorldManager {
     }
 
     /**
+     * add an entity (vehicle, immobile house etc), always related to a spatial
+     * with specific userdata like hp, maxhp etc. (sends message if server)
+     * @param id
+     * @param modelIdentifier
+     * @param location
+     * @param rotation
+     */
+    public void addEntity(long id, String modelIdentifier, Vector3f location, Quaternion rotation) {
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Adding entity: {0}", id);
+        if (isServer()) {
+            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Broadcast adding entity: {0}", id);
+            syncManager.broadcast(new ServerAddEntityMessage(id, modelIdentifier, location, rotation));
+        }
+        Node entityModel = (Node) assetManager.loadModel(modelIdentifier);
+        if (entityModel.getControl(RigidBodyControl.class) != null) {
+            entityModel.getControl(RigidBodyControl.class).setPhysicsLocation(location);
+            entityModel.getControl(RigidBodyControl.class).setPhysicsRotation(rotation.toRotationMatrix());
+            syncManager.addObject(id, entityModel.getControl(RigidBodyControl.class));
+        } else if (entityModel.getControl(CharacterControl.class) != null) {
+            entityModel.getControl(CharacterControl.class).setPhysicsLocation(location);
+            entityModel.addControl(new CharacterAnimControl());
+            syncManager.addObject(id, entityModel.getControl(CharacterControl.class));
+        } else if (entityModel.getControl(VehicleControl.class) != null) {
+            entityModel.getControl(VehicleControl.class).setPhysicsLocation(location);
+            entityModel.getControl(VehicleControl.class).setPhysicsRotation(rotation.toRotationMatrix());
+            syncManager.addObject(id, entityModel.getControl(VehicleControl.class));
+        } else {
+            entityModel.setLocalTranslation(location);
+            entityModel.setLocalRotation(rotation);
+        }
+        entities.put(id, entityModel);
+        space.addAll(entityModel);
+        worldRoot.attachChild(entityModel);
+    }
+
+    /**
      * removes the entity with the specified id (sends message if server)
      * @param id
      */
     public void removeEntity(long id) {
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Removing entity: {0}", id);
         if (isServer()) {
+            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Broadcast removing entity: {0}", id);
             syncManager.broadcast(new ServerRemoveEntityMessage(id));
         }
         syncManager.removeObject(id);
@@ -374,9 +382,7 @@ public class WorldManager {
             return;
         }
         spat.removeFromParent();
-        if (spat.getControl(PhysicsControl.class) != null) {
-            space.remove(spat.getControl(PhysicsControl.class));
-        }
+        space.removeAll(spat);
     }
 
     /**
@@ -594,10 +600,6 @@ public class WorldManager {
 
     public void update(float tpf) {
         syncManager.update(tpf);
-    }
-
-    public PhysicsSyncManager getSyncManager() {
-        return syncManager;
     }
 
     public static class AIControlFactory {
