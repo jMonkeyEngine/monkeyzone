@@ -151,6 +151,9 @@ public class PhysicsSyncManager implements MessageListener {
      * @param msg
      */
     public void broadcast(PhysicsSyncMessage msg) {
+        if(server==null){
+            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.SEVERE, "Broadcasting message on client {0}",msg);
+        }
         msg.time = time;
         try {
             server.broadcast(msg);
