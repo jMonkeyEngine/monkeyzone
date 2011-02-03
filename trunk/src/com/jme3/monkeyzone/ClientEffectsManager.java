@@ -79,7 +79,11 @@ public class ClientEffectsManager {
         effect.setLocalTranslation(location);
         effect.setLocalRotation(rotation);
         worldManager.getWorldRoot().attachChild(effect);
-        liveEmitters.put(id, data);
+        if (id == -1) {
+            putToNew(data);
+        } else {
+            liveEmitters.put(id, data);
+        }
     }
 
     /**
@@ -107,6 +111,15 @@ public class ClientEffectsManager {
             emitters.get(name);
         }
         return emit;
+    }
+
+    private long putToNew(EmitterData data) {
+        long id = 0;
+        while (liveEmitters.containsKey(id)) {
+            id++;
+        }
+        liveEmitters.put(id, data);
+        return id;
     }
 
     private class EmitterData {
