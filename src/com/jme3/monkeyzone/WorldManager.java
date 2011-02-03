@@ -289,6 +289,10 @@ public class WorldManager {
             syncManager.broadcast(new ServerRemovePlayerMessage(id));
         }
         //TODO: remove other (AI) entities of his group..
+        long entityId=PlayerData.getLongData(id, "entity_id");
+        if(entityId!=-1){
+            removeEntity(id);
+        }
         PlayerData.remove(id);
     }
 
