@@ -117,12 +117,12 @@ public class PhysicsSyncManager implements MessageListener {
         double thisoffset = this.time - message.time;
         if (thisoffset > offset) {
             offset = thisoffset;
-            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.INFO, "upping offset {0}", thisoffset);
+//            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.INFO, "upping offset {0}", thisoffset);
         }
         double delayTime = (message.time + offset) - time;
         if (delayTime > maxDelay) {
             offset -= delayTime - maxDelay;
-            delayTime = maxDelay;
+            delayTime = 0;
             Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.INFO, "downing high delaytime", delayTime);
         }
         message.delayTime = delayTime;
