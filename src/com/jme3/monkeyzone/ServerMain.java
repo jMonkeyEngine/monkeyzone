@@ -61,13 +61,6 @@ public class ServerMain extends SimpleApplication {
         }
         Util.registerSerializers();
         Util.setLogLevels(true);
-        try {
-            server = new com.jme3.network.connection.Server(Globals.DEFAULT_PORT_TCP, Globals.DEFAULT_PORT_UDP);
-            server.start();
-        } catch (IOException ex) {
-            Logger.getLogger(ServerMain.class.getName()).log(Level.SEVERE, "Cannot start server: {0}", ex);
-            return;
-        }
         app = new ServerMain();
         app.setShowSettings(false);
         app.setPauseOnLostFocus(false);
@@ -81,6 +74,13 @@ public class ServerMain extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+        try {
+            server = new com.jme3.network.connection.Server(Globals.DEFAULT_PORT_TCP, Globals.DEFAULT_PORT_UDP);
+            server.start();
+        } catch (IOException ex) {
+            Logger.getLogger(ServerMain.class.getName()).log(Level.SEVERE, "Cannot start server: {0}", ex);
+            return;
+        }
         bulletState = new BulletAppState();
         getStateManager().attach(bulletState);
         bulletState.getPhysicsSpace().setDeterministic(Globals.PHYSICS_DETERMINISTIC);

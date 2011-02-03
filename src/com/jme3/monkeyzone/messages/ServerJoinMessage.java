@@ -42,13 +42,13 @@ import com.jme3.network.serializing.Serializable;
 public class ServerJoinMessage extends Message{
     public boolean rejected;
     public long id;
-    public long group_id;
+    public int group_id;
     public String name;
 
     public ServerJoinMessage() {
     }
 
-    public ServerJoinMessage(long id, long group_id, String name, boolean rejected) {
+    public ServerJoinMessage(long id, int group_id, String name, boolean rejected) {
         this.rejected = rejected;
         this.id = id;
         this.group_id = group_id;
