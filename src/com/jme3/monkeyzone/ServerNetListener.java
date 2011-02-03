@@ -89,7 +89,6 @@ public class ServerNetListener implements MessageListener, ConnectionListener {
                 String name = PlayerData.getStringData(playerId, "name");
                 worldManager.removePlayer(playerId);
                 try {
-                    //TODO: remove players that are dependent on client (AI) - for now thats where group_id == client id
                     server.broadcast(new ChatMessage("Server", name + " left the game"));
                     Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Broadcast player left message");
                 } catch (IOException ex) {
@@ -149,7 +148,9 @@ public class ServerNetListener implements MessageListener, ConnectionListener {
             app.enqueue(new Callable<Void>() {
 
                 public Void call() throws Exception {
+                    //TODO: client id as group id
                     worldManager.addPlayer(newPlayerId, clientId, msg.name, -1);
+                    PlayerData.setData(newPlayerId, "client_id", clientId);
                     for (Iterator<PlayerData> it = PlayerData.getPlayers().iterator(); it.hasNext();) {
                         PlayerData playerData = it.next();
                         if (playerData.getId() != newPlayerId) {

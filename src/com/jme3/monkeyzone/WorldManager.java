@@ -75,6 +75,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jme3tools.optimize.GeometryBatchFactory;
 
 /**
@@ -286,13 +288,15 @@ public class WorldManager {
      */
     public void removePlayer(long id) {
         if (isServer()) {
+            //TODO: remove other (AI) entities if this is a human client..
             syncManager.broadcast(new ServerRemovePlayerMessage(id));
             long entityId = PlayerData.getLongData(id, "entity_id");
             if (entityId != -1) {
-                removeEntity(id);
+                enterEntity(id, -1);
+                //TODO: check if character, removing all entities on logout ^^..
+                removeEntity(entityId);
             }
         }
-        //TODO: remove other (AI) entities of his group..
         PlayerData.remove(id);
     }
 
@@ -363,9 +367,13 @@ public class WorldManager {
         if (isServer()) {
             syncManager.broadcast(new ServerRemoveEntityMessage(id));
         }
-        Spatial spat = entities.remove(id);
-        spat.removeFromParent();
         syncManager.removeObject(id);
+        Spatial spat = entities.remove(id);
+        if (spat == null) {
+            Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "try removing entity thats not there: {0}", id);
+            return;
+        }
+        spat.removeFromParent();
         if (spat.getControl(PhysicsControl.class) != null) {
             space.remove(spat.getControl(PhysicsControl.class));
         }
@@ -400,31 +408,33 @@ public class WorldManager {
             Spatial curEntitySpat = getEntity(curEntity);
             curEntitySpat.setUserData("player_id", -1l);
             curEntitySpat.setUserData("group_id", -1l);
+            removeMovementControls(curEntity);
         }
-        Spatial spat = getEntity(entityId);
-        spat.setUserData("player_id", playerId);
-        int groupId = PlayerData.getIntData(playerId, "group_id");
-        spat.setUserData("group_id", groupId);
         PlayerData.setData(playerId, "entity_id", entityId);
-        removeMovementControls(curEntity);
-        if (PlayerData.isHuman(playerId)) {
-            if (playerId == getMyPlayerId()) { //only true on clients
-                //TODO: check also for group, not just own entity id
-                //to see if we have to add a client to send data
-                makeManualControl(entityId, client);
-                //move controls for local user to new spatial
-                if (curEntity != -1) {
-                    removeUserControls(curEntity);
+        if (entityId != -1) {
+            Spatial spat = getEntity(entityId);
+            spat.setUserData("player_id", playerId);
+            int groupId = PlayerData.getIntData(playerId, "group_id");
+            spat.setUserData("group_id", groupId);
+            if (PlayerData.isHuman(playerId)) {
+                if (playerId == getMyPlayerId()) { //only true on clients
+                    //TODO: check also for group, not just own entity id
+                    //to see if we have to add a client to send data
+                    makeManualControl(entityId, client);
+                    //move controls for local user to new spatial
+                    if (curEntity != -1) {
+                        removeUserControls(curEntity);
+                    }
+                    addUserControls(spat);
+                } else {
+                    makeManualControl(entityId, null);
                 }
-                addUserControls(spat);
             } else {
-                makeManualControl(entityId, null);
-            }
-        } else {
-            if (playerId == getMyPlayerId()) { //only true on clients
-                makeAutoControl(entityId, client);
-            } else {
-                makeAutoControl(entityId, null);
+                if (playerId == getMyPlayerId()) { //only true on clients
+                    makeAutoControl(entityId, client);
+                } else {
+                    makeAutoControl(entityId, null);
+                }
             }
         }
     }
