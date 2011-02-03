@@ -32,10 +32,11 @@
 package com.jme3.monkeyzone;
 
 import com.jme3.monkeyzone.messages.ChatMessage;
-import com.jme3.monkeyzone.messages.ClientActionMessage;
 import com.jme3.monkeyzone.messages.ClientJoinMessage;
 import com.jme3.monkeyzone.messages.HandshakeMessage;
+import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
 import com.jme3.monkeyzone.messages.ServerJoinMessage;
+import com.jme3.monkeyzone.messages.ServerRemovePlayerMessage;
 import com.jme3.monkeyzone.messages.StartGameMessage;
 import com.jme3.network.connection.Client;
 import com.jme3.network.events.ConnectionListener;
@@ -64,7 +65,7 @@ public class ClientNetListener implements MessageListener, ConnectionListener {
         this.client = client;
         this.worldManager = worldManager;
         client.addConnectionListener(this);
-        client.addMessageListener(this, HandshakeMessage.class, ServerJoinMessage.class, StartGameMessage.class, ChatMessage.class);
+        client.addMessageListener(this, HandshakeMessage.class, ServerJoinMessage.class, StartGameMessage.class, ChatMessage.class, ServerAddPlayerMessage.class, ServerRemovePlayerMessage.class);
     }
 
     public void clientConnected(Client clienst) {
@@ -129,6 +130,10 @@ public class ClientNetListener implements MessageListener, ConnectionListener {
         } else if (message instanceof ChatMessage) {
             final ChatMessage msg = (ChatMessage) message;
             app.addChat(msg.name + ": " + msg.text);
+        } else if (message instanceof ServerAddPlayerMessage) {
+            app.updatePlayerData();
+        } else if (message instanceof ServerRemovePlayerMessage) {
+            app.updatePlayerData();
         }
     }
 
