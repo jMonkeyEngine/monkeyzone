@@ -102,8 +102,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         }
         inputManager.setCursorVisible(true);
         flyCam.setEnabled(false);
-        //FIXME: why does ChaseCam need a spatial in the constructor??
-        chaseCam = new ChaseCamera(cam, rootNode);
+        chaseCam = new ChaseCamera(cam,inputManager);
         chaseCam.setSmoothMotion(true);
         chaseCam.setChasingSensitivity(100);
         chaseCam.setTrailingEnabled(true);
