@@ -75,7 +75,7 @@ public class ManualControlMessage extends PhysicsSyncMessage {
     public void applyData(Object object) {
         NetworkedManualControl netControl = ((Spatial) ((PhysicsCollisionObject) object).getUserObject()).getControl(NetworkedManualControl.class);
         if (netControl != null) {
-            if (netControl.getSyncManager() != null) {
+            if (netControl.getSyncManager().getServer() != null) {
                 netControl.getSyncManager().broadcast(this);
             }
             netControl.doMoveX(moveX);
