@@ -37,7 +37,6 @@ import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.monkeyzone.messages.ClientActionMessage;
-import com.jme3.monkeyzone.messages.ServerEffectMessage;
 import com.jme3.monkeyzone.messages.StartGameMessage;
 import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.scene.Spatial;

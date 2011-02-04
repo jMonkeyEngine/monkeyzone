@@ -154,9 +154,11 @@ public class ServerNetListener implements MessageListener, ConnectionListener {
                     for (Iterator<PlayerData> it = PlayerData.getPlayers().iterator(); it.hasNext();) {
                         PlayerData playerData = it.next();
                         if (playerData.getId() != newPlayerId) {
-                            msg.getClient().send(new ServerAddPlayerMessage(playerData.getId(), playerData.getStringData("name"), playerData.getIntData("group_id"), playerData.getAiControl()));
+                            worldManager.getSyncManager().send(msg.getClient(), new ServerAddPlayerMessage(playerData.getId(), playerData.getStringData("name"), playerData.getIntData("group_id"), playerData.getAiControl()));
+                            Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Send player {0} to client {1}", new Object[]{playerData.getId(), newPlayerId});
                         }
                     }
+
                     return null;
                 }
             });
