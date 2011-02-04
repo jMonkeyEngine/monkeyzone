@@ -32,7 +32,6 @@
 package com.jme3.network.physicssync;
 
 import com.jme3.app.Application;
-import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.network.connection.Server;
@@ -43,7 +42,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
@@ -101,15 +99,6 @@ public class PhysicsSyncManager implements MessageListener {
         }
     }
 
-    public long addObject(PhysicsCollisionObject object) {
-        long id = 0;
-        while (syncObjects.containsKey(id)) {
-            id++;
-        }
-        syncObjects.put(id, object);
-        return id;
-    }
-
     public void addObject(long id, Object object) {
         syncObjects.put(id, object);
     }
@@ -145,10 +134,10 @@ public class PhysicsSyncManager implements MessageListener {
         double delayTime = (message.time + offset) - time;
         if (delayTime > maxDelay) {
             offset -= delayTime - maxDelay;
-            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.INFO, "Decrease offset due to high delaytime ({0})",  delayTime);
+            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.INFO, "Decrease offset due to high delaytime ({0})", delayTime);
         } else if (delayTime < 0) {
             offset -= delayTime;
-            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.INFO, "Increase offset due to low delaytime ({0})",  delayTime);
+            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.INFO, "Increase offset due to low delaytime ({0})", delayTime);
         }
         messageQueue.add(message);
     }
@@ -187,6 +176,27 @@ public class PhysicsSyncManager implements MessageListener {
         }
     }
 
+    public void send(int client, PhysicsSyncMessage msg) {
+        if (server == null) {
+            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.SEVERE, "Broadcasting message on client {0}", msg);
+            return;
+        }
+        send(server.getClientByID(client), msg);
+    }
+
+    public void send(Client client, PhysicsSyncMessage msg) {
+        msg.time = time;
+        try {
+            if (client == null) {
+                Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.SEVERE, "Client null when sending: {0}", client);
+                return;
+            }
+            client.send(msg);
+        } catch (IOException ex) {
+            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.SEVERE, "Cannot broadcast message: {0}", ex);
+        }
+    }
+
     public void setMessageTypes(Class... classes) {
         if (server != null) {
             server.removeMessageListener(this);
@@ -212,7 +222,6 @@ public class PhysicsSyncManager implements MessageListener {
 
                 public Void call() throws Exception {
                     delayMessage((PhysicsSyncMessage) message);
-//                    doMessage((PhysicsSyncMessage) message);
                     return null;
                 }
             });
