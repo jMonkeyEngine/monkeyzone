@@ -32,12 +32,15 @@
 package com.jme3.monkeyzone;
 
 import com.jme3.asset.AssetManager;
+import com.jme3.effect.ParticleEmitter;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -78,6 +81,11 @@ public class ClientEffectsManager {
         EmitterData data = new EmitterData(effect, id, effectName, location, endLocation, rotation, endRotation, time);
         effect.setLocalTranslation(location);
         effect.setLocalRotation(rotation);
+        List<Spatial> children=effect.getChildren();
+        for (Iterator<Spatial> it = children.iterator(); it.hasNext();) {
+            ParticleEmitter emitter = (ParticleEmitter)it.next();
+            emitter.emitAllParticles();
+        }
         worldManager.getWorldRoot().attachChild(effect);
         if (id == -1) {
             putToNew(data);
