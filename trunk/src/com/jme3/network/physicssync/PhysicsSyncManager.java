@@ -57,11 +57,11 @@ public class PhysicsSyncManager implements MessageListener {
 
     private Server server;
     private Client client;
-    float syncFrequency = 0.25f;
+    private float syncFrequency = 0.25f;
     HashMap<Long, Object> syncObjects = new HashMap<Long, Object>();
     double time = 0;
     double offset = Double.MIN_VALUE;
-    private double maxDelay = 0.250;
+    private double maxDelay = 0.25;
     float syncTimer = 0;
     List<PhysicsSyncMessage> messageQueue = new LinkedList<PhysicsSyncMessage>();
     Application app;
@@ -254,5 +254,13 @@ public class PhysicsSyncManager implements MessageListener {
 
     public void setMaxDelay(double maxDelay) {
         this.maxDelay = maxDelay;
+    }
+
+    public float getSyncFrequency() {
+        return syncFrequency;
+    }
+
+    public void setSyncFrequency(float syncFrequency) {
+        this.syncFrequency = syncFrequency;
     }
 }
