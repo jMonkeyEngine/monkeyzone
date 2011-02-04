@@ -43,8 +43,6 @@ public abstract class PhysicsSyncMessage extends Message {
 
     public long syncId = -1;
     public double time;
-    //TODO: dont dync delayTime somehow? -> not needed
-    public double delayTime = 0;
 
     public PhysicsSyncMessage() {
         setReliable(false);

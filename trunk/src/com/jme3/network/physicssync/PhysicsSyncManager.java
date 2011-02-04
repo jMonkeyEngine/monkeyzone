@@ -50,7 +50,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Handles syncing of physics enabled server/client games.
  * @author normenhansen
  */
 public class PhysicsSyncManager implements MessageListener {
@@ -63,7 +63,7 @@ public class PhysicsSyncManager implements MessageListener {
     double offset = Double.MIN_VALUE;
     private double maxDelay = 0.25;
     float syncTimer = 0;
-    List<PhysicsSyncMessage> messageQueue = new LinkedList<PhysicsSyncMessage>();
+    LinkedList<PhysicsSyncMessage> messageQueue = new LinkedList<PhysicsSyncMessage>();
     Application app;
 
     public PhysicsSyncManager(Application app, Server server) {
@@ -87,11 +87,9 @@ public class PhysicsSyncManager implements MessageListener {
         if (client != null) {
             for (Iterator<PhysicsSyncMessage> it = messageQueue.iterator(); it.hasNext();) {
                 PhysicsSyncMessage message = it.next();
-                if (message.delayTime <= 0) {
+                if (message.time >= time + offset) {
                     doMessage(message);
                     it.remove();
-                } else {
-                    message.delayTime -= tpf;
                 }
             }
         } else if (server != null) {
@@ -145,26 +143,14 @@ public class PhysicsSyncManager implements MessageListener {
             Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.INFO, "Initial offset {0}", offset);
         }
         double delayTime = (message.time + offset) - time;
-        double off = 0;
         if (delayTime > maxDelay) {
-            off -= delayTime - maxDelay;
-            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.INFO, "Decrease offset by {0} due to high delaytime {1}", new Object[]{off, delayTime});
-            changeOffset(off);
+            offset -= delayTime - maxDelay;
+            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.INFO, "Decrease offset due to high delaytime ({0})",  delayTime);
         } else if (delayTime < 0) {
-            off = -delayTime;
-            changeOffset(off);
-            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.INFO, "Increase offset by {0} due to low delaytime {1}", new Object[]{off, delayTime});
+            offset -= delayTime;
+            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.INFO, "Increase offset due to low delaytime ({0})",  delayTime);
         }
-        message.delayTime = delayTime + off;
         messageQueue.add(message);
-    }
-
-    protected void changeOffset(double amount) {
-        offset += amount;
-        for (Iterator<PhysicsSyncMessage> it = messageQueue.iterator(); it.hasNext();) {
-            PhysicsSyncMessage physicsSyncMessage = it.next();
-            physicsSyncMessage.delayTime += amount;
-        }
     }
 
     protected void sendSyncData() {
@@ -226,6 +212,7 @@ public class PhysicsSyncManager implements MessageListener {
 
                 public Void call() throws Exception {
                     delayMessage((PhysicsSyncMessage) message);
+//                    doMessage((PhysicsSyncMessage) message);
                     return null;
                 }
             });

@@ -36,6 +36,7 @@ import com.jme3.export.JmeImporter;
 import com.jme3.math.Vector3f;
 import com.jme3.monkeyzone.messages.ClientActionMessage;
 import com.jme3.network.connection.Client;
+import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.Control;
 import java.io.IOException;
@@ -49,6 +50,7 @@ import java.util.logging.Logger;
 public abstract class NetworkedAutonomousControl implements AutonomousControl {
 
     private Client client;
+    private PhysicsSyncManager syncManager;
     private long entity_id;
     protected boolean enabled = true;
     protected Spatial spatial;
@@ -58,6 +60,11 @@ public abstract class NetworkedAutonomousControl implements AutonomousControl {
 
     public NetworkedAutonomousControl(Client client, long entity_id) {
         this.client = client;
+        this.entity_id = entity_id;
+    }
+
+    public NetworkedAutonomousControl(PhysicsSyncManager manager, long entity_id) {
+        this.syncManager = manager;
         this.entity_id = entity_id;
     }
 
@@ -97,6 +104,10 @@ public abstract class NetworkedAutonomousControl implements AutonomousControl {
         return enabled;
     }
 
+    public PhysicsSyncManager getSyncManager() {
+        return syncManager;
+    }
+    
     public Control cloneForSpatial(Spatial spatial) {
         throw new UnsupportedOperationException("Not supported.");
     }
@@ -108,4 +119,5 @@ public abstract class NetworkedAutonomousControl implements AutonomousControl {
     public void read(JmeImporter im) throws IOException {
         throw new UnsupportedOperationException("Not supported.");
     }
+
 }

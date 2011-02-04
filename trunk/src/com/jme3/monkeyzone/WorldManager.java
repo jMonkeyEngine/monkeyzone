@@ -95,6 +95,7 @@ public class WorldManager {
     private Node rootNode;
     private Node worldRoot;
     private HashMap<Long, Spatial> entities = new HashMap<Long, Spatial>();
+    private int newId = 0;
     private Application app;
     private AssetManager assetManager;
     private NavMeshGenerator generator = new NavMeshGenerator();
@@ -201,11 +202,12 @@ public class WorldManager {
      */
     public void closeLevel() {
         //TODO: remove AI players
-        removeUserControls(myPlayerId);
         for (Iterator<Long> et = new LinkedList(entities.keySet()).iterator(); et.hasNext();) {
             Long entry = et.next();
             syncManager.removeObject(entry);
         }
+        entities.clear();
+        newId = 0;
         space.removeAll(worldRoot);
         rootNode.detachChild(worldRoot);
         ((DesktopAssetManager) assetManager).clearCache();
@@ -323,12 +325,13 @@ public class WorldManager {
      * @return
      */
     public long addNewEntity(String modelIdentifier, Vector3f location, Quaternion rotation) {
-        long id = 0;
-        while (entities.containsKey(id)) {
-            id++;
-        }
-        addEntity(id, modelIdentifier, location, rotation);
-        return id;
+//        long id = 0;
+//        while (entities.containsKey(id)) {
+//            id++;
+//        }
+        newId++;
+        addEntity(newId, modelIdentifier, location, rotation);
+        return newId;
     }
 
     /**
@@ -352,7 +355,7 @@ public class WorldManager {
             syncManager.addObject(id, entityModel.getControl(RigidBodyControl.class));
         } else if (entityModel.getControl(CharacterControl.class) != null) {
             entityModel.getControl(CharacterControl.class).setPhysicsLocation(location);
-            entityModel.getControl(CharacterControl.class).setViewDirection(rotation.mult(Vector3f.UNIT_Z).multLocal(1,0,1).normalizeLocal());
+            entityModel.getControl(CharacterControl.class).setViewDirection(rotation.mult(Vector3f.UNIT_Z).multLocal(1, 0, 1).normalizeLocal());
             entityModel.addControl(new CharacterAnimControl());
             syncManager.addObject(id, entityModel.getControl(CharacterControl.class));
         } else if (entityModel.getControl(VehicleControl.class) != null) {
@@ -413,27 +416,27 @@ public class WorldManager {
             syncManager.broadcast(new ServerEnterEntityMessage(playerId, entityId));
         }
         long curEntity = PlayerData.getLongData(playerId, "entity_id");
+        int groupId = PlayerData.getIntData(playerId, "group_id");
         if (curEntity != -1) {
             Spatial curEntitySpat = getEntity(curEntity);
             curEntitySpat.setUserData("player_id", -1l);
             curEntitySpat.setUserData("group_id", -1l);
             removeMovementControls(curEntity);
+            if (playerId == myPlayerId) {
+                removeUserControls(curEntity);
+            }
         }
         PlayerData.setData(playerId, "entity_id", entityId);
+        //id -1 means enter no entity
         if (entityId != -1) {
             Spatial spat = getEntity(entityId);
             spat.setUserData("player_id", playerId);
-            int groupId = PlayerData.getIntData(playerId, "group_id");
             spat.setUserData("group_id", groupId);
             if (PlayerData.isHuman(playerId)) {
+                //TODO: check also for group, not just own entity id
                 if (playerId == getMyPlayerId()) { //only true on clients
-                    //TODO: check also for group, not just own entity id
-                    //to see if we have to add a client to send data
                     makeManualControl(entityId, client);
                     //move controls for local user to new spatial
-                    if (curEntity != -1) {
-                        removeUserControls(curEntity);
-                    }
                     addUserControls(spat);
                 } else {
                     makeManualControl(entityId, null);
@@ -454,34 +457,28 @@ public class WorldManager {
      */
     private void makeManualControl(long entityId, Client client) {
         Spatial spat = getEntity(entityId);
-        AutonomousControl autoControl = spat.getControl(AutonomousControl.class);
-        if (autoControl != null) {
-            spat.removeControl(autoControl);
-        }
-        ManualControl manualControl = spat.getControl(ManualControl.class);
-        if (manualControl == null) {
-            if (spat.getControl(CharacterControl.class) != null) {
-                if (client != null) {
-                    //add net sending for users own manual control
-                    if (entityId == PlayerData.getLongData(myPlayerId, "entity_id")) {
-                        spat.addControl(new ManualCharacterControl(client, entityId));
-                    } else {
-                        spat.addControl(new ManualCharacterControl());
-                    }
+        if (spat.getControl(CharacterControl.class) != null) {
+            if (client != null) {
+                //add net sending for users own manual control
+                //TODO: add sending for own AI players
+                if (entityId == PlayerData.getLongData(myPlayerId, "entity_id")) {
+                    spat.addControl(new ManualCharacterControl(client, entityId));
                 } else {
-                    spat.addControl(new ManualCharacterControl(syncManager, entityId));
+                    spat.addControl(new ManualCharacterControl());
                 }
-            } else if (spat.getControl(VehicleControl.class) != null) {
-                if (client != null) {
-                    //add net sending for users own manual control
-                    if (entityId == PlayerData.getLongData(myPlayerId, "entity_id")) {
-                        spat.addControl(new ManualVehicleControl(client, entityId));
-                    } else {
-                        spat.addControl(new ManualVehicleControl());
-                    }
+            } else {
+                spat.addControl(new ManualCharacterControl(syncManager, entityId));
+            }
+        } else if (spat.getControl(VehicleControl.class) != null) {
+            if (client != null) {
+                //add net sending for users own manual control
+                if (entityId == PlayerData.getLongData(myPlayerId, "entity_id")) {
+                    spat.addControl(new ManualVehicleControl(client, entityId));
                 } else {
-                    spat.addControl(new ManualVehicleControl(syncManager, entityId));
+                    spat.addControl(new ManualVehicleControl());
                 }
+            } else {
+                spat.addControl(new ManualVehicleControl(syncManager, entityId));
             }
         }
     }
@@ -492,26 +489,19 @@ public class WorldManager {
      */
     private void makeAutoControl(long entityId, Client client) {
         Spatial spat = getEntity(entityId);
-        ManualControl manualControl = spat.getControl(ManualControl.class);
-        if (manualControl != null) {
-            spat.removeControl(manualControl);
-        }
-        AutonomousControl autoControl = spat.getControl(AutonomousControl.class);
-        if (autoControl == null) {
-            //TODO: check for group id and add with client/id for networking (like manual)
-            if (spat.getControl(CharacterControl.class) != null) {
-                if (client != null) {
-                    //TODO: clients for auto controls
-                    spat.addControl(new AutonomousCharacterControl(client, entityId));
-                } else {
-                    spat.addControl(new AutonomousCharacterControl());
-                }
-            } else if (spat.getControl(VehicleControl.class) != null) {
-                if (client != null) {
-                    spat.addControl(new AutonomousVehicleControl(client, entityId));
-                } else {
-                    spat.addControl(new AutonomousVehicleControl());
-                }
+        //TODO: check for group id and add with client/id for networking (like manual)
+        if (spat.getControl(CharacterControl.class) != null) {
+            if (client != null) {
+                //TODO: clients for auto controls
+                spat.addControl(new AutonomousCharacterControl(client, entityId));
+            } else {
+                spat.addControl(new AutonomousCharacterControl(syncManager, entityId));
+            }
+        } else if (spat.getControl(VehicleControl.class) != null) {
+            if (client != null) {
+                spat.addControl(new AutonomousVehicleControl(client, entityId));
+            } else {
+                spat.addControl(new AutonomousVehicleControl(syncManager, entityId));
             }
         }
     }
