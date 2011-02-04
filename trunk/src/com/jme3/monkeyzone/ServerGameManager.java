@@ -75,8 +75,8 @@ public class ServerGameManager {
             return false;
         }
         running = true;
-        //TODO: parse client side string, create model list automatically
         mapName = map;
+        //TODO: parse client side string, create preload model list automatically
         modelNames = new String[]{"Models/HoverTank/HoverTank.j3o", "Models/Sinbad/Sinbad.j3o", "Models/Ferrari/Car.j3o", "Models/Buggy/Buggy.j3o"};
         try {
             server.getServer().broadcast(new StartGameMessage(mapName, modelNames));
@@ -172,7 +172,7 @@ public class ServerGameManager {
                     Spatial spatial = (Spatial) obj;
                     long entityId = worldManager.getEntityId(spatial);
                     if (entityId != -1 && entityId != entity) {
-                        server.broadcast(new ServerEffectMessage(-1, "Effects/ExplosionA.j3o", spatial.getWorldTranslation(), spatial.getWorldRotation(), spatial.getWorldTranslation(), spatial.getWorldRotation(), 2.0f));
+                        worldManager.playWorldEffect("Effects/ExplosionA.j3o", spatial.getWorldTranslation(), 2.0f);
                     }
                 }
             }

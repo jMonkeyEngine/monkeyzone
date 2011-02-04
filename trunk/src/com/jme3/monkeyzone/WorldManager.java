@@ -109,6 +109,7 @@ public class WorldManager {
         this.space = space;
         this.server = server;
         syncManager = new PhysicsSyncManager(app, server);
+        syncManager.setSyncFrequency(Globals.NETWORK_SYNC_FREQUENCY);
         syncManager.addObject(-1, this);
         syncManager.setMessageTypes(AutoControlMessage.class,
                 ManualControlMessage.class);
@@ -121,6 +122,7 @@ public class WorldManager {
         this.space = space;
         this.client = client;
         syncManager = new PhysicsSyncManager(app, client);
+        syncManager.setMaxDelay(Globals.NETWORK_MAX_PHYSICS_DELAY);
         syncManager.addObject(-1, this);
         syncManager.setMessageTypes(ManualControlMessage.class,
                 SyncCharacterMessage.class,
@@ -350,6 +352,7 @@ public class WorldManager {
             syncManager.addObject(id, entityModel.getControl(RigidBodyControl.class));
         } else if (entityModel.getControl(CharacterControl.class) != null) {
             entityModel.getControl(CharacterControl.class).setPhysicsLocation(location);
+            entityModel.getControl(CharacterControl.class).setViewDirection(rotation.mult(Vector3f.UNIT_Z).multLocal(1,0,1).normalizeLocal());
             entityModel.addControl(new CharacterAnimControl());
             syncManager.addObject(id, entityModel.getControl(CharacterControl.class));
         } else if (entityModel.getControl(VehicleControl.class) != null) {
@@ -596,6 +599,23 @@ public class WorldManager {
      * @param channel
      */
     public void playEntityAnimation(long entityId, String animationName, int channel) {
+    }
+
+    public void playWorldEffect(String effectName, Vector3f location, float time) {
+        Quaternion rotation = new Quaternion();
+        playWorldEffect(-1, effectName, location, rotation, location, rotation, time);
+    }
+
+    public void playWorldEffect(String effectName, Vector3f location, Quaternion rotation, float time) {
+        playWorldEffect(-1, effectName, location, rotation, location, rotation, time);
+    }
+
+    public void playWorldEffect(long id, String effectName, Vector3f location, Quaternion rotation, float time) {
+        playWorldEffect(id, effectName, location, rotation, location, rotation, time);
+    }
+
+    public void playWorldEffect(long id, String effectName, Vector3f location, Quaternion rotation, Vector3f endLocation, Quaternion endRotation, float time) {
+        syncManager.broadcast(new ServerEffectMessage(id, effectName, location, rotation, endLocation, endRotation, time));
     }
 
     public void update(float tpf) {
