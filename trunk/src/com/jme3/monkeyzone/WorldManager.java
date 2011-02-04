@@ -412,12 +412,14 @@ public class WorldManager {
      * @param entityId
      */
     public void enterEntity(long playerId, long entityId) {
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Player {0} entering entity {1}", new Object[]{playerId, entityId});
         if (isServer()) {
             syncManager.broadcast(new ServerEnterEntityMessage(playerId, entityId));
         }
         long curEntity = PlayerData.getLongData(playerId, "entity_id");
         int groupId = PlayerData.getIntData(playerId, "group_id");
         if (curEntity != -1) {
+            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Player {0} exiting current entity {1}", new Object[]{playerId, curEntity});
             Spatial curEntitySpat = getEntity(curEntity);
             curEntitySpat.setUserData("player_id", -1l);
             curEntitySpat.setUserData("group_id", -1l);
@@ -462,12 +464,17 @@ public class WorldManager {
                 //add net sending for users own manual control
                 //TODO: add sending for own AI players
                 if (entityId == PlayerData.getLongData(myPlayerId, "entity_id")) {
+                    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make human client type manual control for entity {0} ", entityId);
                     spat.addControl(new ManualCharacterControl(client, entityId));
                 } else {
+                    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make client type manual control for entity {0} ", entityId);
                     spat.addControl(new ManualCharacterControl());
                 }
-            } else {
+            } else if (server != null) {
+                Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make server type manual control for entity {0} ", entityId);
                 spat.addControl(new ManualCharacterControl(syncManager, entityId));
+            } else {
+                spat.addControl(new ManualCharacterControl());
             }
         } else if (spat.getControl(VehicleControl.class) != null) {
             if (client != null) {
@@ -477,8 +484,11 @@ public class WorldManager {
                 } else {
                     spat.addControl(new ManualVehicleControl());
                 }
-            } else {
+            } else if (server != null) {
+                Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make server type manual control for entity {0} ", entityId);
                 spat.addControl(new ManualVehicleControl(syncManager, entityId));
+            } else {
+                spat.addControl(new ManualVehicleControl());
             }
         }
     }
