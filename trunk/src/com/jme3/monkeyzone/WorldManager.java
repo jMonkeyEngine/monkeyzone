@@ -282,6 +282,7 @@ public class WorldManager {
      * @param aiId
      */
     public void addPlayer(long id, int groupId, String name, int aiId) {
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Adding player: {0}", id);
         if (isServer()) {
             syncManager.broadcast(new ServerAddPlayerMessage(id, name, groupId, aiId));
         }
@@ -295,6 +296,7 @@ public class WorldManager {
      * @param id
      */
     public void removePlayer(long id) {
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Removing player: {0}", id);
         if (isServer()) {
             //TODO: remove other (AI) entities if this is a human client..
             syncManager.broadcast(new ServerRemovePlayerMessage(id));
@@ -474,6 +476,7 @@ public class WorldManager {
                 Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make server type manual control for entity {0} ", entityId);
                 spat.addControl(new ManualCharacterControl(syncManager, entityId));
             } else {
+                Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make client type manual control for entity {0} ", entityId);
                 spat.addControl(new ManualCharacterControl());
             }
         } else if (spat.getControl(VehicleControl.class) != null) {
@@ -488,6 +491,7 @@ public class WorldManager {
                 Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make server type manual control for entity {0} ", entityId);
                 spat.addControl(new ManualVehicleControl(syncManager, entityId));
             } else {
+                Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make client type manual control for entity {0} ", entityId);
                 spat.addControl(new ManualVehicleControl());
             }
         }
