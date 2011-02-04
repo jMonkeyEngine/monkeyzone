@@ -35,6 +35,7 @@ import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Vector3f;
 import com.jme3.monkeyzone.Globals;
 import com.jme3.network.connection.Client;
+import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
@@ -61,6 +62,10 @@ public class AutonomousCharacterControl extends NetworkedAutonomousControl {
 
     public AutonomousCharacterControl(Client client, long entityId) {
         super(client, entityId);
+    }
+
+    public AutonomousCharacterControl(PhysicsSyncManager server, long entityId) {
+        super(server, entityId);
     }
 
     @Override

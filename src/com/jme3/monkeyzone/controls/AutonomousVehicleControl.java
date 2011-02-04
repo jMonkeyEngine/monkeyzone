@@ -33,6 +33,8 @@ package com.jme3.monkeyzone.controls;
 
 import com.jme3.math.Vector3f;
 import com.jme3.network.connection.Client;
+import com.jme3.network.connection.Server;
+import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
@@ -49,6 +51,10 @@ public class AutonomousVehicleControl extends NetworkedAutonomousControl{
 
     public AutonomousVehicleControl(Client client, long entityId) {
         super(client, entityId);
+    }
+
+    public AutonomousVehicleControl(PhysicsSyncManager server, long entityId) {
+        super(server, entityId);
     }
 
     public boolean aimAt(Vector3f direction) {
