@@ -94,7 +94,7 @@ public class ServerNetListener implements MessageListener, ConnectionListener {
                 } catch (IOException ex) {
                     Logger.getLogger(ServerNetListener.class.getName()).log(Level.SEVERE, "{0}", ex);
                 }
-                if (PlayerData.getPlayers().isEmpty()) {
+                if (PlayerData.getHumanPlayers().isEmpty()) {
                     gameManager.stopGame();
                 }
                 return null;

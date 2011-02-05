@@ -31,21 +31,47 @@
  */
 package com.jme3.monkeyzone.messages;
 
+import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.math.Vector3f;
-import com.jme3.network.message.Message;
+import com.jme3.monkeyzone.controls.NetworkedAutonomousControl;
+import com.jme3.network.physicssync.PhysicsSyncMessage;
 import com.jme3.network.serializing.Serializable;
+import com.jme3.scene.Spatial;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * automatic (AI) control message, used bidirectional
  * @author normenhansen
  */
 @Serializable()
-public class AutoControlMessage extends Message{
-    public long id;
-    public Vector3f aimAt;
-    public Vector3f moveTo;
+public class AutoControlMessage extends PhysicsSyncMessage {
+
+    public Vector3f aimAt = new Vector3f();
+    public Vector3f moveTo = new Vector3f();
 
     public AutoControlMessage() {
     }
 
+    public AutoControlMessage(long id, Vector3f aimAt, Vector3f moveTo) {
+        setReliable(false);
+        this.syncId = id;
+        this.aimAt.set(aimAt);
+        this.moveTo.set(moveTo);
+    }
+
+    @Override
+    public void applyData(Object object) {
+        NetworkedAutonomousControl netControl = ((Spatial) ((PhysicsCollisionObject) object).getUserObject()).getControl(NetworkedAutonomousControl.class);
+        if (netControl != null) {
+            if (netControl.getSyncManager() != null) {
+                netControl.getSyncManager().broadcast(this);
+            }
+//            Logger.getLogger(AutoControlMessage.class.getName()).log(Level.INFO, "Apply auto control to entity {0}", syncId);
+            netControl.aimAt(aimAt);
+            netControl.moveTo(moveTo);
+        } else {
+            Logger.getLogger(AutoControlMessage.class.getName()).log(Level.SEVERE, "Could not find auto control for entity {0} to apply data!", syncId);
+        }
+    }
 }

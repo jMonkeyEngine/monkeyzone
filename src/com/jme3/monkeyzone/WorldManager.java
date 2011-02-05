@@ -35,6 +35,7 @@ import com.jme3.app.Application;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.DesktopAssetManager;
 import com.jme3.bullet.PhysicsSpace;
+import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.control.VehicleControl;
@@ -50,12 +51,14 @@ import com.jme3.monkeyzone.controls.CharacterAnimControl;
 import com.jme3.monkeyzone.controls.ManualCharacterControl;
 import com.jme3.monkeyzone.controls.ManualControl;
 import com.jme3.monkeyzone.controls.ManualVehicleControl;
+import com.jme3.monkeyzone.controls.SimpleAIControl;
 import com.jme3.monkeyzone.messages.AutoControlMessage;
 import com.jme3.monkeyzone.messages.ManualControlMessage;
 import com.jme3.monkeyzone.messages.ServerAddEntityMessage;
 import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
 import com.jme3.monkeyzone.messages.ServerEffectMessage;
 import com.jme3.monkeyzone.messages.ServerEnterEntityMessage;
+import com.jme3.monkeyzone.messages.ServerEntityDataMessage;
 import com.jme3.monkeyzone.messages.ServerRemoveEntityMessage;
 import com.jme3.monkeyzone.messages.ServerRemovePlayerMessage;
 import com.jme3.network.connection.Client;
@@ -125,7 +128,8 @@ public class WorldManager {
         syncManager = new PhysicsSyncManager(app, client);
         syncManager.setMaxDelay(Globals.NETWORK_MAX_PHYSICS_DELAY);
         syncManager.addObject(-1, this);
-        syncManager.setMessageTypes(ManualControlMessage.class,
+        syncManager.setMessageTypes(AutoControlMessage.class,
+                ManualControlMessage.class,
                 SyncCharacterMessage.class,
                 SyncRigidBodyMessage.class,
                 ServerEnterEntityMessage.class,
@@ -189,6 +193,10 @@ public class WorldManager {
         return syncManager;
     }
 
+    public PhysicsSpace getPhysicsSpace() {
+        return space;
+    }
+
     /**
      * loads the specified level node
      * @param name
@@ -201,7 +209,12 @@ public class WorldManager {
      * detaches the level and clears the cache
      */
     public void closeLevel() {
-        //TODO: remove AI players
+        if (isServer()) {
+            for (Iterator<PlayerData> it = PlayerData.getAIPlayers().iterator(); it.hasNext();) {
+                PlayerData playerData = it.next();
+                removePlayer(playerData.getId());
+            }
+        }
         for (Iterator<Long> et = new LinkedList(entities.keySet()).iterator(); et.hasNext();) {
             Long entry = et.next();
             syncManager.removeObject(entry);
@@ -250,7 +263,6 @@ public class WorldManager {
         green.setColor("Color", ColorRGBA.Green);
         navGeom.setMaterial(green);
 
-        //XXX: oopsie, are we attaching on another thread here? :D works and is for debug only
         worldRoot.attachChild(navGeom);
     }
 
@@ -272,6 +284,19 @@ public class WorldManager {
             }
         }
         return geoms;
+    }
+
+    /**
+     * adds a new player with new id (used on server only)
+     * @param id
+     * @param groupId
+     * @param name
+     * @param aiId
+     */
+    public long addNewPlayer(int groupId, String name, int aiId) {
+        long playerId = PlayerData.getNew(name);
+        addPlayer(playerId, groupId, name, aiId);
+        return playerId;
     }
 
     /**
@@ -317,6 +342,53 @@ public class WorldManager {
      */
     public Spatial getEntity(long id) {
         return entities.get(id);
+    }
+
+    /**
+     * gets the entity belonging to a PhysicsCollisionObject
+     * @param object
+     * @return
+     */
+    public Spatial getEntity(PhysicsCollisionObject object) {
+        Object obj = object.getUserObject();
+        if (obj instanceof Spatial) {
+            Spatial spatial = (Spatial) obj;
+            if (entities.containsValue(spatial)) {
+                return spatial;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * finds the entity id of a given spatial if there is one
+     * @param entity
+     * @return
+     */
+    public long getEntityId(Spatial entity) {
+        for (Iterator<Entry<Long, Spatial>> it = entities.entrySet().iterator(); it.hasNext();) {
+            Entry<Long, Spatial> entry = it.next();
+            if (entry.getValue() == entity) {
+                return entry.getKey();
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * gets the entity belonging to a PhysicsCollisionObject
+     * @param object
+     * @return
+     */
+    public long getEntityId(PhysicsCollisionObject object) {
+        Object obj = object.getUserObject();
+        if (obj instanceof Spatial) {
+            Spatial spatial = (Spatial) obj;
+            if (spatial != null) {
+                return getEntityId(spatial);
+            }
+        }
+        return -1;
     }
 
     /**
@@ -368,6 +440,8 @@ public class WorldManager {
             entityModel.setLocalTranslation(location);
             entityModel.setLocalRotation(rotation);
         }
+        entityModel.setUserData("player_id", -1l);
+        entityModel.setUserData("group_id", -1);
         entities.put(id, entityModel);
         space.addAll(entityModel);
         worldRoot.attachChild(entityModel);
@@ -394,21 +468,6 @@ public class WorldManager {
     }
 
     /**
-     * finds the entity id of a given spatial if there is one
-     * @param entity
-     * @return
-     */
-    public long getEntityId(Spatial entity) {
-        for (Iterator<Entry<Long, Spatial>> it = entities.entrySet().iterator(); it.hasNext();) {
-            Entry<Long, Spatial> entry = it.next();
-            if (entry.getValue() == entity) {
-                return entry.getKey();
-            }
-        }
-        return -1;
-    }
-
-    /**
      * handle player entering entity (sends message if server)
      * @param playerId
      * @param entityId
@@ -424,10 +483,11 @@ public class WorldManager {
             Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Player {0} exiting current entity {1}", new Object[]{playerId, curEntity});
             Spatial curEntitySpat = getEntity(curEntity);
             curEntitySpat.setUserData("player_id", -1l);
-            curEntitySpat.setUserData("group_id", -1l);
-            removeMovementControls(curEntity);
+            curEntitySpat.setUserData("group_id", -1);
+            removeTransientControls(curEntitySpat);
+            removeAIControl(curEntitySpat);
             if (playerId == myPlayerId) {
-                removeUserControls(curEntity);
+                removeUserControls(curEntitySpat);
             }
         }
         PlayerData.setData(playerId, "entity_id", entityId);
@@ -437,17 +497,19 @@ public class WorldManager {
             spat.setUserData("player_id", playerId);
             spat.setUserData("group_id", groupId);
             if (PlayerData.isHuman(playerId)) {
-                //TODO: check also for group, not just own entity id
-                if (playerId == getMyPlayerId()) { //only true on clients
+                if (groupId == getMyGroupId()) { //only true on clients
                     makeManualControl(entityId, client);
                     //move controls for local user to new spatial
-                    addUserControls(spat);
+                    if (playerId == getMyPlayerId()) {
+                        addUserControls(spat);
+                    }
                 } else {
                     makeManualControl(entityId, null);
                 }
             } else {
-                if (playerId == getMyPlayerId()) { //only true on clients
+                if (groupId == getMyGroupId()) { //only true on clients
                     makeAutoControl(entityId, client);
+                    addAIControl(playerId, spat);
                 } else {
                     makeAutoControl(entityId, null);
                 }
@@ -464,8 +526,8 @@ public class WorldManager {
         if (spat.getControl(CharacterControl.class) != null) {
             if (client != null) {
                 //add net sending for users own manual control
-                //TODO: add sending for own AI players
-                if (entityId == PlayerData.getLongData(myPlayerId, "entity_id")) {
+                //TODO: using group id as client id
+                if ((Integer) spat.getUserData("group_id") == myGroupId) {
                     Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make human client type manual control for entity {0} ", entityId);
                     spat.addControl(new ManualCharacterControl(client, entityId));
                 } else {
@@ -481,8 +543,8 @@ public class WorldManager {
             }
         } else if (spat.getControl(VehicleControl.class) != null) {
             if (client != null) {
-                //add net sending for users own manual control
-                if (entityId == PlayerData.getLongData(myPlayerId, "entity_id")) {
+                //TODO: using group id as client id
+                if ((Integer) spat.getUserData("group_id") == myGroupId) {
                     spat.addControl(new ManualVehicleControl(client, entityId));
                 } else {
                     spat.addControl(new ManualVehicleControl());
@@ -503,32 +565,22 @@ public class WorldManager {
      */
     private void makeAutoControl(long entityId, Client client) {
         Spatial spat = getEntity(entityId);
-        //TODO: check for group id and add with client/id for networking (like manual)
         if (spat.getControl(CharacterControl.class) != null) {
             if (client != null) {
-                //TODO: clients for auto controls
                 spat.addControl(new AutonomousCharacterControl(client, entityId));
-            } else {
+            } else if (server != null) {
                 spat.addControl(new AutonomousCharacterControl(syncManager, entityId));
+            } else {
+                spat.addControl(new AutonomousCharacterControl());
             }
         } else if (spat.getControl(VehicleControl.class) != null) {
             if (client != null) {
                 spat.addControl(new AutonomousVehicleControl(client, entityId));
-            } else {
+            } else if (server != null) {
                 spat.addControl(new AutonomousVehicleControl(syncManager, entityId));
+            } else {
+                spat.addControl(new AutonomousCharacterControl());
             }
-        }
-    }
-
-    /**
-     * removes all movement controls (ManualControl / AutonomousControl) from
-     * entity
-     * @param entityID
-     */
-    private void removeMovementControls(long entityID) {
-        Spatial spat = getEntity(entityID);
-        if (spat != null) {
-            removeMovementControls(spat);
         }
     }
 
@@ -537,7 +589,7 @@ public class WorldManager {
      * spatial
      * @param spat
      */
-    private void removeMovementControls(Spatial spat) {
+    private void removeTransientControls(Spatial spat) {
         ManualControl manualControl = spat.getControl(ManualControl.class);
         if (manualControl != null) {
             spat.removeControl(manualControl);
@@ -545,34 +597,6 @@ public class WorldManager {
         AutonomousControl autoControl = spat.getControl(AutonomousControl.class);
         if (autoControl != null) {
             spat.removeControl(autoControl);
-        }
-    }
-
-    /**
-     * adds the user controls for human user to the entity
-     */
-    private void addUserControls(long entityID) {
-        Spatial spat = getEntity(entityID);
-        addUserControls(spat);
-    }
-
-    /**
-     * adds the user controls for human user to the entity
-     */
-    private void removeUserControls(long entityID) {
-        Spatial spat = getEntity(entityID);
-        if (spat != null) {
-            removeUserControls(spat);
-        }
-    }
-
-    /**
-     * adds the user controls for human user to the spatial
-     */
-    private void removeUserControls(Spatial spat) {
-        for (Iterator<Control> it = userControls.iterator(); it.hasNext();) {
-            Control control = it.next();
-            spat.removeControl(control);
         }
     }
 
@@ -587,12 +611,42 @@ public class WorldManager {
     }
 
     /**
+     * removes the user controls for human user to the spatial
+     */
+    private void removeUserControls(Spatial spat) {
+        for (Iterator<Control> it = userControls.iterator(); it.hasNext();) {
+            Control control = it.next();
+            spat.removeControl(control);
+        }
+    }
+
+    /**
+     * adds the user controls for human user to the spatial
+     */
+    private void addAIControl(long playerId, Spatial spat) {
+        spat.addControl(new SimpleAIControl(this));
+    }
+
+    /**
+     * adds the user controls for human user to the spatial
+     */
+    private void removeAIControl(Spatial spat) {
+        AIControl aiControl = spat.getControl(AIControl.class);
+        if (aiControl != null) {
+            spat.removeControl(aiControl);
+        }
+    }
+
+    /**
      * set user data of specified entity (sends message if server)
      * @param id
      * @param name
      * @param data
      */
     public void setEntityUserData(long id, String name, Object data) {
+        if(isServer()){
+//            syncManager.broadcast(new ServerEntityDataMessage());
+        }
         getEntity(id).setUserData(name, data);
     }
 
@@ -624,37 +678,5 @@ public class WorldManager {
 
     public void update(float tpf) {
         syncManager.update(tpf);
-    }
-
-    public static class AIControlFactory {
-
-        public static final int DEFAULT_AI = 0;
-        public static final int WORKER_AI = 1;
-        public static final int FIGHTER_AI = 2;
-        public static final int BASIC3_AI = 3;
-        public static final int BASIC4_AI = 4;
-        public static final int BASIC5_AI = 5;
-        public static final int BASIC6_AI = 6;
-        public static final int BASIC7_AI = 7;
-        public static final int BASIC8_AI = 8;
-        public static final int BASIC9_AI = 9;
-
-        public static AIControl createAIControl(int id) {
-            switch (id) {
-                case 0:
-                    break;
-                case 1:
-                    break;
-                case 2:
-                    break;
-                case 3:
-                    break;
-                case 4:
-                    break;
-                case 5:
-                    break;
-            }
-            return null;
-        }
     }
 }

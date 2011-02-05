@@ -36,6 +36,8 @@ import com.jme3.monkeyzone.controls.NetworkedManualControl;
 import com.jme3.network.physicssync.PhysicsSyncMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.scene.Spatial;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Manual (human) control message, used bidirectional
@@ -54,6 +56,7 @@ public class ManualControlMessage extends PhysicsSyncMessage {
     }
 
     public ManualControlMessage(ManualControlMessage msg) {
+        setReliable(false);
         this.syncId = msg.syncId;
         this.aimX = msg.aimX;
         this.aimY = msg.aimY;
@@ -63,6 +66,7 @@ public class ManualControlMessage extends PhysicsSyncMessage {
     }
 
     public ManualControlMessage(long id, float aimX, float aimY, float moveX, float moveY, float moveZ) {
+        setReliable(false);
         this.syncId = id;
         this.aimX = aimX;
         this.aimY = aimY;
@@ -83,6 +87,8 @@ public class ManualControlMessage extends PhysicsSyncMessage {
             netControl.doMoveZ(moveZ);
             netControl.doSteerX(aimX);
             netControl.doSteerY(aimY);
+        } else {
+            Logger.getLogger(ManualControlMessage.class.getName()).log(Level.SEVERE, "Could not find manual control for entity {0} to apply data!", syncId);
         }
     }
 }

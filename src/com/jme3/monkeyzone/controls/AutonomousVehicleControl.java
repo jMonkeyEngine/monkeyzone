@@ -33,7 +33,6 @@ package com.jme3.monkeyzone.controls;
 
 import com.jme3.math.Vector3f;
 import com.jme3.network.connection.Client;
-import com.jme3.network.connection.Server;
 import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
@@ -57,19 +56,15 @@ public class AutonomousVehicleControl extends NetworkedAutonomousControl{
         super(server, entityId);
     }
 
-    public boolean aimAt(Vector3f direction) {
+    public void doAimAt(Vector3f direction) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void doMoveTo(Vector3f location) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public Vector3f getAimDirection() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void doAction(int action, boolean activate) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public boolean moveTo(Vector3f location) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -93,20 +88,10 @@ public class AutonomousVehicleControl extends NetworkedAutonomousControl{
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void setEnabled(boolean enabled) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public boolean isEnabled() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
     public void update(float tpf) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void render(RenderManager rm, ViewPort vp) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 
