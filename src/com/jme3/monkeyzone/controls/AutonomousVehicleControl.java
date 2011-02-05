@@ -37,13 +37,12 @@ import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.control.Control;
 
 /**
  * TODO: autonomous vehicle control
  * @author normenhansen
  */
-public class AutonomousVehicleControl extends NetworkedAutonomousControl{
+public class AutonomousVehicleControl extends NetworkedAutonomousControl {
 
     public AutonomousVehicleControl() {
     }
@@ -80,12 +79,11 @@ public class AutonomousVehicleControl extends NetworkedAutonomousControl{
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public Control cloneForSpatial(Spatial spatial) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
     public void setSpatial(Spatial spatial) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.spatial = spatial;
+        if (spatial == null) {
+            return;
+        }
     }
 
     public void update(float tpf) {
@@ -93,6 +91,4 @@ public class AutonomousVehicleControl extends NetworkedAutonomousControl{
 
     public void render(RenderManager rm, ViewPort vp) {
     }
-
-
 }

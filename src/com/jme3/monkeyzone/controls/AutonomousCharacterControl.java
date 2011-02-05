@@ -94,7 +94,7 @@ public class AutonomousCharacterControl extends NetworkedAutonomousControl {
         }
         Float spatialSpeed = (Float) spatial.getUserData("Speed");
         if (spatialSpeed != null) {
-            speed = spatialSpeed;
+            speed = spatialSpeed * Globals.PHYSICS_FPS;
         }
         characterControl = spatial.getControl(CharacterControl.class);
     }

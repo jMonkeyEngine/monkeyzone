@@ -58,6 +58,7 @@ import com.jme3.monkeyzone.messages.ServerAddEntityMessage;
 import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
 import com.jme3.monkeyzone.messages.ServerEffectMessage;
 import com.jme3.monkeyzone.messages.ServerEnterEntityMessage;
+import com.jme3.monkeyzone.messages.ServerEntityDataMessage;
 import com.jme3.monkeyzone.messages.ServerRemoveEntityMessage;
 import com.jme3.monkeyzone.messages.ServerRemovePlayerMessage;
 import com.jme3.network.connection.Client;
@@ -131,6 +132,7 @@ public class WorldManager {
                 ManualControlMessage.class,
                 SyncCharacterMessage.class,
                 SyncRigidBodyMessage.class,
+                ServerEntityDataMessage.class,
                 ServerEnterEntityMessage.class,
                 ServerAddEntityMessage.class,
                 ServerAddPlayerMessage.class,
@@ -438,6 +440,7 @@ public class WorldManager {
         } else {
             entityModel.setLocalTranslation(location);
             entityModel.setLocalRotation(rotation);
+            syncManager.addObject(id, entityModel);
         }
         entityModel.setUserData("player_id", -1l);
         entityModel.setUserData("group_id", -1);
@@ -447,7 +450,8 @@ public class WorldManager {
     }
 
     /**
-     * removes the entity with the specified id (sends message if server)
+     * removes the entity with the specified id, exits player if inside
+     * (sends message if server)
      * @param id
      */
     public void removeEntity(long id) {
@@ -456,6 +460,10 @@ public class WorldManager {
             Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Broadcast removing entity: {0}", id);
             syncManager.broadcast(new ServerRemoveEntityMessage(id));
         }
+//        Long playerId = (Long) spat.getUserData("player_id");
+//        if (playerId != null && playerId != -1) {
+//            enterEntity(playerId, -1);
+//        }
         syncManager.removeObject(id);
         Spatial spat = entities.remove(id);
         if (spat == null) {
@@ -643,8 +651,8 @@ public class WorldManager {
      * @param data
      */
     public void setEntityUserData(long id, String name, Object data) {
-        if(isServer()){
-//            syncManager.broadcast(new ServerEntityDataMessage());
+        if (isServer()) {
+            syncManager.broadcast(new ServerEntityDataMessage(id, name, data));
         }
         getEntity(id).setUserData(name, data);
     }
