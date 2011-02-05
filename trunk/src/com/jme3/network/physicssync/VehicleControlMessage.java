@@ -35,7 +35,7 @@ import com.jme3.bullet.objects.PhysicsVehicle;
 import com.jme3.network.serializing.Serializable;
 
 /**
- *
+ * Generic control message for vehicles
  * @author normenhansen
  */
 @Serializable()
@@ -46,9 +46,11 @@ public class VehicleControlMessage extends PhysicsSyncMessage {
     public float brake;
 
     public VehicleControlMessage() {
+        setReliable(false);
     }
 
     public VehicleControlMessage(float steer, float accelerate, float brake) {
+        setReliable(false);
         this.steer = steer;
         this.accelerate = accelerate;
     }

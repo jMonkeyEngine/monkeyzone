@@ -36,7 +36,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.network.serializing.Serializable;
 
 /**
- *
+ * Generic control message for Characters
  * @author normenhansen
  */
 @Serializable()
@@ -46,11 +46,13 @@ public class CharacterControlMessage extends PhysicsSyncMessage {
     public Vector3f viewDirection = new Vector3f();
 
     public CharacterControlMessage(CharacterControl character) {
+        setReliable(false);
         this.walkDirection.set(character.getWalkDirection());
         this.viewDirection.set(character.getViewDirection());
     }
 
     public CharacterControlMessage() {
+        setReliable(false);
     }
 
     public void applyData(Object control){
