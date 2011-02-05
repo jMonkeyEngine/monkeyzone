@@ -34,6 +34,7 @@ package com.jme3.monkeyzone;
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.input.ChaseCamera;
+import com.jme3.monkeyzone.controls.DefaultHUDControl;
 import com.jme3.monkeyzone.controls.UserInputControl;
 import com.jme3.monkeyzone.messages.ChatMessage;
 import com.jme3.monkeyzone.messages.StartGameMessage;
@@ -115,6 +116,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         //adding/creating controls later attached to user controlled spatial
         worldManager.addUserControl(chaseCam);
         worldManager.addUserControl(new UserInputControl(inputManager));
+        worldManager.addUserControl(new DefaultHUDControl(nifty.getScreen("default_hud")));
         effectsManager = new ClientEffectsManager(assetManager, worldManager);
         //register effects manager with sync manager so that messages can apply their data
         worldManager.getSyncManager().addObject(-2, effectsManager);
