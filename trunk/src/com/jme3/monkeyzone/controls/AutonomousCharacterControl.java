@@ -47,8 +47,8 @@ import com.jme3.scene.Spatial;
  */
 public class AutonomousCharacterControl extends NetworkedAutonomousControl {
 
-    private float checkRadius = 1;
-    private float speed = 0.2f * Globals.PHYSICS_FPS;
+    private float checkRadius = 2;
+    private float speed = 10f * Globals.PHYSICS_FPS;
     private Vector3f targetLocation = new Vector3f();
     private Vector3f vector = new Vector3f();
     private Vector3f vector2 = new Vector3f();

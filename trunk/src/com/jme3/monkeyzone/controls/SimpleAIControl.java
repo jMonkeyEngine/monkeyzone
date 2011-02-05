@@ -31,6 +31,7 @@
  */
 package com.jme3.monkeyzone.controls;
 
+import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.collision.shapes.SphereCollisionShape;
 import com.jme3.bullet.control.GhostControl;
 import com.jme3.export.JmeExporter;
@@ -38,10 +39,11 @@ import com.jme3.export.JmeImporter;
 import com.jme3.monkeyzone.WorldManager;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
-import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.Control;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  *
@@ -76,10 +78,9 @@ public class SimpleAIControl implements AIControl {
             throw new IllegalStateException("Cannot add AI control to spatial without AutonomousControl");
         }
         if (ghostControl == null) {
-            ghostControl = new GhostControl(new SphereCollisionShape(5));
+            ghostControl = new GhostControl(new SphereCollisionShape(10));
         }
-        //FIXME: strange collision with ghostobject
-//        spatial.addControl(ghostControl);
+        spatial.addControl(ghostControl);
         world.getPhysicsSpace().add(ghostControl);
     }
 
@@ -92,21 +93,24 @@ public class SimpleAIControl implements AIControl {
     }
 
     public void update(float tpf) {
-//        checkTimer += tpf;
-//        if (checkTimer >= checkTime) {
-//            checkTimer = 0;
-//            List<PhysicsCollisionObject> objects = ghostControl.getOverlappingObjects();
-//            for (Iterator<PhysicsCollisionObject> it = objects.iterator(); it.hasNext();) {
-//                PhysicsCollisionObject physicsCollisionObject = it.next();
-//                Spatial entity = world.getEntity(physicsCollisionObject);
-//                if (entity != null && entity != spatial) {
-//                    if (entity.getUserData("group_id") == spatial.getUserData("group_id")) {
-//                        autoControl.moveTo(spatial.getWorldTranslation());
-//                        return;
-//                    }
-//                }
+        checkTimer += tpf;
+        if (checkTimer >= checkTime) {
+            checkTimer = 0;
+//            if (ghostControl.getOverlappingCount() > 0) {
+                List<PhysicsCollisionObject> objects = ghostControl.getOverlappingObjects();
+                for (Iterator<PhysicsCollisionObject> it = objects.iterator(); it.hasNext();) {
+                    PhysicsCollisionObject physicsCollisionObject = it.next();
+                    Spatial entity = world.getEntity(physicsCollisionObject);
+                    if (entity != null && spatial.getUserData("player_id") != entity.getUserData("player_id")) {
+                        if (entity.getUserData("group_id") == spatial.getUserData("group_id")) {
+//                            System.out.println("move to " + entity.getWorldTranslation());
+                            autoControl.moveTo(entity.getWorldTranslation());
+                            return;
+                        }
+                    }
+                }
 //            }
-//        }
+        }
     }
 
     public void render(RenderManager rm, ViewPort vp) {
