@@ -58,7 +58,6 @@ import com.jme3.monkeyzone.messages.ServerAddEntityMessage;
 import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
 import com.jme3.monkeyzone.messages.ServerEffectMessage;
 import com.jme3.monkeyzone.messages.ServerEnterEntityMessage;
-import com.jme3.monkeyzone.messages.ServerEntityDataMessage;
 import com.jme3.monkeyzone.messages.ServerRemoveEntityMessage;
 import com.jme3.monkeyzone.messages.ServerRemovePlayerMessage;
 import com.jme3.network.connection.Client;

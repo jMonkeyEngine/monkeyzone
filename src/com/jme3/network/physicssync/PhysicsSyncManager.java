@@ -48,7 +48,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Handles syncing of physics enabled server/client games.
+ * <p>Handles syncing of physics enabled server/client games. Puts messages in a queue
+ * and executes them based on server time stamp plus an offset on the client.
+ * The offset is calculated for each arriving message, if the time offset change
+ * is bigger than maxDelay or smaller than zero (the message would be played either
+ * very late or has happened already) then the offset time is adjusted.</p>
+ * <p></p>
  * @author normenhansen
  */
 public class PhysicsSyncManager implements MessageListener {
@@ -72,10 +77,13 @@ public class PhysicsSyncManager implements MessageListener {
     public PhysicsSyncManager(Application app, Client client) {
         this.app = app;
         this.client = client;
-        client.addMessageListener(this, SyncCharacterMessage.class, SyncRigidBodyMessage.class, RigidBodyControlMessage.class, CharacterControlMessage.class);
     }
 
-    //TODO: run on physics tick..?
+    /**
+     * updates the PhysicsSyncManager, executes messages on client and sends
+     * sync info on the server.
+     * @param tpf
+     */
     public void update(float tpf) {
         time += tpf;
         if (time < 0) {
@@ -99,10 +107,19 @@ public class PhysicsSyncManager implements MessageListener {
         }
     }
 
+    /**
+     * add an object to the list of objects managed by this sync manager
+     * @param id
+     * @param object
+     */
     public void addObject(long id, Object object) {
         syncObjects.put(id, object);
     }
 
+    /**
+     * removes an object from the list of objects managed by this sync manager
+     * @param object
+     */
     public void removeObject(Object object) {
         for (Iterator<Entry<Long, Object>> it = syncObjects.entrySet().iterator(); it.hasNext();) {
             Entry<Long, Object> entry = it.next();
@@ -113,10 +130,18 @@ public class PhysicsSyncManager implements MessageListener {
         }
     }
 
+    /**
+     * removes an object from the list of objects managed by this sync manager
+     * @param id
+     */
     public void removeObject(long id) {
         syncObjects.remove(id);
     }
 
+    /**
+     * executes a message immediately
+     * @param message
+     */
     protected void doMessage(PhysicsSyncMessage message) {
         Object object = syncObjects.get(message.syncId);
         if (object != null) {
@@ -126,7 +151,12 @@ public class PhysicsSyncManager implements MessageListener {
         }
     }
 
-    protected void delayMessage(PhysicsSyncMessage message) {
+    /**
+     * enqueues the message and updates the offset of the sync manager based on the
+     * time stamp
+     * @param message
+     */
+    protected void enqueueMessage(PhysicsSyncMessage message) {
         if (offset == Double.MIN_VALUE) {
             offset = this.time - message.time;
             Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.INFO, "Initial offset {0}", offset);
@@ -142,6 +172,9 @@ public class PhysicsSyncManager implements MessageListener {
         messageQueue.add(message);
     }
 
+    /**
+     * sends sync data for all active physics objects
+     */
     protected void sendSyncData() {
         for (Iterator<Entry<Long, Object>> it = syncObjects.entrySet().iterator(); it.hasNext();) {
             Entry<Long, Object> entry = it.next();
@@ -160,7 +193,8 @@ public class PhysicsSyncManager implements MessageListener {
     }
 
     /**
-     * use to broadcast physics control messages if server, call from OpenGL thread!
+     * use to broadcast physics control messages if server, applies timestamp to
+     * PhysicsSyncMessage, call from OpenGL thread!
      * @param msg
      */
     public void broadcast(PhysicsSyncMessage msg) {
@@ -176,6 +210,11 @@ public class PhysicsSyncManager implements MessageListener {
         }
     }
 
+    /**
+     * send data to a specific client
+     * @param client
+     * @param msg
+     */
     public void send(int client, PhysicsSyncMessage msg) {
         if (server == null) {
             Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.SEVERE, "Broadcasting message on client {0}", msg);
@@ -184,6 +223,11 @@ public class PhysicsSyncManager implements MessageListener {
         send(server.getClientByID(client), msg);
     }
 
+    /**
+     * send data to a specific client
+     * @param client
+     * @param msg
+     */
     public void send(Client client, PhysicsSyncMessage msg) {
         msg.time = time;
         try {
@@ -197,6 +241,10 @@ public class PhysicsSyncManager implements MessageListener {
         }
     }
 
+    /**
+     * registers the types of messages this PhysicsSyncManager listens to
+     * @param classes
+     */
     public void setMessageTypes(Class... classes) {
         if (server != null) {
             server.removeMessageListener(this);
@@ -221,7 +269,7 @@ public class PhysicsSyncManager implements MessageListener {
             app.enqueue(new Callable<Void>() {
 
                 public Void call() throws Exception {
-                    delayMessage((PhysicsSyncMessage) message);
+                    enqueueMessage((PhysicsSyncMessage) message);
                     return null;
                 }
             });
