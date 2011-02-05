@@ -46,7 +46,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- *
+ * Simple AI control that uses a GhostControl to check for overlapping objects.
  * @author normenhansen
  */
 public class SimpleAIControl implements AIControl {
@@ -96,20 +96,19 @@ public class SimpleAIControl implements AIControl {
         checkTimer += tpf;
         if (checkTimer >= checkTime) {
             checkTimer = 0;
-//            if (ghostControl.getOverlappingCount() > 0) {
+            if (ghostControl.getOverlappingCount() > 0) {
                 List<PhysicsCollisionObject> objects = ghostControl.getOverlappingObjects();
                 for (Iterator<PhysicsCollisionObject> it = objects.iterator(); it.hasNext();) {
                     PhysicsCollisionObject physicsCollisionObject = it.next();
                     Spatial entity = world.getEntity(physicsCollisionObject);
                     if (entity != null && spatial.getUserData("player_id") != entity.getUserData("player_id")) {
                         if (entity.getUserData("group_id") == spatial.getUserData("group_id")) {
-//                            System.out.println("move to " + entity.getWorldTranslation());
                             autoControl.moveTo(entity.getWorldTranslation());
                             return;
                         }
                     }
                 }
-//            }
+            }
         }
     }
 
