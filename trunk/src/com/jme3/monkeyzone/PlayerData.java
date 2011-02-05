@@ -66,6 +66,17 @@ public class PlayerData {
         return list;
     }
 
+    public static synchronized List<PlayerData> getAIPlayers() {
+        LinkedList<PlayerData> list = new LinkedList<PlayerData>();
+        for (Iterator<Entry<Long, PlayerData>> it = players.entrySet().iterator(); it.hasNext();) {
+            Entry<Long, PlayerData> entry = it.next();
+            if (!entry.getValue().isHuman()) {
+                list.add(entry.getValue());
+            }
+        }
+        return list;
+    }
+
     public static synchronized List<PlayerData> getPlayers() {
         LinkedList<PlayerData> list = new LinkedList<PlayerData>(players.values());
         return list;

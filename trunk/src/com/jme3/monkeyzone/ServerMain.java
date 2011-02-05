@@ -52,11 +52,11 @@ public class ServerMain extends SimpleApplication {
     public static void main(String[] args) {
         AppSettings settings = new AppSettings(true);
         settings.setFrameRate(Globals.SCENE_FPS);
-        settings.setRenderer("NULL");
+        settings.setRenderer(AppSettings.NULL);
         for (int i = 0; i < args.length; i++) {
             String string = args[i];
             if ("-display".equals(string)) {
-                settings.setRenderer("LWJGL");
+                settings.setRenderer(AppSettings.LWJGL_OPENGL2);
             }
         }
         Util.registerSerializers();

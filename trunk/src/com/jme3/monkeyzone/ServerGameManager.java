@@ -90,10 +90,12 @@ public class ServerGameManager {
         int i = 0;
         for (Iterator<PlayerData> it = PlayerData.getPlayers().iterator(); it.hasNext();) {
             PlayerData playerData = it.next();
-//            long entityId = worldManager.addNewEntity("Models/Ferrari/Car.j3o", new Vector3f(i*3, 3, 0), new Quaternion());
-//            long entityId = worldManager.addNewEntity("Models/Buggy/Buggy.j3o", new Vector3f(i*3, 3, 0), new Quaternion());
             long entityId = worldManager.addNewEntity("Models/Sinbad/Sinbad.j3o", new Vector3f(i * 3, 3, 0), new Quaternion());
             worldManager.enterEntity(playerData.getId(), entityId);
+
+//            long entitayId = worldManager.addNewEntity("Models/Sinbad/Sinbad.j3o", new Vector3f(i * 3, 3, 1), new Quaternion());
+//            long playearId = worldManager.addNewPlayer(PlayerData.getIntData(playerData.getId(), "group_id"), "AI", 0);
+//            worldManager.enterEntity(playearId, entitayId);
             i++;
         }
         return true;
@@ -166,16 +168,12 @@ public class ServerGameManager {
             List<PhysicsRayTestResult> list = space.rayTest(control.getPhysicsLocation(), control.getPhysicsLocation().add(control.getViewDirection().mult(10)));
             for (Iterator<PhysicsRayTestResult> it = list.iterator(); it.hasNext();) {
                 PhysicsRayTestResult physicsRayTestResult = it.next();
-                Object obj = physicsRayTestResult.getCollisionObject().getUserObject();
-                if (obj instanceof Spatial) {
-                    Spatial spatial = (Spatial) obj;
-                    long entityId = worldManager.getEntityId(spatial);
-                    if (entityId != -1 && entityId != entity) {
-                        worldManager.playWorldEffect("Effects/ExplosionA.j3o", spatial.getWorldTranslation(), 2.0f);
-                    }
+                long entityId = worldManager.getEntityId(physicsRayTestResult.getCollisionObject());
+                if (entityId != -1 && entityId != entity) {
+                    Spatial spatial = worldManager.getEntity(entityId);
+                    worldManager.playWorldEffect("Effects/ExplosionA.j3o", spatial.getWorldTranslation(), 2.0f);
                 }
             }
         }
     }
-
 }

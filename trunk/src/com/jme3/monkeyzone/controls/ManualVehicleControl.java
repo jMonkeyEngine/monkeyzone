@@ -95,7 +95,7 @@ public class ManualVehicleControl extends NetworkedManualControl {
         if (this.control == null) {
             throw new IllegalStateException("Cannot add ManualCharacterControl to Spatial without CharacterControl");
         }
-        Float spatialSpeed = (Float) spatial.getUserData("speed");
+        Float spatialSpeed = (Float) spatial.getUserData("Speed");
         if (spatialSpeed != null) {
             speed = spatialSpeed;
         }

@@ -84,6 +84,7 @@ public class ClientEffectsManager {
         List<Spatial> children=effect.getChildren();
         for (Iterator<Spatial> it = children.iterator(); it.hasNext();) {
             ParticleEmitter emitter = (ParticleEmitter)it.next();
+            emitter.killAllParticles();
             emitter.emitAllParticles();
         }
         worldManager.getWorldRoot().attachChild(effect);

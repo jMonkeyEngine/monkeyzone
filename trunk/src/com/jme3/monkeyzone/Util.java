@@ -61,17 +61,17 @@ public class Util {
 
     public static void setLogLevels(boolean debug) {
         if (debug) {
-            Logger.getLogger("de.lessvoid.nifty").setLevel(Level.OFF);
-            Logger.getLogger("de.lessvoid.nifty.effects.EffectProcessor").setLevel(Level.OFF);
+            Logger.getLogger("de.lessvoid.nifty").setLevel(Level.SEVERE);
+            Logger.getLogger("de.lessvoid.nifty.effects.EffectProcessor").setLevel(Level.SEVERE);
             Logger.getLogger("org.lwjgl").setLevel(Level.WARNING);
             Logger.getLogger("com.jme3").setLevel(Level.FINEST);
             Logger.getLogger("com.jme3.monkeyzone").setLevel(Level.FINEST);
         } else {
-            Logger.getLogger("de.lessvoid").setLevel(Level.SEVERE);
-            Logger.getLogger("de.lessvoid.nifty.effects.EffectProcessor").setLevel(Level.SEVERE);
-            Logger.getLogger("org.lwjgl").setLevel(Level.SEVERE);
-            Logger.getLogger("com.jme3").setLevel(Level.SEVERE);
-            Logger.getLogger("com.jme3.monkeyzone").setLevel(Level.SEVERE);
+            Logger.getLogger("de.lessvoid").setLevel(Level.WARNING);
+            Logger.getLogger("de.lessvoid.nifty.effects.EffectProcessor").setLevel(Level.WARNING);
+            Logger.getLogger("org.lwjgl").setLevel(Level.WARNING);
+            Logger.getLogger("com.jme3").setLevel(Level.WARNING);
+            Logger.getLogger("com.jme3.monkeyzone").setLevel(Level.WARNING);
         }
     }
 

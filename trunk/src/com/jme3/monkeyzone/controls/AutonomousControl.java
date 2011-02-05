@@ -47,13 +47,13 @@ public interface AutonomousControl extends Control {
      * @param direction
      * @return
      */
-    public boolean aimAt(Vector3f direction);
+    public void aimAt(Vector3f direction);
 
     /**
      * do action x, same as button press for human player
      * @param action
      */
-    public void doAction(int action, boolean activate);
+    public void performAction(int action, boolean activate);
 
     /**
      * move to location by means of this control, should use NavigationControl
@@ -61,7 +61,7 @@ public interface AutonomousControl extends Control {
      * @param location
      * @return false if already at location, uses radius from NavigationControl if it exists
      */
-    public boolean moveTo(Vector3f location);
+    public void moveTo(Vector3f location);
 
     /**
      * checks if this entity is moving

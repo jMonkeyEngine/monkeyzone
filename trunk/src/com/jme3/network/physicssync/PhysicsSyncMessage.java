@@ -45,12 +45,10 @@ public abstract class PhysicsSyncMessage extends Message {
     public double time;
 
     public PhysicsSyncMessage() {
-        setReliable(false);
     }
 
     public PhysicsSyncMessage(long id) {
         this.syncId = id;
-        setReliable(false);
     }
 
     public abstract void applyData(Object object);

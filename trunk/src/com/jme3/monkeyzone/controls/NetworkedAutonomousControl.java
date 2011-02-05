@@ -34,6 +34,7 @@ package com.jme3.monkeyzone.controls;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.math.Vector3f;
+import com.jme3.monkeyzone.messages.AutoControlMessage;
 import com.jme3.monkeyzone.messages.ClientActionMessage;
 import com.jme3.network.connection.Client;
 import com.jme3.network.physicssync.PhysicsSyncManager;
@@ -52,6 +53,8 @@ public abstract class NetworkedAutonomousControl implements AutonomousControl {
     private Client client;
     private PhysicsSyncManager syncManager;
     private long entity_id;
+    private Vector3f lastMoveToLocation = new Vector3f();
+    private Vector3f lastAimDirection = new Vector3f();
     protected boolean enabled = true;
     protected Spatial spatial;
 
@@ -68,23 +71,49 @@ public abstract class NetworkedAutonomousControl implements AutonomousControl {
         this.entity_id = entity_id;
     }
 
-    public boolean aimAt(Vector3f direction) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void aimAt(Vector3f direction) {
+        if (client != null) {
+            if (!lastAimDirection.equals(direction)) {
+                lastAimDirection.set(direction);
+                sendMoveSync();
+            }
+        } else {
+            doAimAt(direction);
+        }
     }
 
-    public void doAction(int action, boolean activate) {
+    public void performAction(int action, boolean activate) {
         if (client != null) {
             try {
                 client.send(new ClientActionMessage(entity_id, action, activate));
             } catch (IOException ex) {
-                Logger.getLogger(NetworkedAutonomousControl.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(NetworkedAutonomousControl.class.getName()).log(Level.SEVERE, "Cannot send auto control message: {0}", ex);
             }
         }
     }
 
-    public boolean moveTo(Vector3f location) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void moveTo(Vector3f location) {
+        if (client != null) {
+            if (!lastMoveToLocation.equals(location)) {
+                lastMoveToLocation.set(location);
+                sendMoveSync();
+            }
+        } else {
+            doMoveTo(location);
+        }
     }
+
+    private void sendMoveSync() {
+        try {
+            client.send(new AutoControlMessage(entity_id, lastAimDirection, lastMoveToLocation));
+        } catch (IOException ex) {
+            Logger.getLogger(NetworkedAutonomousControl.class.getName()).log(Level.SEVERE, "Cannot send auto control message: {0}", ex);
+        }
+    }
+
+    public abstract void doAimAt(Vector3f direction);
+
+    public abstract void doMoveTo(Vector3f location);
 
     public abstract boolean isMoving();
 
@@ -107,7 +136,7 @@ public abstract class NetworkedAutonomousControl implements AutonomousControl {
     public PhysicsSyncManager getSyncManager() {
         return syncManager;
     }
-    
+
     public Control cloneForSpatial(Spatial spatial) {
         throw new UnsupportedOperationException("Not supported.");
     }
@@ -119,5 +148,4 @@ public abstract class NetworkedAutonomousControl implements AutonomousControl {
     public void read(JmeImporter im) throws IOException {
         throw new UnsupportedOperationException("Not supported.");
     }
-
 }
