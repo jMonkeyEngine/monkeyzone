@@ -130,12 +130,12 @@ public class ServerGameManager {
 
     /**
      * called when an entity (human or AI) performs an action
-     * @param entity
+     * @param entityId
      * @param action
      * @param pressed
      */
-    public void performAction(long entity, int action, boolean pressed) {
-        Spatial myEntity = worldManager.getEntity(entity);
+    public void performAction(long entityId, int action, boolean pressed) {
+        Spatial myEntity = worldManager.getEntity(entityId);
         if (myEntity == null) {
             Logger.getLogger(ServerGameManager.class.getName()).log(Level.WARNING, "Cannot find entity performing action!");
             return;
@@ -150,11 +150,11 @@ public class ServerGameManager {
             if (myEntity.getControl(CharacterControl.class) != null) {
                 long entity_id = worldManager.addNewEntity("Models/Ferrari/Car.j3o", myEntity.getWorldTranslation().add(Vector3f.UNIT_Y), myEntity.getWorldRotation());
                 worldManager.enterEntity(player_id, entity_id);
-                worldManager.removeEntity(entity);
+                worldManager.removeEntity(entityId);
             } else {
                 long entity_id = worldManager.addNewEntity("Models/Sinbad/Sinbad.j3o", myEntity.getWorldTranslation().add(Vector3f.UNIT_Y), myEntity.getWorldRotation());
                 worldManager.enterEntity(player_id, entity_id);
-                worldManager.removeEntity(entity);
+                worldManager.removeEntity(entityId);
             }
         } //shoot on space
         else if (action == ClientActionMessage.SPACE_ACTION && pressed) {
@@ -168,10 +168,20 @@ public class ServerGameManager {
             List<PhysicsRayTestResult> list = space.rayTest(control.getPhysicsLocation(), control.getPhysicsLocation().add(control.getViewDirection().mult(10)));
             for (Iterator<PhysicsRayTestResult> it = list.iterator(); it.hasNext();) {
                 PhysicsRayTestResult physicsRayTestResult = it.next();
-                long entityId = worldManager.getEntityId(physicsRayTestResult.getCollisionObject());
-                if (entityId != -1 && entityId != entity) {
-                    Spatial spatial = worldManager.getEntity(entityId);
-                    worldManager.playWorldEffect("Effects/ExplosionA.j3o", spatial.getWorldTranslation(), 2.0f);
+                long targetId = worldManager.getEntityId(physicsRayTestResult.getCollisionObject());
+                if (targetId != -1 && targetId != entityId) {
+                    Spatial targetSpatial = worldManager.getEntity(targetId);
+                    Float hp = (Float) targetSpatial.getUserData("HitPoints");
+                    if (hp != null) {
+                        hp -= 10;
+                        worldManager.playWorldEffect("Effects/ExplosionA.j3o", targetSpatial.getWorldTranslation(), 2.0f);
+                        worldManager.setEntityUserData(targetId, "HitPoints", hp);
+                        if (hp < 0) {
+                            worldManager.removeEntity(targetId);
+                            worldManager.playWorldEffect("Effects/ExplosionB.j3o", targetSpatial.getWorldTranslation(), 2.0f);
+                        }
+                    }
+                    return;
                 }
             }
         }
