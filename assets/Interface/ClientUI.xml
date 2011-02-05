@@ -132,32 +132,32 @@
 
     <screen id="default_hud" controller="com.jme3.monkeyzone.ClientMain">
         <layer id="layer" childLayout="vertical">
-            <panel id="panel" childLayout="horizontal">
+            <panel id="panel_top" childLayout="horizontal">
                 <panel id="top_panel_left" height="60px" width="90%" align="left" valign="top" style="nifty-panel" childLayout="horizontal">
-                    <text id="status_text" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
-                    <text id="status_text2" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
-                    <text id="status_text3" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
+                    <text id="status_text_01" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
+                    <text id="status_text_02" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
+                    <text id="status_text_03" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
                 </panel>
                 <panel id="top_panel_right" height="60px" width="10%" align="right" valign="top" style="nifty-panel" childLayout="horizontal">
-                    <text id="status_text" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
+                    <text id="status_text_01" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
                 </panel>
             </panel>
             <panel id="buffer_panel" width="100%">
 
             </panel>
-            <panel id="panel" childLayout="horizontal">
+            <panel id="panel_bottom" childLayout="horizontal">
                 <panel id="bottom_panel_left" height="250px" width="200px" align="left" valign="bottom" style="nifty-panel" childLayout="vertical">
-                    <text id="status_text" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
-                    <text id="status_text2" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
-                    <text id="status_text3" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
+                    <text id="status_text_01" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
+                    <text id="status_text_02" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
+                    <text id="status_text_03" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
                 </panel>
                 <panel id="buffer_panel">
 
                 </panel>
                 <panel id="bottom_panel_right" height="250px" width="250px" align="right" valign="bottom" style="nifty-panel" childLayout="vertical">
-                    <text id="status_text" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
-                    <text id="status_text2" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
-                    <text id="status_text3" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
+                    <text id="status_text_01" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
+                    <text id="status_text_02" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
+                    <text id="status_text_03" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
                 </panel>
             </panel>
         </layer>
