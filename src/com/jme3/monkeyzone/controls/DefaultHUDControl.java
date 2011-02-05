@@ -58,7 +58,7 @@ public class DefaultHUDControl implements HUDControl {
 
     public DefaultHUDControl(Screen screen) {
         this.screen = screen;
-        if(screen==null){
+        if (screen == null) {
             throw new IllegalStateException("DefaultHUDControl nifty screen null!");
         }
         hitPoints = screen.findElementByName("layer").findElementByName("panel_bottom").findElementByName("bottom_panel_left").findElementByName("status_text_01").getRenderer(TextRenderer.class);
@@ -92,12 +92,12 @@ public class DefaultHUDControl implements HUDControl {
             Float hitPoints = (Float) spatial.getUserData("HitPoints");
             Float speed = (Float) spatial.getUserData("Speed");
             if (hitPoints != null) {
-                this.hitPoints.setText(hitPoints + "HP");
+                this.hitPoints.setText("HP:" + hitPoints);
             } else {
                 this.hitPoints.setText("No HitPoints!");
             }
             if (speed != null) {
-                this.speed.setText(hitPoints + "HP");
+                this.speed.setText("Speed: " + speed);
             } else {
                 this.speed.setText("No HitPoints!");
             }
