@@ -31,38 +31,37 @@
  */
 package com.jme3.monkeyzone.messages;
 
-import com.jme3.network.message.Message;
+import com.jme3.monkeyzone.controls.NetworkActionEnabled;
+import com.jme3.network.physicssync.PhysicsSyncMessage;
 import com.jme3.network.serializing.Serializable;
+import com.jme3.scene.Spatial;
 
 /**
  * perform action for player (human and AI), used bidirectional
  * @author normenhansen
  */
 @Serializable()
-public class ClientActionMessage extends Message {
+public class ActionMessage extends PhysicsSyncMessage {
 
     public final static int NULL_ACTION = 0;
-    public final static int SPACE_ACTION = 1;
+    public final static int JUMP_ACTION = 1;
     public final static int ENTER_ACTION = 2;
-//    public int NULL_ACTION = 3;
-//    public int NULL_ACTION = 4;
-//    public int NULL_ACTION = 5;
-//    public int NULL_ACTION = 6;
-//    public int NULL_ACTION = 7;
-//    public int NULL_ACTION = 8;
-//    public int NULL_ACTION = 9;
-//    public int NULL_ACTION = 10;
+    public final static int SHOOT_ACTION = 3;
     
-    public long id;
     public int action;
     public boolean pressed;
 
-    public ClientActionMessage() {
+    public ActionMessage() {
     }
 
-    public ClientActionMessage(long id, int action, boolean pressed) {
-        this.id = id;
+    public ActionMessage(long id, int action, boolean pressed) {
+        this.syncId = id;
         this.action = action;
         this.pressed = pressed;
+    }
+
+    @Override
+    public void applyData(Object object) {
+        ((Spatial)object).getControl(NetworkActionEnabled.class).doPerformAction(action, pressed);
     }
 }

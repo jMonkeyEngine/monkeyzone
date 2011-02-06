@@ -33,7 +33,7 @@ package com.jme3.monkeyzone.controls;
 
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
-import com.jme3.monkeyzone.messages.ClientActionMessage;
+import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.monkeyzone.messages.ManualControlMessage;
 import com.jme3.network.connection.Client;
 import com.jme3.network.physicssync.PhysicsSyncManager;
@@ -47,11 +47,10 @@ import java.util.logging.Logger;
  * Abstract Manual Control, handles sending to server when client is set
  * @author normenhansen
  */
-public abstract class NetworkedManualControl implements ManualControl {
+public abstract class NetworkedManualControl implements ManualControl, NetworkActionEnabled {
 
     protected boolean enabled = true;
     private Client client;
-    private PhysicsSyncManager server;
     private long entity_id;
     private float lastSteerX = 0;
     private float lastSteerY = 0;
@@ -68,7 +67,6 @@ public abstract class NetworkedManualControl implements ManualControl {
     }
 
     public NetworkedManualControl(PhysicsSyncManager server, long entity_id) {
-        this.server = server;
         this.entity_id = entity_id;
     }
 
@@ -76,8 +74,6 @@ public abstract class NetworkedManualControl implements ManualControl {
         if (client != null && amount != lastSteerX) {
             lastSteerX = amount;
             sendMoveSync();
-        } else {
-            doSteerX(amount);
         }
     }
 
@@ -85,8 +81,6 @@ public abstract class NetworkedManualControl implements ManualControl {
         if (client != null && amount != lastSteerY) {
             lastSteerY = amount;
             sendMoveSync();
-        } else {
-            doSteerY(amount);
         }
     }
 
@@ -94,8 +88,6 @@ public abstract class NetworkedManualControl implements ManualControl {
         if (client != null && amount != lastMoveX) {
             lastMoveX = amount;
             sendMoveSync();
-        } else {
-            doMoveX(amount);
         }
     }
 
@@ -103,8 +95,6 @@ public abstract class NetworkedManualControl implements ManualControl {
         if (client != null && amount != lastMoveY) {
             lastMoveY = amount;
             sendMoveSync();
-        } else {
-            doMoveY(amount);
         }
     }
 
@@ -112,8 +102,16 @@ public abstract class NetworkedManualControl implements ManualControl {
         if (client != null && amount != lastMoveZ) {
             lastMoveZ = amount;
             sendMoveSync();
-        } else {
-            doMoveZ(amount);
+        }
+    }
+
+    public void performAction(int button, boolean pressed) {
+        if (client != null) {
+            try {
+                client.send(new ActionMessage(entity_id, button, pressed));
+            } catch (IOException ex) {
+                Logger.getLogger(NetworkedManualControl.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
@@ -127,15 +125,7 @@ public abstract class NetworkedManualControl implements ManualControl {
 
     public abstract void doMoveZ(float amount);
 
-    public void button(int button, boolean pressed) {
-        if (client != null) {
-            try {
-                client.send(new ClientActionMessage(entity_id, button, pressed));
-            } catch (IOException ex) {
-                Logger.getLogger(NetworkedManualControl.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
+    public abstract void doPerformAction(int button, boolean pressed);
 
     private void sendMoveSync() {
         try {
@@ -143,10 +133,6 @@ public abstract class NetworkedManualControl implements ManualControl {
         } catch (IOException ex) {
             Logger.getLogger(NetworkedManualControl.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    public PhysicsSyncManager getSyncManager() {
-        return server;
     }
 
     public void setEnabled(boolean enabled) {

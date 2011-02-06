@@ -49,6 +49,6 @@ public interface ManualControl extends Control {
 
     public void moveZ(float value);
 
-    public void button(int button, boolean pressed);
+    public void performAction(int button, boolean pressed);
 
 }

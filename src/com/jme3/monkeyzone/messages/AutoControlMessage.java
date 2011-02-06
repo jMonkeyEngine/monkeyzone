@@ -62,16 +62,9 @@ public class AutoControlMessage extends PhysicsSyncMessage {
 
     @Override
     public void applyData(Object object) {
-        NetworkedAutonomousControl netControl = ((Spatial) ((PhysicsCollisionObject) object).getUserObject()).getControl(NetworkedAutonomousControl.class);
-        if (netControl != null) {
-            if (netControl.getSyncManager() != null) {
-                netControl.getSyncManager().broadcast(this);
-            }
-//            Logger.getLogger(AutoControlMessage.class.getName()).log(Level.INFO, "Apply auto control to entity {0}", syncId);
-            netControl.aimAt(aimAt);
-            netControl.moveTo(moveTo);
-        } else {
-            Logger.getLogger(AutoControlMessage.class.getName()).log(Level.SEVERE, "Could not find auto control for entity {0} to apply data!", syncId);
-        }
+        NetworkedAutonomousControl netControl = ((Spatial) object).getControl(NetworkedAutonomousControl.class);
+        assert (netControl != null);
+        netControl.doAimAt(aimAt);
+        netControl.doMoveTo(moveTo);
     }
 }

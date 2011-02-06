@@ -35,9 +35,11 @@ import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
-import com.jme3.monkeyzone.messages.ClientActionMessage;
+import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
@@ -77,7 +79,17 @@ public class UserInputControl implements Control, ActionListener {
         inputManager.addMapping("UserInput_Right_Arrow_Key", new KeyTrigger(KeyInput.KEY_RIGHT));
         inputManager.addMapping("UserInput_Space_Key", new KeyTrigger(KeyInput.KEY_SPACE));
         inputManager.addMapping("UserInput_Enter_Key", new KeyTrigger(KeyInput.KEY_RETURN));
-        inputManager.addListener(this, "UserInput_Left_Key", "UserInput_Right_Key", "UserInput_Up_Key", "UserInput_Down_Key", "UserInput_Left_Arrow_Key", "UserInput_Right_Arrow_Key", "UserInput_Space_Key", "UserInput_Enter_Key");
+        inputManager.addMapping("UserInput_Left_Mouse", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addListener(this,
+                "UserInput_Left_Key",
+                "UserInput_Right_Key",
+                "UserInput_Up_Key",
+                "UserInput_Down_Key",
+                "UserInput_Left_Arrow_Key",
+                "UserInput_Right_Arrow_Key",
+                "UserInput_Space_Key",
+                "UserInput_Enter_Key",
+                "UserInput_Left_Mouse");
     }
 
     public void setSpatial(Spatial spatial) {
@@ -159,9 +171,11 @@ public class UserInputControl implements Control, ActionListener {
                 manualControl.moveZ(moveZ);
             }
         } else if (binding.equals("UserInput_Space_Key")) {
-            manualControl.button(ClientActionMessage.SPACE_ACTION, value);
+            manualControl.performAction(ActionMessage.JUMP_ACTION, value);
         } else if (binding.equals("UserInput_Enter_Key")) {
-            manualControl.button(ClientActionMessage.ENTER_ACTION, value);
+            manualControl.performAction(ActionMessage.ENTER_ACTION, value);
+        } else if (binding.equals("UserInput_Left_Mouse")) {
+            manualControl.performAction(ActionMessage.SHOOT_ACTION, value);
         }
     }
 

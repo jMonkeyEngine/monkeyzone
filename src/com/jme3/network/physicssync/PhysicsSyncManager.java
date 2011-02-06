@@ -33,11 +33,14 @@ package com.jme3.network.physicssync;
 
 import com.jme3.app.Application;
 import com.jme3.bullet.control.CharacterControl;
+import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.bullet.control.VehicleControl;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.network.connection.Server;
 import com.jme3.network.connection.Client;
 import com.jme3.network.events.MessageListener;
 import com.jme3.network.message.Message;
+import com.jme3.scene.Spatial;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -178,16 +181,22 @@ public class PhysicsSyncManager implements MessageListener {
     protected void sendSyncData() {
         for (Iterator<Entry<Long, Object>> it = syncObjects.entrySet().iterator(); it.hasNext();) {
             Entry<Long, Object> entry = it.next();
-            if (entry.getValue() instanceof PhysicsRigidBody) {
-                PhysicsRigidBody control = (PhysicsRigidBody) entry.getValue();
-                if (control.isActive()) {
-                    SyncRigidBodyMessage msg = new SyncRigidBodyMessage(entry.getKey(), control);
+            if (entry.getValue() instanceof Spatial) {
+                Spatial spat = (Spatial) entry.getValue();
+                PhysicsRigidBody body = spat.getControl(RigidBodyControl.class);
+                if (body == null) {
+                    body = spat.getControl(VehicleControl.class);
+                }
+                if (body != null && body.isActive()) {
+                    SyncRigidBodyMessage msg = new SyncRigidBodyMessage(entry.getKey(), body);
+                    broadcast(msg);
+                    continue;
+                }
+                CharacterControl control = spat.getControl(CharacterControl.class);
+                if (control != null) {
+                    SyncCharacterMessage msg = new SyncCharacterMessage(entry.getKey(), control);
                     broadcast(msg);
                 }
-            } else if (entry.getValue() instanceof CharacterControl) {
-                CharacterControl control = (CharacterControl) entry.getValue();
-                SyncCharacterMessage msg = new SyncCharacterMessage(entry.getKey(), control);
-                broadcast(msg);
             }
         }
     }
@@ -265,6 +274,7 @@ public class PhysicsSyncManager implements MessageListener {
     }
 
     public void messageReceived(final Message message) {
+        assert (message instanceof PhysicsSyncMessage);
         if (client != null) {
             app.enqueue(new Callable<Void>() {
 
@@ -277,6 +287,8 @@ public class PhysicsSyncManager implements MessageListener {
             app.enqueue(new Callable<Void>() {
 
                 public Void call() throws Exception {
+                    //TODO: add some kind of callback interface to check for validity
+                    broadcast((PhysicsSyncMessage) message);
                     doMessage((PhysicsSyncMessage) message);
                     return null;
                 }

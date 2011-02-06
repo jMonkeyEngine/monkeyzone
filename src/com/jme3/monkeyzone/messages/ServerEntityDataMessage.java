@@ -31,7 +31,6 @@
  */
 package com.jme3.monkeyzone.messages;
 
-import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.network.physicssync.PhysicsSyncMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.scene.Spatial;
@@ -81,7 +80,7 @@ public class ServerEntityDataMessage extends PhysicsSyncMessage {
 
     @Override
     public void applyData(Object object) {
-        Spatial spat = ((Spatial) ((PhysicsCollisionObject) object).getUserObject());
+        Spatial spat = ((Spatial) object);
         switch (type) {
             case 0:
                 spat.setUserData(name, intData);

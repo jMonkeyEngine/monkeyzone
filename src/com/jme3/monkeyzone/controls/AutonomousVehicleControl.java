@@ -51,15 +51,16 @@ public class AutonomousVehicleControl extends NetworkedAutonomousControl {
         super(client, entityId);
     }
 
-    public AutonomousVehicleControl(PhysicsSyncManager server, long entityId) {
-        super(server, entityId);
-    }
-
     public void doAimAt(Vector3f direction) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void doMoveTo(Vector3f location) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void doPerformAction(int action, boolean activate) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

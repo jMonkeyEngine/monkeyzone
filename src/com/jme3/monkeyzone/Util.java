@@ -31,7 +31,7 @@
  */
 package com.jme3.monkeyzone;
 
-import com.jme3.monkeyzone.messages.ClientActionMessage;
+import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.monkeyzone.messages.AutoControlMessage;
 import com.jme3.monkeyzone.messages.ChatMessage;
 import com.jme3.monkeyzone.messages.ClientJoinMessage;
@@ -76,7 +76,7 @@ public class Util {
     }
 
     public static void registerSerializers() {
-        Serializer.registerClass(ClientActionMessage.class);
+        Serializer.registerClass(ActionMessage.class);
         Serializer.registerClass(AutoControlMessage.class);
         Serializer.registerClass(ChatMessage.class);
         Serializer.registerClass(ClientJoinMessage.class);

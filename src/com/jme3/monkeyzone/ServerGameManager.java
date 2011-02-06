@@ -36,7 +36,8 @@ import com.jme3.bullet.collision.PhysicsRayTestResult;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.monkeyzone.messages.ClientActionMessage;
+import com.jme3.monkeyzone.controls.NetworkActionEnabled;
+import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.monkeyzone.messages.StartGameMessage;
 import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.scene.Spatial;
@@ -140,13 +141,17 @@ public class ServerGameManager {
             Logger.getLogger(ServerGameManager.class.getName()).log(Level.WARNING, "Cannot find entity performing action!");
             return;
         }
+        //TODO: broadcasting/activating keypress here, not done in syncmanager..
+        worldManager.getSyncManager().broadcast(new ActionMessage(entityId, action, pressed));
+        myEntity.getControl(NetworkActionEnabled.class).doPerformAction(action, pressed);
+        
         long player_id = (Long) myEntity.getUserData("player_id");
         if (player_id == -1) {
             Logger.getLogger(ServerGameManager.class.getName()).log(Level.WARNING, "Cannot find player id for entity performing action!");
             return;
         }
         //switch car and character on pressing enter
-        if (action == ClientActionMessage.ENTER_ACTION && pressed) {
+        if (action == ActionMessage.ENTER_ACTION && pressed) {
             if (myEntity.getControl(CharacterControl.class) != null) {
                 long entity_id = worldManager.addNewEntity("Models/Ferrari/Car.j3o", myEntity.getWorldTranslation().add(Vector3f.UNIT_Y), myEntity.getWorldRotation());
                 worldManager.enterEntity(player_id, entity_id);
@@ -157,7 +162,7 @@ public class ServerGameManager {
                 worldManager.removeEntity(entityId);
             }
         } //shoot on space
-        else if (action == ClientActionMessage.SPACE_ACTION && pressed) {
+        else if (action == ActionMessage.SHOOT_ACTION && pressed) {
             CharacterControl control = myEntity.getControl(CharacterControl.class);
             if (control == null) {
                 Logger.getLogger(ServerGameManager.class.getName()).log(Level.WARNING, "Cannot shoot when not character!");

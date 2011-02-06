@@ -34,6 +34,7 @@ package com.jme3.network.physicssync;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Vector3f;
 import com.jme3.network.serializing.Serializable;
+import com.jme3.scene.Spatial;
 
 /**
  * Sync message for character objects
@@ -64,8 +65,8 @@ public class SyncCharacterMessage extends PhysicsSyncMessage {
     }
 
     public void applyData(Object character) {
-        ((CharacterControl)character).setPhysicsLocation(location);
-        ((CharacterControl)character).setWalkDirection(walkDirection);
-        ((CharacterControl)character).setViewDirection(viewDirection);
+        ((Spatial) character).getControl(CharacterControl.class).setPhysicsLocation(location);
+        ((Spatial) character).getControl(CharacterControl.class).setWalkDirection(walkDirection);
+        ((Spatial) character).getControl(CharacterControl.class).setViewDirection(viewDirection);
     }
 }

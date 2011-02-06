@@ -59,10 +59,6 @@ public class ManualVehicleControl extends NetworkedManualControl {
         super(client, entityId);
     }
 
-    public ManualVehicleControl(PhysicsSyncManager server, long entityId) {
-        super(server, entityId);
-    }
-
     @Override
     public void doSteerX(float amount) {
     }
@@ -83,6 +79,10 @@ public class ManualVehicleControl extends NetworkedManualControl {
     @Override
     public void doMoveZ(float amount) {
         accelerate = amount * speed;
+    }
+
+    @Override
+    public void doPerformAction(int button, boolean pressed) {
     }
 
     @Override
