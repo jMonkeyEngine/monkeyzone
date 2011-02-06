@@ -33,6 +33,7 @@ package com.jme3.monkeyzone.controls;
 
 import com.jme3.bullet.control.VehicleControl;
 import com.jme3.math.FastMath;
+import com.jme3.math.Vector3f;
 import com.jme3.network.connection.Client;
 import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.renderer.RenderManager;
@@ -51,6 +52,7 @@ public class ManualVehicleControl extends NetworkedManualControl {
     private float speed = 800f;
     private float steer = 0;
     private float accelerate = 0;
+    private Vector3f forward = new Vector3f();
 
     public ManualVehicleControl() {
     }
@@ -83,6 +85,10 @@ public class ManualVehicleControl extends NetworkedManualControl {
 
     @Override
     public void doPerformAction(int button, boolean pressed) {
+    }
+
+    public Vector3f getAimDirection() {
+        return control.getForwardVector(forward);
     }
 
     @Override

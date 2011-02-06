@@ -31,6 +31,7 @@
  */
 package com.jme3.monkeyzone.controls;
 
+import com.jme3.math.Vector3f;
 import com.jme3.scene.control.Control;
 
 /**
@@ -42,6 +43,8 @@ public interface ManualControl extends Control {
     public void steerX(float value);
 
     public void steerY(float value);
+
+    public Vector3f getAimDirection();
 
     public void moveX(float value);
 

@@ -96,26 +96,26 @@ public class ClientMain extends SimpleApplication implements ScreenController {
 
     @Override
     public void simpleInitApp() {
+        startNifty();
         client = new Client();
         bulletState = new BulletAppState();
         if (Globals.PHYSICS_THREADED) {
             bulletState.setThreadingType(BulletAppState.ThreadingType.PARALLEL);
         }
+        getStateManager().attach(bulletState);
+        bulletState.getPhysicsSpace().setDeterministic(Globals.PHYSICS_DETERMINISTIC);
+        bulletState.getPhysicsSpace().setAccuracy(Globals.PHYSICS_FPS);
         inputManager.setCursorVisible(true);
         flyCam.setEnabled(false);
         chaseCam = new ChaseCamera(cam, inputManager);
         chaseCam.setSmoothMotion(true);
         chaseCam.setChasingSensitivity(100);
         chaseCam.setTrailingEnabled(true);
-        getStateManager().attach(bulletState);
-        bulletState.getPhysicsSpace().setDeterministic(Globals.PHYSICS_DETERMINISTIC);
-        bulletState.getPhysicsSpace().setAccuracy(Globals.PHYSICS_FPS);
-        startNifty();
 
         worldManager = new WorldManager(this, rootNode, bulletState.getPhysicsSpace(), client);
         //adding/creating controls later attached to user controlled spatial
         worldManager.addUserControl(chaseCam);
-        worldManager.addUserControl(new UserInputControl(inputManager));
+        worldManager.addUserControl(new UserInputControl(inputManager, cam));
         worldManager.addUserControl(new DefaultHUDControl(nifty.getScreen("default_hud")));
         effectsManager = new ClientEffectsManager(assetManager, worldManager);
         //register effects manager with sync manager so that messages can apply their data
@@ -255,8 +255,8 @@ public class ClientMain extends SimpleApplication implements ScreenController {
      * brings up the lobby display
      */
     public void lobby() {
+        chaseCam.setDragToRotate(false);
         inputManager.setCursorVisible(true);
-        flyCam.setEnabled(false);
         nifty.gotoScreen("lobby");
     }
 
@@ -327,7 +327,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
                             statusText.changeText("Done Loading!");
                             nifty.gotoScreen("default_hud");
                             inputManager.setCursorVisible(false);
-                            flyCam.setEnabled(true);
+                            chaseCam.setDragToRotate(false);
                             return null;
                         }
                     }).get();

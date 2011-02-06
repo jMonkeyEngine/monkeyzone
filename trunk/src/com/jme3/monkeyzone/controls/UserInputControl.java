@@ -39,7 +39,10 @@ import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.math.FastMath;
+import com.jme3.math.Vector3f;
 import com.jme3.monkeyzone.messages.ActionMessage;
+import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
@@ -64,9 +67,14 @@ public class UserInputControl implements Control, ActionListener {
     private float moveY = 0;
     private float moveZ = 0;
     private float steerX = 0;
+    private Camera cam;
+    private Vector3f vectorA = new Vector3f();
+    private Vector3f vectorB = new Vector3f();
+    private Vector3f elimY = new Vector3f(1, 0, 1);
 
-    public UserInputControl(InputManager inputManager) {
+    public UserInputControl(InputManager inputManager, Camera cam) {
         this.inputManager = inputManager;
+        this.cam = cam;
         prepareInputManager();
     }
 
@@ -113,6 +121,17 @@ public class UserInputControl implements Control, ActionListener {
     }
 
     public void update(float tpf) {
+        //TODO: add switch to enable/disable rotate with cam
+        vectorA.set(cam.getLeft()).multLocal(elimY).multLocal(-1);
+        vectorB.set(manualControl.getAimDirection()).multLocal(elimY);
+        float angle = FastMath.HALF_PI - vectorA.angleBetween(vectorB);
+        if (angle > 0.1f) {
+            manualControl.steerX(1);
+        } else if (angle < -0.1f) {
+            manualControl.steerX(-1);
+        } else {
+            manualControl.steerX(0);
+        }
     }
 
     public void render(RenderManager rm, ViewPort vp) {
