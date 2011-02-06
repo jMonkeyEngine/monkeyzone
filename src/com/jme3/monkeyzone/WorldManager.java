@@ -227,6 +227,7 @@ public class WorldManager {
             Long entry = et.next();
             syncManager.removeObject(entry);
         }
+        syncManager.clearObjects();
         entities.clear();
         newId = 0;
         space.removeAll(worldRoot);
