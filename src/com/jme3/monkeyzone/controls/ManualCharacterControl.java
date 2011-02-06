@@ -112,6 +112,10 @@ public class ManualCharacterControl extends NetworkedManualControl {
         }
     }
 
+    public Vector3f getAimDirection() {
+        return viewDirection;
+    }
+
     @Override
     public void setSpatial(Spatial spatial) {
         this.spatial = spatial;
