@@ -67,7 +67,7 @@ public class PhysicsSyncManager implements MessageListener {
     HashMap<Long, Object> syncObjects = new HashMap<Long, Object>();
     double time = 0;
     double offset = Double.MIN_VALUE;
-    private double maxDelay = 0.25;
+    private double maxDelay = 0.50;
     float syncTimer = 0;
     LinkedList<PhysicsSyncMessage> messageQueue = new LinkedList<PhysicsSyncMessage>();
     Application app;
@@ -139,6 +139,10 @@ public class PhysicsSyncManager implements MessageListener {
      */
     public void removeObject(long id) {
         syncObjects.remove(id);
+    }
+
+    public void clearObjects(){
+        syncObjects.clear();
     }
 
     /**
