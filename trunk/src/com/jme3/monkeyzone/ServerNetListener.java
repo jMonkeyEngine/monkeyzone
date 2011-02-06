@@ -32,7 +32,7 @@
 package com.jme3.monkeyzone;
 
 import com.jme3.monkeyzone.messages.ChatMessage;
-import com.jme3.monkeyzone.messages.ClientActionMessage;
+import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.monkeyzone.messages.ClientJoinMessage;
 import com.jme3.monkeyzone.messages.HandshakeMessage;
 import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
@@ -66,7 +66,7 @@ public class ServerNetListener implements MessageListener, ConnectionListener {
         this.app = app;
         this.gameManager = gameManager;
         server.addConnectionListener(this);
-        server.addMessageListener(this, HandshakeMessage.class, ClientJoinMessage.class, ChatMessage.class, StartGameMessage.class, ClientActionMessage.class);
+        server.addMessageListener(this, HandshakeMessage.class, ClientJoinMessage.class, ChatMessage.class, StartGameMessage.class, ActionMessage.class);
     }
 
     public void clientConnected(Client client) {
@@ -184,12 +184,12 @@ public class ServerNetListener implements MessageListener, ConnectionListener {
                     return null;
                 }
             });
-        } else if (message instanceof ClientActionMessage) {
-            final ClientActionMessage msg = (ClientActionMessage) message;
+        } else if (message instanceof ActionMessage) {
+            final ActionMessage msg = (ActionMessage) message;
             app.enqueue(new Callable<Void>() {
 
                 public Void call() throws Exception {
-                    gameManager.performAction(msg.id, msg.action, msg.pressed);
+                    gameManager.performAction(msg.syncId, msg.action, msg.pressed);
                     return null;
                 }
             });

@@ -29,13 +29,15 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package com.jme3.monkeyzone.controls;
 
-package com.jme3.network.physicssync;
+import com.jme3.scene.control.Control;
 
 /**
- *
+ * Interface used to unify performing actions for autonomous and manual controls
  * @author normenhansen
  */
-public class RigidBodyControlMessage {
+public interface NetworkActionEnabled extends Control{
 
+    public void doPerformAction(int action, boolean activate);
 }

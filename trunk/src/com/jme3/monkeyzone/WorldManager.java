@@ -53,6 +53,7 @@ import com.jme3.monkeyzone.controls.ManualControl;
 import com.jme3.monkeyzone.controls.ManualVehicleControl;
 import com.jme3.monkeyzone.controls.SimpleAIControl;
 import com.jme3.monkeyzone.messages.AutoControlMessage;
+import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.monkeyzone.messages.ManualControlMessage;
 import com.jme3.monkeyzone.messages.ServerAddEntityMessage;
 import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
@@ -116,6 +117,7 @@ public class WorldManager {
         syncManager.setSyncFrequency(Globals.NETWORK_SYNC_FREQUENCY);
         syncManager.addObject(-1, this);
         syncManager.setMessageTypes(AutoControlMessage.class,
+//                ActionMessage.class,
                 ManualControlMessage.class);
     }
 
@@ -130,6 +132,7 @@ public class WorldManager {
         syncManager.addObject(-1, this);
         syncManager.setMessageTypes(AutoControlMessage.class,
                 ManualControlMessage.class,
+                ActionMessage.class,
                 SyncCharacterMessage.class,
                 SyncRigidBodyMessage.class,
                 ServerEntityDataMessage.class,
@@ -210,6 +213,10 @@ public class WorldManager {
      * detaches the level and clears the cache
      */
     public void closeLevel() {
+        for (Iterator<PlayerData> it = PlayerData.getPlayers().iterator(); it.hasNext();) {
+            PlayerData playerData = it.next();
+            playerData.setData("entity_id", -1l);
+        }
         if (isServer()) {
             for (Iterator<PlayerData> it = PlayerData.getAIPlayers().iterator(); it.hasNext();) {
                 PlayerData playerData = it.next();
@@ -251,13 +258,7 @@ public class WorldManager {
 
         navMesh.loadFromMesh(optiMesh);
 
-//        Geometry navBaseGeom = new Geometry("NavBaseMesh");
-//        navBaseGeom.setMesh(mesh);
-//        Material red = new Material(manager, "Common/MatDefs/Misc/WireColor.j3md");
-//        red.setColor("Color", ColorRGBA.Red);
-//        navBaseGeom.setMaterial(red);
-//        rootNode.attachChild(navBaseGeom);
-
+        //TODO: navmesh only for debug
         Geometry navGeom = new Geometry("NavMesh");
         navGeom.setMesh(optiMesh);
         Material green = new Material(assetManager, "Common/MatDefs/Misc/WireColor.j3md");
@@ -427,24 +428,24 @@ public class WorldManager {
         if (entityModel.getControl(RigidBodyControl.class) != null) {
             entityModel.getControl(RigidBodyControl.class).setPhysicsLocation(location);
             entityModel.getControl(RigidBodyControl.class).setPhysicsRotation(rotation.toRotationMatrix());
-            syncManager.addObject(id, entityModel.getControl(RigidBodyControl.class));
         } else if (entityModel.getControl(CharacterControl.class) != null) {
             entityModel.getControl(CharacterControl.class).setPhysicsLocation(location);
             entityModel.getControl(CharacterControl.class).setViewDirection(rotation.mult(Vector3f.UNIT_Z).multLocal(1, 0, 1).normalizeLocal());
             entityModel.addControl(new CharacterAnimControl());
-            syncManager.addObject(id, entityModel.getControl(CharacterControl.class));
+            //FIXME: strangeness setting these in jMP..
+            entityModel.getControl(CharacterControl.class).setFallSpeed(55);
+            entityModel.getControl(CharacterControl.class).setJumpSpeed(15);
         } else if (entityModel.getControl(VehicleControl.class) != null) {
             entityModel.getControl(VehicleControl.class).setPhysicsLocation(location);
             entityModel.getControl(VehicleControl.class).setPhysicsRotation(rotation.toRotationMatrix());
-            syncManager.addObject(id, entityModel.getControl(VehicleControl.class));
         } else {
             entityModel.setLocalTranslation(location);
             entityModel.setLocalRotation(rotation);
-            syncManager.addObject(id, entityModel);
         }
         entityModel.setUserData("player_id", -1l);
         entityModel.setUserData("group_id", -1);
         entities.put(id, entityModel);
+        syncManager.addObject(id, entityModel);
         space.addAll(entityModel);
         worldRoot.attachChild(entityModel);
     }
@@ -460,10 +461,6 @@ public class WorldManager {
             Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Broadcast removing entity: {0}", id);
             syncManager.broadcast(new ServerRemoveEntityMessage(id));
         }
-//        Long playerId = (Long) spat.getUserData("player_id");
-//        if (playerId != null && playerId != -1) {
-//            enterEntity(playerId, -1);
-//        }
         syncManager.removeObject(id);
         Spatial spat = entities.remove(id);
         if (spat == null) {
@@ -531,24 +528,20 @@ public class WorldManager {
     private void makeManualControl(long entityId, Client client) {
         Spatial spat = getEntity(entityId);
         if (spat.getControl(CharacterControl.class) != null) {
+            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make manual character control for entity {0} ", entityId);
             if (client != null) {
                 //add net sending for users own manual control
                 //TODO: using group id as client id
                 if ((Integer) spat.getUserData("group_id") == myGroupId) {
-                    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make human client type manual control for entity {0} ", entityId);
                     spat.addControl(new ManualCharacterControl(client, entityId));
                 } else {
-                    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make client type manual control for entity {0} ", entityId);
                     spat.addControl(new ManualCharacterControl());
                 }
-            } else if (server != null) {
-                Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make server type manual control for entity {0} ", entityId);
-                spat.addControl(new ManualCharacterControl(syncManager, entityId));
             } else {
-                Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make client type manual control for entity {0} ", entityId);
                 spat.addControl(new ManualCharacterControl());
             }
         } else if (spat.getControl(VehicleControl.class) != null) {
+            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make manual vehicle control for entity {0} ", entityId);
             if (client != null) {
                 //TODO: using group id as client id
                 if ((Integer) spat.getUserData("group_id") == myGroupId) {
@@ -556,11 +549,7 @@ public class WorldManager {
                 } else {
                     spat.addControl(new ManualVehicleControl());
                 }
-            } else if (server != null) {
-                Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make server type manual control for entity {0} ", entityId);
-                spat.addControl(new ManualVehicleControl(syncManager, entityId));
             } else {
-                Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make client type manual control for entity {0} ", entityId);
                 spat.addControl(new ManualVehicleControl());
             }
         }
@@ -573,18 +562,16 @@ public class WorldManager {
     private void makeAutoControl(long entityId, Client client) {
         Spatial spat = getEntity(entityId);
         if (spat.getControl(CharacterControl.class) != null) {
+            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make autonomous character control for entity {0} ", entityId);
             if (client != null) {
                 spat.addControl(new AutonomousCharacterControl(client, entityId));
-            } else if (server != null) {
-                spat.addControl(new AutonomousCharacterControl(syncManager, entityId));
             } else {
                 spat.addControl(new AutonomousCharacterControl());
             }
         } else if (spat.getControl(VehicleControl.class) != null) {
+            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make autonomous vehicle control for entity {0} ", entityId);
             if (client != null) {
                 spat.addControl(new AutonomousVehicleControl(client, entityId));
-            } else if (server != null) {
-                spat.addControl(new AutonomousVehicleControl(syncManager, entityId));
             } else {
                 spat.addControl(new AutonomousCharacterControl());
             }

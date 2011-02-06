@@ -31,10 +31,13 @@
  */
 package com.jme3.network.physicssync;
 
+import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.bullet.control.VehicleControl;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 import com.jme3.network.serializing.Serializable;
+import com.jme3.scene.Spatial;
 
 /**
  * sync message for physics objects (RigidBody + Vehicle)
@@ -75,9 +78,13 @@ public class SyncRigidBodyMessage extends PhysicsSyncMessage {
         if (body == null) {
             return;
         }
-        ((PhysicsRigidBody)body).setPhysicsLocation(location);
-        ((PhysicsRigidBody)body).setPhysicsRotation(rotation);
-        ((PhysicsRigidBody)body).setLinearVelocity(linearVelocity);
-        ((PhysicsRigidBody)body).setAngularVelocity(angularVelocity);
+        PhysicsRigidBody rigidBody = ((Spatial) body).getControl(RigidBodyControl.class);
+        if (rigidBody == null) {
+            rigidBody = ((Spatial) body).getControl(VehicleControl.class);
+        }
+        rigidBody.setPhysicsLocation(location);
+        rigidBody.setPhysicsRotation(rotation);
+        rigidBody.setLinearVelocity(linearVelocity);
+        rigidBody.setAngularVelocity(angularVelocity);
     }
 }

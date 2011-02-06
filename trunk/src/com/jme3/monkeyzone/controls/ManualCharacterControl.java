@@ -36,6 +36,7 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.monkeyzone.Globals;
+import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.network.connection.Client;
 import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.renderer.RenderManager;
@@ -50,7 +51,7 @@ import com.jme3.scene.Spatial;
 public class ManualCharacterControl extends NetworkedManualControl {
 
     private Spatial spatial;
-    private CharacterControl control;
+    private CharacterControl characterControl;
     private Vector3f walkDirection = new Vector3f(Vector3f.ZERO);
     private Vector3f viewDirection = new Vector3f(Vector3f.UNIT_Z);
     private Vector3f directionLeft = new Vector3f(Vector3f.UNIT_X);
@@ -68,10 +69,6 @@ public class ManualCharacterControl extends NetworkedManualControl {
 
     public ManualCharacterControl(Client client, long entityId) {
         super(client, entityId);
-    }
-
-    public ManualCharacterControl(PhysicsSyncManager server, long entityId) {
-        super(server, entityId);
     }
 
     @Override
@@ -109,13 +106,20 @@ public class ManualCharacterControl extends NetworkedManualControl {
     }
 
     @Override
+    public void doPerformAction(int button, boolean pressed) {
+        if (pressed && button == ActionMessage.JUMP_ACTION) {
+            characterControl.jump();
+        }
+    }
+
+    @Override
     public void setSpatial(Spatial spatial) {
         this.spatial = spatial;
         if (spatial == null) {
             return;
         }
-        this.control = spatial.getControl(CharacterControl.class);
-        if (this.control == null) {
+        this.characterControl = spatial.getControl(CharacterControl.class);
+        if (this.characterControl == null) {
             throw new IllegalStateException("Cannot add ManualCharacterControl to Spatial without CharacterControl");
         }
         Float spatialSpeed = (Float) spatial.getUserData("Speed");
@@ -143,8 +147,8 @@ public class ManualCharacterControl extends NetworkedManualControl {
         //when we didnt get any new input we get directions from the control,
         //they might have been updated by network sync
         if (!gotInput) {
-            walkDirection.set(control.getWalkDirection());
-            viewDirection.set(control.getViewDirection());
+            walkDirection.set(characterControl.getWalkDirection());
+            viewDirection.set(characterControl.getViewDirection());
             directionLeft.set(viewDirection).normalizeLocal();
             ROTATE_90.multLocal(directionLeft);
         }
@@ -157,8 +161,8 @@ public class ManualCharacterControl extends NetworkedManualControl {
             directionQuat.multLocal(viewDirection);
             directionQuat.multLocal(directionLeft);
         }
-        control.setWalkDirection(walkDirection);
-        control.setViewDirection(viewDirection);
+        characterControl.setWalkDirection(walkDirection);
+        characterControl.setViewDirection(viewDirection);
         gotInput = false;
     }
 

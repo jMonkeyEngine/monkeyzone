@@ -77,18 +77,12 @@ public class ManualControlMessage extends PhysicsSyncMessage {
 
     @Override
     public void applyData(Object object) {
-        NetworkedManualControl netControl = ((Spatial) ((PhysicsCollisionObject) object).getUserObject()).getControl(NetworkedManualControl.class);
-        if (netControl != null) {
-            if (netControl.getSyncManager() != null) {
-                netControl.getSyncManager().broadcast(this);
-            }
-            netControl.doMoveX(moveX);
-            netControl.doMoveY(moveY);
-            netControl.doMoveZ(moveZ);
-            netControl.doSteerX(aimX);
-            netControl.doSteerY(aimY);
-        } else {
-            Logger.getLogger(ManualControlMessage.class.getName()).log(Level.SEVERE, "Could not find manual control for entity {0} to apply data!", syncId);
-        }
+        NetworkedManualControl netControl = ((Spatial) object).getControl(NetworkedManualControl.class);
+        assert (netControl != null);
+        netControl.doMoveX(moveX);
+        netControl.doMoveY(moveY);
+        netControl.doMoveZ(moveZ);
+        netControl.doSteerX(aimX);
+        netControl.doSteerY(aimY);
     }
 }

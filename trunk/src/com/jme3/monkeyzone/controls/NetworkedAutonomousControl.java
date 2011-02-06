@@ -35,7 +35,7 @@ import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.math.Vector3f;
 import com.jme3.monkeyzone.messages.AutoControlMessage;
-import com.jme3.monkeyzone.messages.ClientActionMessage;
+import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.network.connection.Client;
 import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.scene.Spatial;
@@ -48,10 +48,9 @@ import java.util.logging.Logger;
  * Abstract Autonomous Control, handles sending to server when client is set
  * @author normenhansen
  */
-public abstract class NetworkedAutonomousControl implements AutonomousControl {
+public abstract class NetworkedAutonomousControl implements AutonomousControl, NetworkActionEnabled {
 
     private Client client;
-    private PhysicsSyncManager syncManager;
     private long entity_id;
     private Vector3f lastMoveToLocation = new Vector3f();
     private Vector3f lastAimDirection = new Vector3f();
@@ -66,26 +65,19 @@ public abstract class NetworkedAutonomousControl implements AutonomousControl {
         this.entity_id = entity_id;
     }
 
-    public NetworkedAutonomousControl(PhysicsSyncManager manager, long entity_id) {
-        this.syncManager = manager;
-        this.entity_id = entity_id;
-    }
-
     public void aimAt(Vector3f direction) {
         if (client != null) {
             if (!lastAimDirection.equals(direction)) {
                 lastAimDirection.set(direction);
                 sendMoveSync();
             }
-        } else {
-            doAimAt(direction);
         }
     }
 
     public void performAction(int action, boolean activate) {
         if (client != null) {
             try {
-                client.send(new ClientActionMessage(entity_id, action, activate));
+                client.send(new ActionMessage(entity_id, action, activate));
             } catch (IOException ex) {
                 Logger.getLogger(NetworkedAutonomousControl.class.getName()).log(Level.SEVERE, "Cannot send auto control message: {0}", ex);
             }
@@ -98,8 +90,6 @@ public abstract class NetworkedAutonomousControl implements AutonomousControl {
                 lastMoveToLocation.set(location);
                 sendMoveSync();
             }
-        } else {
-            doMoveTo(location);
         }
     }
 
@@ -114,6 +104,8 @@ public abstract class NetworkedAutonomousControl implements AutonomousControl {
     public abstract void doAimAt(Vector3f direction);
 
     public abstract void doMoveTo(Vector3f location);
+
+    public abstract void doPerformAction(int action, boolean activate);
 
     public abstract boolean isMoving();
 
@@ -131,10 +123,6 @@ public abstract class NetworkedAutonomousControl implements AutonomousControl {
 
     public boolean isEnabled() {
         return enabled;
-    }
-
-    public PhysicsSyncManager getSyncManager() {
-        return syncManager;
     }
 
     public Control cloneForSpatial(Spatial spatial) {

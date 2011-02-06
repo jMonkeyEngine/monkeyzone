@@ -34,6 +34,7 @@ package com.jme3.monkeyzone.controls;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Vector3f;
 import com.jme3.monkeyzone.Globals;
+import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.network.connection.Client;
 import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.renderer.RenderManager;
@@ -63,10 +64,6 @@ public class AutonomousCharacterControl extends NetworkedAutonomousControl {
         super(client, entityId);
     }
 
-    public AutonomousCharacterControl(PhysicsSyncManager server, long entityId) {
-        super(server, entityId);
-    }
-
     @Override
     public void doAimAt(Vector3f direction) {
     }
@@ -80,6 +77,13 @@ public class AutonomousCharacterControl extends NetworkedAutonomousControl {
     public void doMoveTo(Vector3f location) {
         targetLocation.set(location);
         moving = true;
+    }
+
+    @Override
+    public void doPerformAction(int action, boolean activate) {
+        if (activate && action == ActionMessage.JUMP_ACTION) {
+            characterControl.jump();
+        }
     }
 
     @Override
