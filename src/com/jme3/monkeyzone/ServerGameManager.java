@@ -141,9 +141,6 @@ public class ServerGameManager {
             Logger.getLogger(ServerGameManager.class.getName()).log(Level.WARNING, "Cannot find entity performing action!");
             return;
         }
-        //TODO: broadcasting/activating keypress here, not done in syncmanager..
-        worldManager.getSyncManager().broadcast(new ActionMessage(entityId, action, pressed));
-        myEntity.getControl(NetworkActionEnabled.class).doPerformAction(action, pressed);
         
         long player_id = (Long) myEntity.getUserData("player_id");
         if (player_id == -1) {
