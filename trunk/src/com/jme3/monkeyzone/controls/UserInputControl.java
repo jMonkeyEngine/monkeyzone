@@ -121,14 +121,14 @@ public class UserInputControl implements Control, ActionListener {
     }
 
     public void update(float tpf) {
-        //TODO: add switch to enable/disable rotate with cam
+//        TODO: add switch to enable/disable rotate with cam
         vectorA.set(cam.getLeft()).multLocal(elimY).multLocal(-1);
         vectorB.set(manualControl.getAimDirection()).multLocal(elimY);
         float angle = FastMath.HALF_PI - vectorA.angleBetween(vectorB);
         if (angle > 0.1f) {
-            manualControl.steerX(1);
+            manualControl.steerX(angle < 1 ? angle : 1);
         } else if (angle < -0.1f) {
-            manualControl.steerX(-1);
+            manualControl.steerX(angle > -1 ? angle : -1);
         } else {
             manualControl.steerX(0);
         }
