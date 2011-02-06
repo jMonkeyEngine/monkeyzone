@@ -117,7 +117,7 @@ public class WorldManager {
         syncManager.setSyncFrequency(Globals.NETWORK_SYNC_FREQUENCY);
         syncManager.addObject(-1, this);
         syncManager.setMessageTypes(AutoControlMessage.class,
-//                ActionMessage.class,
+                ActionMessage.class,
                 ManualControlMessage.class);
     }
 
