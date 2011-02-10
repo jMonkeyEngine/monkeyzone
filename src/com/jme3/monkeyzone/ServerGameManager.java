@@ -94,7 +94,7 @@ public class ServerGameManager {
             long entityId = worldManager.addNewEntity("Models/Sinbad/Sinbad.j3o", new Vector3f(i * 3, 3, 0), new Quaternion());
             worldManager.enterEntity(playerData.getId(), entityId);
 
-            long entitayId = worldManager.addNewEntity("Models/Sinbad/Sinbad.j3o", new Vector3f(i * 3, 3, 1), new Quaternion());
+            long entitayId = worldManager.addNewEntity("Models/Ferrari/Car.j3o", new Vector3f(i * 3, 3, 3), new Quaternion());
             long playearId = worldManager.addNewPlayer(PlayerData.getIntData(playerData.getId(), "group_id"), "AI", 0);
             worldManager.enterEntity(playearId, entitayId);
             i++;

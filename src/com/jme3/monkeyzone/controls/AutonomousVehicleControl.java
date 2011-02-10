@@ -31,18 +31,36 @@
  */
 package com.jme3.monkeyzone.controls;
 
+import com.jme3.bullet.control.VehicleControl;
+import com.jme3.math.FastMath;
+import com.jme3.math.Plane;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.monkeyzone.Globals;
+import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.network.connection.Client;
-import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
 
 /**
- * TODO: autonomous vehicle control
+ * Automomous character control, implements the AutonomousControl interface and
+ * controls a character if available on the spatial.
  * @author normenhansen
  */
 public class AutonomousVehicleControl extends NetworkedAutonomousControl {
+
+    private float checkRadius = 6;
+    private float speed = 10f * Globals.PHYSICS_FPS;
+    private Vector3f targetLocation = new Vector3f();
+    private Vector3f vector = new Vector3f();
+    private Vector3f vector2 = new Vector3f();
+    private Vector3f vector3 = new Vector3f();
+    private boolean moving = false;
+    private VehicleControl vehicle;
+    private Vector3f aimDirection = new Vector3f(Vector3f.UNIT_Z);
+    private Plane plane = new Plane();
+    static final Quaternion ROTATE_RIGHT = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y);
 
     public AutonomousVehicleControl() {
     }
@@ -51,43 +69,97 @@ public class AutonomousVehicleControl extends NetworkedAutonomousControl {
         super(client, entityId);
     }
 
+    @Override
     public void doAimAt(Vector3f direction) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public Vector3f getAimDirection() {
+        return aimDirection;
+    }
+
+    @Override
     public void doMoveTo(Vector3f location) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        targetLocation.set(location);
+        moving = true;
     }
 
     @Override
     public void doPerformAction(int action, boolean activate) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (activate && action == ActionMessage.JUMP_ACTION) {
+//            characterControl.jump();
+        }
     }
 
-    public Vector3f getAimDirection() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public boolean isMoving() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public Vector3f getTargetLocation() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public Vector3f getCurrentLocation() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
+    @Override
     public void setSpatial(Spatial spatial) {
         this.spatial = spatial;
         if (spatial == null) {
             return;
         }
+        NavigationControl navControl = spatial.getControl(NavigationControl.class);
+        if (navControl != null) {
+            checkRadius = navControl.getEntityRadius();
+        }
+        Float spatialSpeed = (Float) spatial.getUserData("Speed");
+        if (spatialSpeed != null) {
+            speed = spatialSpeed;
+        }
+        vehicle = spatial.getControl(VehicleControl.class);
     }
 
+    @Override
+    public boolean isMoving() {
+        return moving;
+    }
+
+    @Override
+    public Vector3f getTargetLocation() {
+        return targetLocation;
+    }
+
+    @Override
+    public Vector3f getCurrentLocation() {
+        return vehicle.getPhysicsLocation(vector);
+    }
+
+    @Override
     public void update(float tpf) {
+        if (!moving || !enabled) {
+            return;
+        }
+        vehicle.getPhysicsLocation(vector);
+        vector2.set(targetLocation);
+        vector2.subtractLocal(vector);
+        float distance = vector2.length();
+        if (distance <= checkRadius) {
+            moving = false;
+            vehicle.accelerate(0);
+            vehicle.brake(2);
+        } else {
+            vector2.normalizeLocal();
+            vehicle.getForwardVector(vector3).normalizeLocal();
+            plane.setOriginNormal(Vector3f.ZERO, vector3);
+            ROTATE_RIGHT.multLocal(vector3);
+            float angle = FastMath.HALF_PI - vector2.angleBetween(vector3);
+            //backwards
+            if (plane.whichSide(vector2) == Plane.Side.Positive) {
+                if (angle < 0) {
+                    vehicle.steer(angle > -1 ? -angle : 1 * -FastMath.QUARTER_PI * 0.5f);
+                } else {
+                    vehicle.steer(angle < 1 ? angle : 1 * FastMath.QUARTER_PI * 0.5f);
+                }
+                vehicle.accelerate(speed);
+            } else {
+                if (angle > 0) {
+                    vehicle.steer(-FastMath.QUARTER_PI * 0.5f);
+                } else {
+                    vehicle.steer(FastMath.QUARTER_PI * 0.5f);
+                }
+                vehicle.accelerate(-speed);
+            }
+            vehicle.brake(0);
+        }
     }
 
     public void render(RenderManager rm, ViewPort vp) {
