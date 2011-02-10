@@ -56,7 +56,7 @@ public class ManualControlMessage extends PhysicsSyncMessage {
     }
 
     public ManualControlMessage(ManualControlMessage msg) {
-        setReliable(false);
+//        setReliable(false);
         this.syncId = msg.syncId;
         this.aimX = msg.aimX;
         this.aimY = msg.aimY;
@@ -66,7 +66,7 @@ public class ManualControlMessage extends PhysicsSyncMessage {
     }
 
     public ManualControlMessage(long id, float aimX, float aimY, float moveX, float moveY, float moveZ) {
-        setReliable(false);
+//        setReliable(false);
         this.syncId = id;
         this.aimX = aimX;
         this.aimY = aimY;

@@ -54,7 +54,7 @@ public class AutoControlMessage extends PhysicsSyncMessage {
     }
 
     public AutoControlMessage(long id, Vector3f aimAt, Vector3f moveTo) {
-        setReliable(false);
+//        setReliable(false);
         this.syncId = id;
         this.aimAt.set(aimAt);
         this.moveTo.set(moveTo);

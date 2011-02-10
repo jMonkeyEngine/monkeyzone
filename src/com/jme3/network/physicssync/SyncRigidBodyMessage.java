@@ -55,7 +55,7 @@ public class SyncRigidBodyMessage extends PhysicsSyncMessage {
     }
 
     public SyncRigidBodyMessage(long id, PhysicsRigidBody body) {
-        setReliable(false);
+//        setReliable(false);
         this.syncId = id;
         location = body.getPhysicsLocation(new Vector3f());
         rotation = body.getPhysicsRotation(new Matrix3f());
