@@ -51,7 +51,7 @@ public class SyncCharacterMessage extends PhysicsSyncMessage {
     }
 
     public SyncCharacterMessage(long id, CharacterControl character) {
-        setReliable(false);
+//        setReliable(false);
         this.syncId = id;
         character.getPhysicsLocation(location);
         this.walkDirection.set(character.getWalkDirection());
