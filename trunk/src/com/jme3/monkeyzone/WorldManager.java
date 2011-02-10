@@ -574,7 +574,7 @@ public class WorldManager {
             if (client != null) {
                 spat.addControl(new AutonomousVehicleControl(client, entityId));
             } else {
-                spat.addControl(new AutonomousCharacterControl());
+                spat.addControl(new AutonomousVehicleControl());
             }
         }
     }
