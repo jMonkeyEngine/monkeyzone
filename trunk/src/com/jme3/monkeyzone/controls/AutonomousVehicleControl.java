@@ -44,14 +44,14 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
 
 /**
- * Automomous character control, implements the AutonomousControl interface and
- * controls a character if available on the spatial.
+ * Automomous vehicle control, implements the AutonomousControl interface and
+ * controls a vehicle if available on the spatial.
  * @author normenhansen
  */
 public class AutonomousVehicleControl extends NetworkedAutonomousControl {
 
-    private float checkRadius = 6;
-    private float speed = 10f * Globals.PHYSICS_FPS;
+    private float checkRadius = 4;
+    private float speed = 800f;
     private Vector3f targetLocation = new Vector3f();
     private Vector3f vector = new Vector3f();
     private Vector3f vector2 = new Vector3f();
@@ -81,7 +81,13 @@ public class AutonomousVehicleControl extends NetworkedAutonomousControl {
     @Override
     public void doMoveTo(Vector3f location) {
         targetLocation.set(location);
-        moving = true;
+        vehicle.getPhysicsLocation(vector);
+        vector2.set(targetLocation);
+        vector2.subtractLocal(vector);
+        float distance = vector2.length();
+        if (distance > checkRadius) {
+            moving = true;
+        }
     }
 
     @Override

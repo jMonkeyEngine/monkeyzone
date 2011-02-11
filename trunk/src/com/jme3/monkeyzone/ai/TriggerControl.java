@@ -29,15 +29,13 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.monkeyzone.controls;
+package com.jme3.monkeyzone.ai;
 
 import com.jme3.scene.control.Control;
 
 /**
- * Base interface for controls that implement NPC AI, should only use spatials
- * AutonomousControl for movement.
+ * Basic interface for AI triggers
  * @author normenhansen
  */
-public interface AIControl extends Control{
-
+public interface TriggerControl extends Control{
 }

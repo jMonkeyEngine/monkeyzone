@@ -43,7 +43,8 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.monkeyzone.controls.AIControl;
+import com.jme3.monkeyzone.ai.AttackCommand;
+import com.jme3.monkeyzone.ai.Command;
 import com.jme3.monkeyzone.controls.AutonomousCharacterControl;
 import com.jme3.monkeyzone.controls.AutonomousControl;
 import com.jme3.monkeyzone.controls.AutonomousVehicleControl;
@@ -51,7 +52,9 @@ import com.jme3.monkeyzone.controls.CharacterAnimControl;
 import com.jme3.monkeyzone.controls.ManualCharacterControl;
 import com.jme3.monkeyzone.controls.ManualControl;
 import com.jme3.monkeyzone.controls.ManualVehicleControl;
-import com.jme3.monkeyzone.controls.SimpleAIControl;
+import com.jme3.monkeyzone.ai.SphereTrigger;
+import com.jme3.monkeyzone.ai.TriggerControl;
+import com.jme3.monkeyzone.controls.CommandQueueControl;
 import com.jme3.monkeyzone.messages.AutoControlMessage;
 import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.monkeyzone.messages.ManualControlMessage;
@@ -445,6 +448,7 @@ public class WorldManager {
         }
         entityModel.setUserData("player_id", -1l);
         entityModel.setUserData("group_id", -1);
+        entityModel.setUserData("entity_id", id);
         entities.put(id, entityModel);
         syncManager.addObject(id, entityModel);
         space.addAll(entityModel);
@@ -468,6 +472,11 @@ public class WorldManager {
             Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "try removing entity thats not there: {0}", id);
             return;
         }
+        removeTransientControls(spat);
+        removeAIControls(spat);
+        if ((Long) spat.getUserData("player_id") == myPlayerId) {
+            removeUserControls(spat);
+        }
         spat.removeFromParent();
         space.removeAll(spat);
     }
@@ -490,7 +499,7 @@ public class WorldManager {
             curEntitySpat.setUserData("player_id", -1l);
             curEntitySpat.setUserData("group_id", -1);
             removeTransientControls(curEntitySpat);
-            removeAIControl(curEntitySpat);
+            removeAIControls(curEntitySpat);
             if (playerId == myPlayerId) {
                 removeUserControls(curEntitySpat);
             }
@@ -514,7 +523,7 @@ public class WorldManager {
             } else {
                 if (groupId == getMyGroupId()) { //only true on clients
                     makeAutoControl(entityId, client);
-                    addAIControl(playerId, spat);
+                    addAIControls(playerId, entityId);
                 } else {
                     makeAutoControl(entityId, null);
                 }
@@ -616,19 +625,29 @@ public class WorldManager {
     }
 
     /**
-     * adds the user controls for human user to the spatial
+     * adds the command queue and triggers for user controlled ai entities
      */
-    private void addAIControl(long playerId, Spatial spat) {
-        spat.addControl(new SimpleAIControl(this));
+    private void addAIControls(long playerId, long entityId) {
+        //TODO: use stored controls for playerId
+        Spatial spat = getEntity(entityId);
+        spat.addControl(new CommandQueueControl(this, playerId, entityId));
+        Command command = new AttackCommand();
+        SphereTrigger trigger = new SphereTrigger(this, command);
+        spat.addControl(trigger);
     }
 
     /**
-     * adds the user controls for human user to the spatial
+     * removes the command queue and triggers for user controlled ai entities
      */
-    private void removeAIControl(Spatial spat) {
-        AIControl aiControl = spat.getControl(AIControl.class);
+    private void removeAIControls(Spatial spat) {
+        CommandQueueControl aiControl = spat.getControl(CommandQueueControl.class);
         if (aiControl != null) {
             spat.removeControl(aiControl);
+        }
+        TriggerControl triggerControl = spat.getControl(TriggerControl.class);
+        while (triggerControl != null) {
+            spat.removeControl(triggerControl);
+            triggerControl = spat.getControl(TriggerControl.class);
         }
     }
 
