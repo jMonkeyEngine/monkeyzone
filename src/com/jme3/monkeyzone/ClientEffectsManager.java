@@ -32,6 +32,8 @@
 package com.jme3.monkeyzone;
 
 import com.jme3.asset.AssetManager;
+import com.jme3.audio.AudioNode;
+import com.jme3.audio.AudioRenderer;
 import com.jme3.effect.ParticleEmitter;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -53,12 +55,14 @@ import java.util.logging.Logger;
 public class ClientEffectsManager {
 
     private AssetManager assetManager;
+    private AudioRenderer audioRenderer;
     private WorldManager worldManager;
     private HashMap<String, LinkedList<Node>> emitters = new HashMap<String, LinkedList<Node>>();
     private HashMap<Long, EmitterData> liveEmitters = new HashMap<Long, EmitterData>();
 
-    public ClientEffectsManager(AssetManager assetManager, WorldManager worldManager) {
+    public ClientEffectsManager(AssetManager assetManager, AudioRenderer audioRenderer, WorldManager worldManager) {
         this.assetManager = assetManager;
+        this.audioRenderer = audioRenderer;
         this.worldManager = worldManager;
     }
 
@@ -81,11 +85,17 @@ public class ClientEffectsManager {
         EmitterData data = new EmitterData(effect, id, effectName, location, endLocation, rotation, endRotation, time);
         effect.setLocalTranslation(location);
         effect.setLocalRotation(rotation);
-        List<Spatial> children=effect.getChildren();
+        List<Spatial> children = effect.getChildren();
         for (Iterator<Spatial> it = children.iterator(); it.hasNext();) {
-            ParticleEmitter emitter = (ParticleEmitter)it.next();
-            emitter.killAllParticles();
-            emitter.emitAllParticles();
+            Spatial spat = it.next();
+            if (spat instanceof ParticleEmitter) {
+                ParticleEmitter emitter = (ParticleEmitter) spat;
+                emitter.emitAllParticles();
+            } else if (spat instanceof AudioNode) {
+                AudioNode audioNode = (AudioNode) spat;
+//                audioNode.setStatus(AudioNode.Status.Playing);
+                audioRenderer.playSource(audioNode);
+            }
         }
         worldManager.getWorldRoot().attachChild(effect);
         if (id == -1) {
@@ -103,6 +113,15 @@ public class ClientEffectsManager {
         EmitterData data = liveEmitters.get(id);
         data.emit.removeFromParent();
         emitters.get(data.effectName).add(data.emit);
+        List<Spatial> children = data.emit.getChildren();
+        for (Iterator<Spatial> it = children.iterator(); it.hasNext();) {
+            Spatial spatial = it.next();
+            if (spatial instanceof AudioNode) {
+                audioRenderer.stopSource((AudioNode) spatial);
+            } else if (spatial instanceof ParticleEmitter) {
+                ((ParticleEmitter) spatial).killAllParticles();
+            }
+        }
     }
 
     /**

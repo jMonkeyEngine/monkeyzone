@@ -76,7 +76,13 @@ public class AutonomousCharacterControl extends NetworkedAutonomousControl {
     @Override
     public void doMoveTo(Vector3f location) {
         targetLocation.set(location);
-        moving = true;
+        characterControl.getPhysicsLocation(vector);
+        vector2.set(targetLocation);
+        vector2.subtractLocal(vector);
+        float distance = vector2.length();
+        if (distance > checkRadius) {
+            moving = true;
+        }
     }
 
     @Override

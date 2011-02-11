@@ -117,7 +117,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         worldManager.addUserControl(chaseCam);
         worldManager.addUserControl(new UserInputControl(inputManager, cam));
         worldManager.addUserControl(new DefaultHUDControl(nifty.getScreen("default_hud")));
-        effectsManager = new ClientEffectsManager(assetManager, worldManager);
+        effectsManager = new ClientEffectsManager(assetManager, audioRenderer, worldManager);
         //register effects manager with sync manager so that messages can apply their data
         worldManager.getSyncManager().addObject(-2, effectsManager);
         listenerManager = new ClientNetListener(this, client, worldManager, effectsManager);
