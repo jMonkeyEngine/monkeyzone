@@ -2,10 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.jme3.monkeyzone.ai;
+package com.jme3.monkeyzone.ai.commands;
 
 import com.jme3.bullet.control.PhysicsControl;
 import com.jme3.math.Vector3f;
+import com.jme3.monkeyzone.ai.AbstractCommand;
+import com.jme3.monkeyzone.ai.SphereTrigger;
 import com.jme3.monkeyzone.controls.AutonomousControl;
 import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.scene.Spatial;

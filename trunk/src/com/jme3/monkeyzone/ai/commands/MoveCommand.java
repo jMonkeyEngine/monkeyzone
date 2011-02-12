@@ -29,8 +29,9 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.monkeyzone.ai;
+package com.jme3.monkeyzone.ai.commands;
 
+import com.jme3.monkeyzone.ai.AbstractCommand;
 import com.jme3.monkeyzone.controls.AutonomousControl;
 
 /**
