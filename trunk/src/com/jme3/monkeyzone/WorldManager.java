@@ -474,9 +474,12 @@ public class WorldManager {
             Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "try removing entity thats not there: {0}", id);
             return;
         }
+        Long playerId=(Long) spat.getUserData("player_id");
+        //TODO: removing from aiManager w/o checking if necessary
+        aiManager.removePlayerEntity(playerId);
         removeTransientControls(spat);
         removeAIControls(spat);
-        if ((Long) spat.getUserData("player_id") == myPlayerId) {
+        if (playerId == myPlayerId) {
             removeUserControls(spat);
         }
         spat.removeFromParent();
