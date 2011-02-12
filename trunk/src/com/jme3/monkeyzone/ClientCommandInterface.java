@@ -143,6 +143,13 @@ public class ClientCommandInterface implements ActionListener {
         this.world = world;
     }
 
+    /**
+     * adds a player id with entity to the list of user controlled entities,
+     * called from WorldManager when a player that belongs to this user has
+     * entered an entity.
+     * @param id
+     * @param entity
+     */
     public void setPlayerEntity(long id, Spatial entity) {
         if (entity == null) {
             players.remove(id);
@@ -160,16 +167,28 @@ public class ClientCommandInterface implements ActionListener {
         }
     }
 
+    /**
+     * clears the list of user controlled entities
+     */
     public void clearPlayers() {
         players.clear();
         setSelectionMenu(currentSelectionMenu);
     }
 
+    /**
+     * removes a user controlled entity
+     * @param id
+     */
     public void removePlayerEntity(long id) {
         players.remove(id);
         setSelectionMenu(currentSelectionMenu);
     }
 
+    /**
+     * gets the command queue of a specific player
+     * @param id
+     * @return
+     */
     public CommandControl getCommandQueue(long id) {
         if (!players.containsKey(id)) {
             return null;
@@ -177,6 +196,11 @@ public class ClientCommandInterface implements ActionListener {
         return players.get(id).getControl(CommandControl.class);
     }
 
+    /**
+     * gets the SphereTrigger of a specific player
+     * @param id
+     * @return
+     */
     public SphereTrigger getSphereTrigger(long id) {
         if (!players.containsKey(id)) {
             return null;
@@ -184,23 +208,39 @@ public class ClientCommandInterface implements ActionListener {
         return players.get(id).getControl(SphereTrigger.class);
     }
 
+    /**
+     * clear the selection list and set entity as selected entity
+     * @param entity
+     */
     public void selectEntity(Spatial entity) {
         this.selectedEntities.clear();
         this.selectedEntities.add(entity);
         updateCommandMenu();
     }
 
+    /**
+     * set multiple entitis as the list of selected entities
+     * @param entities
+     */
     public void selectEntities(List<Spatial> entities) {
         this.selectedEntities.clear();
         this.selectedEntities.addAll(entities);
         updateCommandMenu();
     }
 
+    /**
+     * add a single entity to the list of selected entities
+     * @param entity
+     */
     public void addSelectEntity(Spatial entity) {
         this.selectedEntities.add(entity);
         updateCommandMenu();
     }
 
+    /**
+     * remove a single entity from the list of selected entities
+     * @param entity
+     */
     public void removeSelectEntity(Spatial entity) {
         this.selectedEntities.remove(entity);
         updateCommandMenu();
@@ -262,54 +302,11 @@ public class ClientCommandInterface implements ActionListener {
         }
     }
 
-    private void processSelectionKey(int key) {
-        switch (currentSelectionMenu) {
-            case Main:
-                switch (key) {
-                    case 1:
-                        setSelectionMenu(SelectionMenu.Offensive);
-                        break;
-//                    case 2:
-//                        setSelectionMenu(SelectionMenu.Defensive);
-//                        break;
-//                    case 3:
-//                        setSelectionMenu(SelectionMenu.Builder);
-//                        break;
-//                    case 4:
-//                        setSelectionMenu(SelectionMenu.NavPoints);
-//                        break;
-                }
-                break;
-            case Offensive:
-                selectUnit(key, shift);
-                if (!shift) {
-                    setSelectionMenu(SelectionMenu.Main);
-                }
-                break;
-        }
-    }
-
-    private void selectUnit(int key, boolean add) {
-        int i = 0;
-        for (Iterator<Entry<Long, Spatial>> it = players.entrySet().iterator(); it.hasNext();) {
-            i++;
-            Entry<Long, Spatial> entry = it.next();
-            if (i == key) {
-                if (selectedEntities.contains(entry.getValue())) {
-                    removeSelectEntity(entry.getValue());
-                } else {
-                    if (add) {
-                        addSelectEntity(entry.getValue());
-                    } else {
-                        selectEntity(entry.getValue());
-                    }
-                }
-            }
-        }
-        //update menu
-        setSelectionMenu(currentSelectionMenu);
-    }
-
+    /**
+     * displays a specific selection menu, compiles list of current entities
+     * in that menu
+     * @param key
+     */
     private void setSelectionMenu(SelectionMenu key) {
         currentSelectionMenu = key;
         switch (currentSelectionMenu) {
@@ -354,6 +351,9 @@ public class ClientCommandInterface implements ActionListener {
         }
     }
 
+    /**
+     * clears the selection menu ui
+     */
     private void clearSelectionMenu() {
         for (int i = 0; i < selectionTexts.length; i++) {
             TextRenderer textRenderer = selectionTexts[i];
@@ -361,6 +361,67 @@ public class ClientCommandInterface implements ActionListener {
         }
     }
 
+    /**
+     * processes selection key (1-0) being pressed
+     * @param key
+     */
+    private void processSelectionKey(int key) {
+        switch (currentSelectionMenu) {
+            case Main:
+                switch (key) {
+                    case 1:
+                        setSelectionMenu(SelectionMenu.Offensive);
+                        break;
+//                    case 2:
+//                        setSelectionMenu(SelectionMenu.Defensive);
+//                        break;
+//                    case 3:
+//                        setSelectionMenu(SelectionMenu.Builder);
+//                        break;
+//                    case 4:
+//                        setSelectionMenu(SelectionMenu.NavPoints);
+//                        break;
+                }
+                break;
+            case Offensive:
+                selectUnit(currentSelectionMenu, key, shift);
+                if (!shift) {
+                    setSelectionMenu(SelectionMenu.Main);
+                }
+                break;
+        }
+    }
+
+    /**
+     * select a specific unit from the selection menu
+     * @param key
+     * @param add
+     */
+    private void selectUnit(SelectionMenu menu, int key, boolean add) {
+        //TODO: filter for menu
+        int i = 0;
+        for (Iterator<Entry<Long, Spatial>> it = players.entrySet().iterator(); it.hasNext();) {
+            i++;
+            Entry<Long, Spatial> entry = it.next();
+            if (i == key) {
+                if (selectedEntities.contains(entry.getValue())) {
+                    removeSelectEntity(entry.getValue());
+                } else {
+                    if (add) {
+                        addSelectEntity(entry.getValue());
+                    } else {
+                        selectEntity(entry.getValue());
+                    }
+                }
+            }
+        }
+        //update menu
+        setSelectionMenu(currentSelectionMenu);
+    }
+
+    /**
+     * updates the command menu based on the currently selected entities
+     */
     private void updateCommandMenu() {
         commands.clear();
         if (selectedEntities.size() > 0) {
@@ -386,6 +447,9 @@ public class ClientCommandInterface implements ActionListener {
         }
     }
 
+    /**
+     * clears the command menu UI
+     */
     private void clearCommandMenu() {
         for (int i = 0; i < commandTexts.length; i++) {
             TextRenderer textRenderer = commandTexts[i];
@@ -393,6 +457,10 @@ public class ClientCommandInterface implements ActionListener {
         }
     }
 
+    /**
+     * processes a command key
+     * @param key
+     */
     private void processCommandKey(int key) {
         Long entityId = PlayerData.getLongData(world.getMyPlayerId(), "entity_id");
         if (entityId != -1) {
@@ -400,6 +468,11 @@ public class ClientCommandInterface implements ActionListener {
         }
     }
 
+    /**
+     * issues a command with a spatial target to the selected entities
+     * @param command
+     * @param spatial
+     */
     private void doCommand(int command, Spatial spatial) {
         for (Iterator<Spatial> it = selectedEntities.iterator(); it.hasNext();) {
             Spatial spatial1 = it.next();
@@ -424,6 +497,11 @@ public class ClientCommandInterface implements ActionListener {
         }
     }
 
+    /**
+     * issues a command with a location target to the selected entities
+     * @param command
+     * @param location
+     */
     private void doCommand(int command, Vector3f location) {
         for (Iterator<Spatial> it = selectedEntities.iterator(); it.hasNext();) {
             Spatial spatial1 = it.next();

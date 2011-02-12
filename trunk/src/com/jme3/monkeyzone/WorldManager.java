@@ -534,6 +534,11 @@ public class WorldManager {
             if (groupId == myGroupId && playerId != myPlayerId) {
                 aiManager.setPlayerEntity(playerId, spat);
             }
+        }else{
+            //TODO: groupid as client id
+            if (groupId == myGroupId && playerId != myPlayerId) {
+                aiManager.removePlayerEntity(playerId);
+            }
         }
     }
 
