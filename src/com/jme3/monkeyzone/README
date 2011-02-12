@@ -1,20 +1,26 @@
-MonkeyZone Dev Infos (for true monkeys only)
+--------------------
+MonkeyZone Dev Infos
+--------------------
 
 MonkeyZone is a physics-based networking game. Both clients and server run the
 physics simulation, the clients send input data from the human and AI players
-to the server where they are broadcast. Additionally the server sends sync data
-in intervals for all objects in the game. When a human user or an AI presses
-a button/performs an action the actual logic for shooting or performing actions
-is done on the server and the results are broadcast as data messages for the
-entities. When the entity is controlled by an AI the actual AI code that
-determines where the entity should move and when it should perform an action
-is executed on the client.
+to the server where they are applied broadcast to the clients, which apply it too.
+Additionally the server sends sync data in intervals for all objects in the game.
+When a human user or an AI presses a button/performs an action the actual logic
+for shooting or performing actions is done on the server and the results are
+broadcast as data messages for the entities.
+When the entity is controlled by an AI the actual AI code that determines where
+the entity should move and when it should perform an action is executed on the client.
 
+-----------
+Terminology
+-----------
+
+The game uses certain terms that might be familiar to you but maybe used in
+another way, so heres a quick rundown on the terms being used.
 When understanding the terms used during the naming of classes, variables etc.
 most of the code should be self-explanatory. Most classes have javadoc descriptions
 on what they do, almost all methods have javadoc too.
-
-Terminology:
 
 Player
 Logical human or AI player that can enter entities and generally act, uses
@@ -36,3 +42,71 @@ Computer connected to server
 User
 Human player using client
 
+---------------
+Use of Controls
+---------------
+
+Controls are used extensively in MonkeyZone for many aspects of the game. When
+a player enters an entity the entity Spatial is configured based on the player
+that enters the entity. For example when the human user enters an entity, Controls
+that manage the user interface (DefaultUIControl) or user input (UserInputControl)
+are added to the current entity Spatial.
+
+As "capabilities"
+Controls attached to Spatials are generally used like an "array of capabilities" that
+the entity posesses. So when an entity has a VehicleControl its expected to be a
+vehicle, when its got a CharacterControl its expected to be a character.
+
+To abstract
+Furthermore theres special interfaces for Controls that allow abstraction of
+different Controls into one base interface. For example ManualControl and
+AutonomousControl are interfaces for controls that manage the movement of a
+spatial in a generalized way. This way AI code and e.g. the UserInputControl
+only have to check for a valid AutonomousControl or ManualControl on the spatial
+to control and move it. The details of the movement are handled by classes like
+ManualVehicleControl and ManualCharacterControl.
+
+For AI functions
+A special Control called "CommandControl" handles the "Commands" that can be executed
+by user controlled entities, see below.
+
+-----------------------
+Artificial Intelligence
+-----------------------
+
+Commands
+To implement autonomous AI players MonkeyZone uses a system of "Commands" that are
+managed by a "CommandControl" that is attached to each AI player controlled by
+the user. This CommandControl manages a list of Commands that are executed based on
+priority. For example theres a MoveCommand, a FollowCommand and an AttachCommand
+
+Triggers
+The SphereTrigger is a TriggerControl that is also attached to each AI player.
+It consists of a GhostControl that checks the overlapping entities around the
+entity its attached to.
+It can be assigned a command that is checked with every entity entering the
+SphereTrigger and executed.
+
+-----------------------------------
+Names of flags / data used in game:
+-----------------------------------
+
+Programmatic UserData of entities:
+- (long) entity_id
+- (long) group_id
+- (long) player_id
+
+Programmatic PlayerData:
+- (long) id
+- (int) group_id
+- (long) entity_id
+
+Editable UserData of entity Spatials:
+- (float) HitPoints
+- (float) MaxHitPoints
+- (float) Speed
+
+Level Spatial marking Node names:
+- StartPoint
+- PowerSource
+- MetalField
