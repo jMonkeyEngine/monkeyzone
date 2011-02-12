@@ -37,7 +37,7 @@ import com.jme3.bullet.control.GhostControl;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.monkeyzone.WorldManager;
-import com.jme3.monkeyzone.controls.CommandQueueControl;
+import com.jme3.monkeyzone.controls.CommandControl;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
@@ -47,7 +47,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * 
+ * Sphere trigger attached to every autonomous entity, contains command that is
+ * executed when entity enters and command!=null.
  * @author normenhansen
  */
 public class SphereTrigger implements TriggerControl {
@@ -58,11 +59,19 @@ public class SphereTrigger implements TriggerControl {
     protected float checkTimer = 0;
     protected float checkTime = 1;
     protected WorldManager world;
-    protected CommandQueueControl queueControl;
+    protected CommandControl queueControl;
     protected Command command;
+
+    public SphereTrigger(WorldManager world) {
+        this.world = world;
+    }
 
     public SphereTrigger(WorldManager world, Command command) {
         this.world = world;
+        this.command = command;
+    }
+
+    public void setCommand(Command command) {
         this.command = command;
     }
 
@@ -85,13 +94,13 @@ public class SphereTrigger implements TriggerControl {
         checkTimer += tpf;
         if (checkTimer >= checkTime) {
             checkTimer = 0;
-            if (ghostControl.getOverlappingCount() > 0) {
+            if (command != null && ghostControl.getOverlappingCount() > 0) {
                 List<PhysicsCollisionObject> objects = ghostControl.getOverlappingObjects();
                 for (Iterator<PhysicsCollisionObject> it = objects.iterator(); it.hasNext();) {
                     PhysicsCollisionObject physicsCollisionObject = it.next();
                     Spatial targetEntity = world.getEntity(physicsCollisionObject);
                     if (targetEntity != null && spatial.getUserData("player_id") != targetEntity.getUserData("player_id")) {
-                        if (command.setTargetEntity((Long) targetEntity.getUserData("player_id"), (Long) targetEntity.getUserData("entity_id"), targetEntity)) {
+                        if (command.setTargetEntity(targetEntity)) {
                             if (!command.isRunning()) {
                                 queueControl.addCommand(command);
                             }
@@ -118,8 +127,10 @@ public class SphereTrigger implements TriggerControl {
         }
         spatial.addControl(ghostControl);
         world.getPhysicsSpace().add(ghostControl);
-        queueControl = spatial.getControl(CommandQueueControl.class);
-        queueControl.initializeCommand(command);
+        queueControl = spatial.getControl(CommandControl.class);
+        if (command != null) {
+            queueControl.initializeCommand(command);
+        }
         if (queueControl == null) {
             throw new IllegalStateException("Cannot add AI control to spatial without CommandQueueControl");
         }

@@ -33,7 +33,7 @@ package com.jme3.monkeyzone.ai;
 
 import com.jme3.math.Vector3f;
 import com.jme3.monkeyzone.WorldManager;
-import com.jme3.monkeyzone.controls.CommandQueueControl;
+import com.jme3.monkeyzone.controls.CommandControl;
 import com.jme3.scene.Spatial;
 
 /**
@@ -55,16 +55,17 @@ public abstract class AbstractCommand implements Command {
 
     public abstract boolean doCommand(float tpf);
 
-    public void initialize(WorldManager world, long playerId, long entityId, Spatial spat) {
+    public Command initialize(WorldManager world, long playerId, long entityId, Spatial spat) {
         this.world = world;
         this.playerId = playerId;
         this.entityId = entityId;
         this.entity = spat;
+        return this;
     }
 
-    public boolean setTargetEntity(long playerId, long entityId, Spatial spat) {
-        this.targetPlayerId = playerId;
-        this.targetEntityId = entityId;
+    public boolean setTargetEntity(Spatial spat) {
+        this.targetPlayerId = (Long) spat.getUserData("player_id");
+        this.targetEntityId = (Long) spat.getUserData("entity_id");
         this.targetEntity = spat;
         targetLocation.set(spat.getWorldTranslation());
         return true;
@@ -84,7 +85,7 @@ public abstract class AbstractCommand implements Command {
     }
 
     public void cancel() {
-        entity.getControl(CommandQueueControl.class).removeCommand(this);
+        entity.getControl(CommandControl.class).removeCommand(this);
     }
 
     public boolean isRunning() {

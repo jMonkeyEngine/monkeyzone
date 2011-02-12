@@ -43,8 +43,6 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.monkeyzone.ai.AttackCommand;
-import com.jme3.monkeyzone.ai.Command;
 import com.jme3.monkeyzone.controls.AutonomousCharacterControl;
 import com.jme3.monkeyzone.controls.AutonomousControl;
 import com.jme3.monkeyzone.controls.AutonomousVehicleControl;
@@ -54,7 +52,7 @@ import com.jme3.monkeyzone.controls.ManualControl;
 import com.jme3.monkeyzone.controls.ManualVehicleControl;
 import com.jme3.monkeyzone.ai.SphereTrigger;
 import com.jme3.monkeyzone.ai.TriggerControl;
-import com.jme3.monkeyzone.controls.CommandQueueControl;
+import com.jme3.monkeyzone.controls.CommandControl;
 import com.jme3.monkeyzone.messages.AutoControlMessage;
 import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.monkeyzone.messages.ManualControlMessage;
@@ -109,6 +107,7 @@ public class WorldManager {
     private PhysicsSpace space;
     private List<Control> userControls = new LinkedList<Control>();
     private PhysicsSyncManager syncManager;
+    private ClientCommandInterface aiManager;
 
     public WorldManager(Application app, Node rootNode, PhysicsSpace space, Server server) {
         this.app = app;
@@ -124,12 +123,15 @@ public class WorldManager {
                 ManualControlMessage.class);
     }
 
-    public WorldManager(Application app, Node rootNode, PhysicsSpace space, Client client) {
+    public WorldManager(Application app, Node rootNode, PhysicsSpace space, Client client, ClientCommandInterface aiManager) {
         this.app = app;
         this.rootNode = rootNode;
         this.assetManager = app.getAssetManager();
         this.space = space;
         this.client = client;
+        this.aiManager = aiManager;
+        //TODO: criss-crossing of references between ai and world manager not nice..
+        aiManager.setWorldManager(this);
         syncManager = new PhysicsSyncManager(app, client);
         syncManager.setMaxDelay(Globals.NETWORK_MAX_PHYSICS_DELAY);
         syncManager.addObject(-1, this);
@@ -528,6 +530,10 @@ public class WorldManager {
                     makeAutoControl(entityId, null);
                 }
             }
+            //TODO: groupid as client id
+            if (groupId == myGroupId && playerId != myPlayerId) {
+                aiManager.setPlayerEntity(playerId, spat);
+            }
         }
     }
 
@@ -630,9 +636,9 @@ public class WorldManager {
     private void addAIControls(long playerId, long entityId) {
         //TODO: use stored controls for playerId
         Spatial spat = getEntity(entityId);
-        spat.addControl(new CommandQueueControl(this, playerId, entityId));
-        Command command = new AttackCommand();
-        SphereTrigger trigger = new SphereTrigger(this, command);
+        spat.addControl(new CommandControl(this, playerId, entityId));
+//        Command command = new AttackCommand();
+        SphereTrigger trigger = new SphereTrigger(this);
         spat.addControl(trigger);
     }
 
@@ -640,7 +646,7 @@ public class WorldManager {
      * removes the command queue and triggers for user controlled ai entities
      */
     private void removeAIControls(Spatial spat) {
-        CommandQueueControl aiControl = spat.getControl(CommandQueueControl.class);
+        CommandControl aiControl = spat.getControl(CommandControl.class);
         if (aiControl != null) {
             spat.removeControl(aiControl);
         }

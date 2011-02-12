@@ -41,11 +41,13 @@ import com.jme3.scene.Spatial;
  */
 public interface Command {
 
+    public String getName();
+
     public boolean doCommand(float tpf);
 
-    public void initialize(WorldManager world, long playerId, long entityId, Spatial spat);
+    public Command initialize(WorldManager world, long playerId, long entityId, Spatial spat);
 
-    public boolean setTargetEntity(long playerId, long entityId, Spatial spat);
+    public boolean setTargetEntity(Spatial spat);
 
     public boolean setTargetLocation(Vector3f location);
 
