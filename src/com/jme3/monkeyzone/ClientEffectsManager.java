@@ -85,6 +85,8 @@ public class ClientEffectsManager {
         EmitterData data = new EmitterData(effect, id, effectName, location, endLocation, rotation, endRotation, time);
         effect.setLocalTranslation(location);
         effect.setLocalRotation(rotation);
+        data.curTime = 0;
+        data.time = time;
         List<Spatial> children = effect.getChildren();
         for (Iterator<Spatial> it = children.iterator(); it.hasNext();) {
             Spatial spat = it.next();
@@ -101,8 +103,19 @@ public class ClientEffectsManager {
         if (id == -1) {
             putToNew(data);
         } else {
+            data.id = id;
             liveEmitters.put(id, data);
         }
+    }
+
+    private long putToNew(EmitterData data) {
+        long id = 0;
+        while (liveEmitters.containsKey(id)) {
+            id++;
+        }
+        data.id = id;
+        liveEmitters.put(id, data);
+        return id;
     }
 
     /**
@@ -136,18 +149,8 @@ public class ClientEffectsManager {
         Node emit = emitters.get(name).poll();
         if (emit == null) {
             emit = (Node) assetManager.loadModel(name);
-            emitters.get(name);
         }
         return emit;
-    }
-
-    private long putToNew(EmitterData data) {
-        long id = 0;
-        while (liveEmitters.containsKey(id)) {
-            id++;
-        }
-        liveEmitters.put(id, data);
-        return id;
     }
 
     private class EmitterData {
@@ -180,7 +183,7 @@ public class ClientEffectsManager {
             Entry<Long, ClientEffectsManager.EmitterData> entry = it.next();
             EmitterData data = entry.getValue();
             if (data.curTime >= data.time) {
-                data.emit.removeFromParent();
+                stopEffect(data.id);
                 emitters.get(data.effectName).add(data.emit);
                 it.remove();
             }

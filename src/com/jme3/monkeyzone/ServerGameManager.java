@@ -164,6 +164,7 @@ public class ServerGameManager {
             }
             //doing raytest for shooting.. 
             List<PhysicsRayTestResult> list = space.rayTest(control.getPhysicsLocation(), control.getPhysicsLocation().add(control.getViewDirection().mult(10)));
+            worldManager.playWorldEffect("Effects/GunShotA.j3o", myEntity.getWorldTranslation(), 0.1f);
             for (Iterator<PhysicsRayTestResult> it = list.iterator(); it.hasNext();) {
                 PhysicsRayTestResult physicsRayTestResult = it.next();
                 long targetId = worldManager.getEntityId(physicsRayTestResult.getCollisionObject());
