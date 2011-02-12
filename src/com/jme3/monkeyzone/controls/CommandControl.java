@@ -80,10 +80,15 @@ public class CommandControl implements Control {
     }
 
     public void removeCommand(Command command) {
+        command.setRunning(false);
         commands.remove(command);
     }
 
     public void clearCommands() {
+        for (Iterator<Command> it = commands.iterator(); it.hasNext();) {
+            Command command = it.next();
+            command.setRunning(false);
+        }
         commands.clear();
     }
 
