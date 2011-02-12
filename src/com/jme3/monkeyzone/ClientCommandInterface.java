@@ -269,15 +269,15 @@ public class ClientCommandInterface implements ActionListener {
                     case 1:
                         setSelectionMenu(SelectionMenu.Offensive);
                         break;
-                    case 2:
-                        setSelectionMenu(SelectionMenu.Defensive);
-                        break;
-                    case 3:
-                        setSelectionMenu(SelectionMenu.Builder);
-                        break;
-                    case 4:
-                        setSelectionMenu(SelectionMenu.NavPoints);
-                        break;
+//                    case 2:
+//                        setSelectionMenu(SelectionMenu.Defensive);
+//                        break;
+//                    case 3:
+//                        setSelectionMenu(SelectionMenu.Builder);
+//                        break;
+//                    case 4:
+//                        setSelectionMenu(SelectionMenu.NavPoints);
+//                        break;
                 }
                 break;
             case Offensive:
@@ -315,9 +315,12 @@ public class ClientCommandInterface implements ActionListener {
         switch (currentSelectionMenu) {
             case Main:
                 selectionTexts[1].changeText("1 - Offensive Units");
-                selectionTexts[2].changeText("2 - Defensive Units");
-                selectionTexts[3].changeText("3 - Builder Units");
-                selectionTexts[4].changeText("4 - Nav Points");
+//                selectionTexts[2].changeText("2 - Defensive Units");
+//                selectionTexts[3].changeText("3 - Builder Units");
+//                selectionTexts[4].changeText("4 - Nav Points");
+                selectionTexts[2].changeText("");
+                selectionTexts[3].changeText("");
+                selectionTexts[4].changeText("");
                 selectionTexts[5].changeText("");
                 selectionTexts[6].changeText("");
                 selectionTexts[7].changeText("");
