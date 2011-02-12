@@ -50,7 +50,7 @@ public class DefaultHUDControl implements HUDControl {
     protected boolean enabled = true;
     protected Spatial spatial;
     protected Screen screen;
-    protected float updateTime = 1;
+    protected float updateTime = 0.25f;
     protected float curTime = 1;
     protected TextRenderer hitPoints;
     protected TextRenderer speed;

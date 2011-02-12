@@ -134,9 +134,16 @@
         <layer id="layer" childLayout="vertical">
             <panel id="panel_top" childLayout="horizontal">
                 <panel id="top_panel_left" height="60px" width="90%" align="left" valign="top" style="nifty-panel" childLayout="horizontal">
-                    <text id="status_text_01" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
-                    <text id="status_text_02" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
-                    <text id="status_text_03" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
+                    <text id="status_text_01" font="aurulent-sans-17.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
+                    <text id="status_text_02" font="aurulent-sans-17.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
+                    <text id="status_text_03" font="aurulent-sans-17.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
+                    <text id="status_text_04" font="aurulent-sans-17.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
+                    <text id="status_text_05" font="aurulent-sans-17.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
+                    <text id="status_text_06" font="aurulent-sans-17.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
+                    <text id="status_text_07" font="aurulent-sans-17.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
+                    <text id="status_text_08" font="aurulent-sans-17.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
+                    <text id="status_text_09" font="aurulent-sans-17.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
+                    <text id="status_text_00" font="aurulent-sans-17.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
                 </panel>
                 <panel id="top_panel_right" height="60px" width="10%" align="right" valign="top" style="nifty-panel" childLayout="horizontal">
                     <text id="status_text_01" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
@@ -155,9 +162,16 @@
 
                 </panel>
                 <panel id="bottom_panel_right" height="250px" width="250px" align="right" valign="bottom" style="nifty-panel" childLayout="vertical">
-                    <text id="status_text_01" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
-                    <text id="status_text_02" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
-                    <text id="status_text_03" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="left" valign="center" />
+                    <text id="status_text_01" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
+                    <text id="status_text_02" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
+                    <text id="status_text_03" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
+                    <text id="status_text_04" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
+                    <text id="status_text_05" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
+                    <text id="status_text_06" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
+                    <text id="status_text_07" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
+                    <text id="status_text_08" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
+                    <text id="status_text_09" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
+                    <text id="status_text_00" font="aurulent-sans-17.fnt" color="#ffff" text="Text" align="center" valign="center" />
                 </panel>
             </panel>
         </layer>

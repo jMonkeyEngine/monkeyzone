@@ -36,7 +36,6 @@ import com.jme3.bullet.collision.PhysicsRayTestResult;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.monkeyzone.controls.NetworkActionEnabled;
 import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.monkeyzone.messages.StartGameMessage;
 import com.jme3.network.physicssync.PhysicsSyncManager;
@@ -58,7 +57,6 @@ public class ServerGameManager {
     private boolean running;
     String mapName;
     String[] modelNames;
-    float syncTimer = 0;
     PhysicsSpace space;
 
     public ServerGameManager(PhysicsSyncManager server, WorldManager worldManager, PhysicsSpace space) {
@@ -141,7 +139,6 @@ public class ServerGameManager {
             Logger.getLogger(ServerGameManager.class.getName()).log(Level.WARNING, "Cannot find entity performing action!");
             return;
         }
-
         long player_id = (Long) myEntity.getUserData("player_id");
         if (player_id == -1) {
             Logger.getLogger(ServerGameManager.class.getName()).log(Level.WARNING, "Cannot find player id for entity performing action!");
@@ -165,8 +162,7 @@ public class ServerGameManager {
                 Logger.getLogger(ServerGameManager.class.getName()).log(Level.WARNING, "Cannot shoot when not character!");
                 return;
             }
-
-            //TODO: doing raytest for shooting.. 
+            //doing raytest for shooting.. 
             List<PhysicsRayTestResult> list = space.rayTest(control.getPhysicsLocation(), control.getPhysicsLocation().add(control.getViewDirection().mult(10)));
             for (Iterator<PhysicsRayTestResult> it = list.iterator(); it.hasNext();) {
                 PhysicsRayTestResult physicsRayTestResult = it.next();
@@ -178,7 +174,7 @@ public class ServerGameManager {
                         hp -= 10;
                         worldManager.playWorldEffect("Effects/ExplosionA.j3o", targetSpatial.getWorldTranslation(), 2.0f);
                         worldManager.setEntityUserData(targetId, "HitPoints", hp);
-                        if (hp < 0) {
+                        if (hp <= 0) {
                             worldManager.removeEntity(targetId);
                             worldManager.playWorldEffect("Effects/ExplosionB.j3o", targetSpatial.getWorldTranslation(), 2.0f);
                         }

@@ -44,10 +44,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
- * Simple AI control that uses a GhostControl to check for overlapping objects.
+ * Handles the command queue of an AI entity.
  * @author normenhansen
  */
-public class CommandQueueControl implements Control {
+public class CommandControl implements Control {
 
     protected Spatial spatial;
     protected boolean enabled = true;
@@ -57,15 +57,16 @@ public class CommandQueueControl implements Control {
     protected long entityId;
     protected WorldManager world;
 
-    public CommandQueueControl(WorldManager world, long playerId, long entityId) {
+    public CommandControl(WorldManager world, long playerId, long entityId) {
         this.world = world;
         this.playerId = playerId;
         this.entityId = entityId;
     }
 
-    public void initializeCommand(Command command){
-        command.initialize(world, playerId, entityId, spatial);
+    public Command initializeCommand(Command command) {
+        return command.initialize(world, playerId, entityId, spatial);
     }
+
     public void addCommand(Command command) {
         command.setRunning(true);
         for (int i = 0; i < commands.size(); i++) {
