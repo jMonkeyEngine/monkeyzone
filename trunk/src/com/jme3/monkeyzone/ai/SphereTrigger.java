@@ -100,7 +100,8 @@ public class SphereTrigger implements TriggerControl {
                     PhysicsCollisionObject physicsCollisionObject = it.next();
                     Spatial targetEntity = world.getEntity(physicsCollisionObject);
                     if (targetEntity != null && spatial.getUserData("player_id") != targetEntity.getUserData("player_id")) {
-                        if (command.setTargetEntity(targetEntity)) {
+                        Command.TargetResult info = command.setTargetEntity(targetEntity);
+                        if (info == Command.TargetResult.Accept || info == Command.TargetResult.AcceptEnemy || info == Command.TargetResult.AcceptFriendly) {
                             if (!command.isRunning()) {
                                 queueControl.addCommand(command);
                             }

@@ -99,11 +99,16 @@ public class CommandControl implements Control {
         for (Iterator<Command> it = commands.iterator(); it.hasNext();) {
             Command command = it.next();
             //do command and remove if returned true, else stop processing
-            if (command.doCommand(tpf)) {
-                command.setRunning(false);
-                it.remove();
-            } else {
-                return;
+            Command.State commandState = command.doCommand(tpf);
+            switch (commandState) {
+                case Finished:
+                    command.setRunning(false);
+                    it.remove();
+                    break;
+                case Blocking:
+                    return;
+                case Continuing:
+                    break;
             }
         }
     }

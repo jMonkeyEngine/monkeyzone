@@ -22,20 +22,20 @@ public class AttackCommand extends AbstractCommand {
     private float attackTime = .5f;
 
     @Override
-    public boolean setTargetLocation(Vector3f location) {
-        return false;
+    public TargetResult setTargetLocation(Vector3f location) {
+        return TargetResult.Deny;
     }
 
     @Override
-    public boolean setTargetEntity(Spatial spatial) {
+    public TargetResult setTargetEntity(Spatial spatial) {
         if (spatial.getUserData("group_id") != entity.getUserData("group_id")) {
             return super.setTargetEntity(spatial);
         }
-        return false;
+        return TargetResult.Deny;
     }
 
     @Override
-    public boolean doCommand(float tpf) {
+    public State doCommand(float tpf) {
         timer += tpf;
         if (timer >= attackTime) {
             timer = 0;
@@ -44,14 +44,14 @@ public class AttackCommand extends AbstractCommand {
                 entity.getControl(AutonomousControl.class).moveTo(targetEntity.getWorldTranslation());
                 entity.getControl(AutonomousControl.class).performAction(ActionMessage.SHOOT_ACTION, true);
             } else {
-                return true;
+                return State.Finished;
             }
         }
         Float targetHP = (Float) targetEntity.getUserData("HitPoints");
         if (targetHP != null && targetHP < 0) {
-            return true;
+            return State.Finished;
         }
-        return false;
+        return State.Blocking;
     }
 
     public String getName() {
