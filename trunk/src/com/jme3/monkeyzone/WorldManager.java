@@ -94,8 +94,8 @@ public class WorldManager {
 
     private Server server;
     private Client client;
-    private long myPlayerId = -1;
-    private long myGroupId = -1;
+    private long myPlayerId = -2;
+    private long myGroupId = -2;
     private NavMesh navMesh = new NavMesh();
     private Node rootNode;
     private Node worldRoot;
@@ -474,9 +474,11 @@ public class WorldManager {
             Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "try removing entity thats not there: {0}", id);
             return;
         }
-        Long playerId=(Long) spat.getUserData("player_id");
+        Long playerId = (Long) spat.getUserData("player_id");
         //TODO: removing from aiManager w/o checking if necessary
-        aiManager.removePlayerEntity(playerId);
+        if (!isServer()) {
+            aiManager.removePlayerEntity(playerId);
+        }
         removeTransientControls(spat);
         removeAIControls(spat);
         if (playerId == myPlayerId) {
@@ -537,7 +539,7 @@ public class WorldManager {
             if (groupId == myGroupId && playerId != myPlayerId) {
                 aiManager.setPlayerEntity(playerId, spat);
             }
-        }else{
+        } else {
             //TODO: groupid as client id
             if (groupId == myGroupId && playerId != myPlayerId) {
                 aiManager.removePlayerEntity(playerId);
