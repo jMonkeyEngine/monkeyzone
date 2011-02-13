@@ -44,7 +44,7 @@ public class FollowCommand extends AbstractCommand {
     float updateTime = 0.25f;
 
     @Override
-    public boolean doCommand(float tpf) {
+    public State doCommand(float tpf) {
         timer += tpf;
         if (timer > updateTime) {
             if(targetEntity!=null){
@@ -53,8 +53,7 @@ public class FollowCommand extends AbstractCommand {
             entity.getControl(AutonomousControl.class).moveTo(targetLocation);
             timer = 0;
         }
-//        return entity.getControl(AutonomousControl.class).isMoving();
-        return false;
+        return State.Blocking;
     }
 
     public String getName() {

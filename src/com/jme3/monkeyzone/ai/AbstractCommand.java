@@ -53,7 +53,7 @@ public abstract class AbstractCommand implements Command {
     private boolean running = false;
     protected WorldManager world;
 
-    public abstract boolean doCommand(float tpf);
+    public abstract State doCommand(float tpf);
 
     public Command initialize(WorldManager world, long playerId, long entityId, Spatial spat) {
         this.world = world;
@@ -63,17 +63,17 @@ public abstract class AbstractCommand implements Command {
         return this;
     }
 
-    public boolean setTargetEntity(Spatial spat) {
+    public TargetResult setTargetEntity(Spatial spat) {
         this.targetPlayerId = (Long) spat.getUserData("player_id");
         this.targetEntityId = (Long) spat.getUserData("entity_id");
         this.targetEntity = spat;
         targetLocation.set(spat.getWorldTranslation());
-        return true;
+        return TargetResult.Accept;
     }
 
-    public boolean setTargetLocation(Vector3f location) {
+    public TargetResult setTargetLocation(Vector3f location) {
         targetLocation.set(location);
-        return true;
+        return TargetResult.Accept;
     }
 
     public int getPriority() {

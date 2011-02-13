@@ -40,16 +40,30 @@ import com.jme3.scene.Spatial;
  * @author normenhansen
  */
 public interface Command {
+    enum State{
+        Finished,
+        Continuing,
+        Blocking,
+    }
+
+    enum TargetResult{
+        Deny,
+        Accept,
+        DenyFriendly,
+        DenyEnemy,
+        AcceptEnemy,
+        AcceptFriendly
+    }
 
     public String getName();
 
-    public boolean doCommand(float tpf);
+    public State doCommand(float tpf);
 
     public Command initialize(WorldManager world, long playerId, long entityId, Spatial spat);
 
-    public boolean setTargetEntity(Spatial spat);
+    public TargetResult setTargetEntity(Spatial spat);
 
-    public boolean setTargetLocation(Vector3f location);
+    public TargetResult setTargetLocation(Vector3f location);
 
     public int getPriority();
 

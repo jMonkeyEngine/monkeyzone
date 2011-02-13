@@ -41,12 +41,12 @@ import com.jme3.monkeyzone.controls.AutonomousControl;
 public class MoveCommand extends AbstractCommand {
 
     @Override
-    public boolean doCommand(float tpf) {
+    public State doCommand(float tpf) {
         entity.getControl(AutonomousControl.class).moveTo(targetLocation);
         if (!entity.getControl(AutonomousControl.class).isMoving()) {
-            return true;
+            return State.Finished;
         }
-        return false;
+        return State.Continuing;
     }
 
     public String getName() {

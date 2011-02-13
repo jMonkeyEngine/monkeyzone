@@ -486,7 +486,8 @@ public class ClientCommandInterface implements ActionListener {
                 commandInst.setPriority(10);
                 commandControl.clearCommands();
                 commandControl.initializeCommand(commandInst);
-                if (commandInst.setTargetEntity(spatial)) {
+                Command.TargetResult info = commandInst.setTargetEntity(spatial);
+                if (info == Command.TargetResult.Accept || info == Command.TargetResult.AcceptEnemy || info == Command.TargetResult.AcceptFriendly) {
                     commandControl.addCommand(commandInst);
                 }
             } catch (InstantiationException ex) {
@@ -514,7 +515,8 @@ public class ClientCommandInterface implements ActionListener {
                 commandInst.setPriority(10);
                 commandControl.clearCommands();
                 commandControl.initializeCommand(commandInst);
-                if (commandInst.setTargetLocation(location)) {
+                Command.TargetResult info = commandInst.setTargetLocation(location);
+                if (info == Command.TargetResult.Accept || info == Command.TargetResult.AcceptEnemy || info == Command.TargetResult.AcceptFriendly) {
                     commandControl.addCommand(commandInst);
                 }
             } catch (InstantiationException ex) {
