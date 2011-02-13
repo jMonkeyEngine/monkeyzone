@@ -68,9 +68,6 @@ public class UserInputControl implements Control, ActionListener, AnalogListener
     private float steerX = 0;
     private float steerY = 0;
     private Camera cam;
-    private Vector3f vectorA = new Vector3f();
-    private Vector3f vectorB = new Vector3f();
-    private Vector3f elimY = new Vector3f(1, 0, 1);
 
     public UserInputControl(InputManager inputManager, Camera cam) {
         this.inputManager = inputManager;
@@ -129,20 +126,6 @@ public class UserInputControl implements Control, ActionListener, AnalogListener
     }
 
     public void update(float tpf) {
-//        steerX = 0;
-//        manualControl.steerX(0);
-//        TODO: add switch to enable/disable rotate with cam
-//        vectorA.set(cam.getLeft()).multLocal(elimY).multLocal(-1);
-//        vectorB.set(manualControl.getAimDirection()).multLocal(elimY);
-//        float angle = FastMath.HALF_PI - vectorA.angleBetween(vectorB);
-//        if (angle > 0.1f) {
-//            manualControl.steerX(angle < 1 ? angle : 1);
-//        } else if (angle < -0.1f) {
-//            manualControl.steerX(angle > -1 ? angle : -1);
-//        } else {
-//            manualControl.steerX(0);
-//        }
-
         //'trick' to apply steering when it has been set by onAnalog and reset it to zero after
         if (steerX != 0) {
             steerX = 0;
@@ -170,18 +153,15 @@ public class UserInputControl implements Control, ActionListener, AnalogListener
             steerX = value / tpf;
             steerX = steerX > 1 ? 1 : steerX;
             manualControl.steerX(steerX);
-        }
-        else if(binding.equals("UserInput_Mouse_Axis_X_Right")) {
+        } else if (binding.equals("UserInput_Mouse_Axis_X_Right")) {
             steerX = value / tpf;
             steerX = steerX > 1 ? 1 : steerX;
             manualControl.steerX(-steerX);
-        }
-        else if(binding.equals("UserInput_Mouse_Axis_Y_Up")) {
+        } else if (binding.equals("UserInput_Mouse_Axis_Y_Up")) {
             steerY = value / tpf;
             steerY = steerY > 1 ? 1 : steerY;
             manualControl.steerY(steerY);
-        }
-        else if(binding.equals("UserInput_Mouse_Axis_Y_Down")) {
+        } else if (binding.equals("UserInput_Mouse_Axis_Y_Down")) {
             steerY = value / tpf;
             steerY = steerY > 1 ? 1 : steerY;
             manualControl.steerY(-steerY);
@@ -192,23 +172,6 @@ public class UserInputControl implements Control, ActionListener, AnalogListener
         if (!isEnabled() || manualControl == null) {
             return;
         }
-        /*if (binding.equals("UserInput_Left_Arrow_Key")) {
-        if (value) {
-        steerX += 1;
-        manualControl.steerX(steerX);
-        } else {
-        steerX -= 1;
-        manualControl.steerX(steerX);
-        }
-        } else if (binding.equals("UserInput_Right_Arrow_Key")) {
-        if (value) {
-        steerX -= 1;
-        manualControl.steerX(steerX);
-        } else {
-        steerX += 1;
-        manualControl.steerX(steerX);
-        }
-        } else */
         if (binding.equals("UserInput_Left_Key")) {
             if (value) {
                 moveX += 1;

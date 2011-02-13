@@ -31,6 +31,7 @@
  */
 package com.jme3.monkeyzone;
 
+import com.jme3.bullet.collision.PhysicsRayTestResult;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
@@ -42,6 +43,7 @@ import com.jme3.monkeyzone.ai.commands.FollowCommand;
 import com.jme3.monkeyzone.ai.commands.MoveCommand;
 import com.jme3.monkeyzone.ai.SphereTrigger;
 import com.jme3.monkeyzone.controls.CommandControl;
+import com.jme3.monkeyzone.controls.ManualControl;
 import com.jme3.scene.Spatial;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
@@ -71,6 +73,7 @@ public class ClientCommandInterface implements ActionListener {
     protected boolean shift = false;
     protected SelectionMenu currentSelectionMenu = SelectionMenu.Main;
     protected WorldManager world;
+    protected Spatial userEntity;
 
     protected enum SelectionMenu {
 
@@ -182,6 +185,14 @@ public class ClientCommandInterface implements ActionListener {
     public void removePlayerEntity(long id) {
         players.remove(id);
         setSelectionMenu(currentSelectionMenu);
+    }
+
+    /**
+     * sets the current entity of the user, called from WorldManager
+     * @param spatial
+     */
+    public void setUserEntity(Spatial spatial) {
+        this.userEntity = spatial;
     }
 
     /**
@@ -462,9 +473,15 @@ public class ClientCommandInterface implements ActionListener {
      * @param key
      */
     private void processCommandKey(int key) {
-        Long entityId = PlayerData.getLongData(world.getMyPlayerId(), "entity_id");
-        if (entityId != -1) {
-            doCommand(key - 1, world.getEntity(entityId));
+        if (userEntity == null) {
+            return;
+        }
+        Vector3f location = new Vector3f(userEntity.getControl(ManualControl.class).getLocation());
+        Spatial spat = doRayTest(location);
+        if (spat != null) {
+            doCommand(key - 1, spat);
+        } else {
+            doCommand(key - 1, location);
         }
     }
 
@@ -525,5 +542,28 @@ public class ClientCommandInterface implements ActionListener {
                 Logger.getLogger(ClientCommandInterface.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    /**
+     * does a ray test, stores collision location in supplied vector, if collision
+     * object is an entity, returns entity
+     * @param location
+     * @return
+     */
+    private Spatial doRayTest(Vector3f location) {
+        if (userEntity == null) {
+            return null;
+        }
+        ManualControl control = userEntity.getControl(ManualControl.class);
+        Vector3f startLocation = new Vector3f(control.getLocation());
+        Vector3f endLocation = startLocation.add(control.getAimDirection().mult(100));
+        List<PhysicsRayTestResult> results = world.getPhysicsSpace().rayTest(startLocation, endLocation);
+        for (Iterator<PhysicsRayTestResult> it = results.iterator(); it.hasNext();) {
+            PhysicsRayTestResult physicsRayTestResult = it.next();
+            Spatial entity = world.getEntity(physicsRayTestResult.getCollisionObject());
+            location.set(startLocation.add(control.getAimDirection().mult(physicsRayTestResult.getHitFraction() * 100)));
+            return entity;
+        }
+        return null;
     }
 }
