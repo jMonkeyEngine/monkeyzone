@@ -120,7 +120,7 @@ public class AutonomousCharacterControl extends NetworkedAutonomousControl {
     }
 
     @Override
-    public Vector3f getCurrentLocation() {
+    public Vector3f getLocation() {
         return characterControl.getPhysicsLocation(vector);
     }
 

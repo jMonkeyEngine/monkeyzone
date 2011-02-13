@@ -111,7 +111,7 @@ public abstract class NetworkedAutonomousControl implements AutonomousControl, N
 
     public abstract Vector3f getTargetLocation();
 
-    public abstract Vector3f getCurrentLocation();
+    public abstract Vector3f getLocation();
 
     public abstract Vector3f getAimDirection();
 

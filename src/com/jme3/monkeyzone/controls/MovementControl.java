@@ -32,58 +32,14 @@
 package com.jme3.monkeyzone.controls;
 
 import com.jme3.math.Vector3f;
+import com.jme3.scene.control.Control;
 
 /**
- * Basic interface for autonomous movement controls, these are used by AI to move entities.
- * When a NavigationControl is available on the spatial, it should be used by
- * the AutonomousControl to navigate.
+ * Base interface for autonomous and manual movements controls, mostly used
+ * to read position of entity
  * @author normenhansen
  */
-public interface AutonomousControl extends MovementControl {
-
-    /**
-     * aim at location, return false if not possible (max view range, obstacles)
-     * @param direction
-     * @return
-     */
-    public void aimAt(Vector3f direction);
-
-    /**
-     * do action x, same as button press for human player
-     * @param action
-     */
-    public void performAction(int action, boolean activate);
-
-    /**
-     * move to location by means of this control, should use NavigationControl
-     * if available
-     * @param location
-     * @return false if already at location, uses radius from NavigationControl if it exists
-     */
-    public void moveTo(Vector3f location);
-
-    /**
-     * checks if this entity is moving
-     * @return
-     */
-    public boolean isMoving();
-
-    /**
-     * gets the current target location of this entity
-     * @return
-     */
-    public Vector3f getTargetLocation();
-
-    /**
-     * gets the current location of this entity
-     * @return
-     */
+public interface MovementControl extends Control{
     public Vector3f getLocation();
-
-    /**
-     * gets the aim direction of this entity
-     * @return
-     */
     public Vector3f getAimDirection();
-
 }

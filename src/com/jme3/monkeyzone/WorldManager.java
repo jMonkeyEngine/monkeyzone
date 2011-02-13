@@ -36,11 +36,13 @@ import com.jme3.asset.AssetManager;
 import com.jme3.asset.DesktopAssetManager;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
+import com.jme3.bullet.collision.PhysicsRayTestResult;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.control.VehicleControl;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.monkeyzone.controls.AutonomousCharacterControl;
@@ -53,12 +55,15 @@ import com.jme3.monkeyzone.controls.ManualVehicleControl;
 import com.jme3.monkeyzone.ai.SphereTrigger;
 import com.jme3.monkeyzone.ai.TriggerControl;
 import com.jme3.monkeyzone.controls.CommandControl;
+import com.jme3.monkeyzone.controls.MovementControl;
 import com.jme3.monkeyzone.messages.AutoControlMessage;
 import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.monkeyzone.messages.ManualControlMessage;
 import com.jme3.monkeyzone.messages.ServerAddEntityMessage;
 import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
+import com.jme3.monkeyzone.messages.ServerDisableEntityMessage;
 import com.jme3.monkeyzone.messages.ServerEffectMessage;
+import com.jme3.monkeyzone.messages.ServerEnableEntityMessage;
 import com.jme3.monkeyzone.messages.ServerEnterEntityMessage;
 import com.jme3.monkeyzone.messages.ServerEntityDataMessage;
 import com.jme3.monkeyzone.messages.ServerRemoveEntityMessage;
@@ -145,6 +150,8 @@ public class WorldManager {
                 ServerAddEntityMessage.class,
                 ServerAddPlayerMessage.class,
                 ServerEffectMessage.class,
+                ServerEnableEntityMessage.class,
+                ServerDisableEntityMessage.class,
                 ServerRemoveEntityMessage.class,
                 ServerRemovePlayerMessage.class);
     }
@@ -431,22 +438,12 @@ public class WorldManager {
             syncManager.broadcast(new ServerAddEntityMessage(id, modelIdentifier, location, rotation));
         }
         Node entityModel = (Node) assetManager.loadModel(modelIdentifier);
-        if (entityModel.getControl(RigidBodyControl.class) != null) {
-            entityModel.getControl(RigidBodyControl.class).setPhysicsLocation(location);
-            entityModel.getControl(RigidBodyControl.class).setPhysicsRotation(rotation.toRotationMatrix());
-        } else if (entityModel.getControl(CharacterControl.class) != null) {
-            entityModel.getControl(CharacterControl.class).setPhysicsLocation(location);
-            entityModel.getControl(CharacterControl.class).setViewDirection(rotation.mult(Vector3f.UNIT_Z).multLocal(1, 0, 1).normalizeLocal());
+        setEntityTranslation(entityModel, location, rotation);
+        if (entityModel.getControl(CharacterControl.class) != null) {
             entityModel.addControl(new CharacterAnimControl());
             //FIXME: strangeness setting these in jMP..
             entityModel.getControl(CharacterControl.class).setFallSpeed(55);
             entityModel.getControl(CharacterControl.class).setJumpSpeed(15);
-        } else if (entityModel.getControl(VehicleControl.class) != null) {
-            entityModel.getControl(VehicleControl.class).setPhysicsLocation(location);
-            entityModel.getControl(VehicleControl.class).setPhysicsRotation(rotation.toRotationMatrix());
-        } else {
-            entityModel.setLocalTranslation(location);
-            entityModel.setLocalRotation(rotation);
         }
         entityModel.setUserData("player_id", -1l);
         entityModel.setUserData("group_id", -1);
@@ -475,17 +472,75 @@ public class WorldManager {
             return;
         }
         Long playerId = (Long) spat.getUserData("player_id");
-        //TODO: removing from aiManager w/o checking if necessary
-        if (!isServer()) {
-            commandInterface.removePlayerEntity(playerId);
-        }
         removeTransientControls(spat);
         removeAIControls(spat);
         if (playerId == myPlayerId) {
             removeUserControls(spat);
         }
+        if (playerId != -1) {
+            PlayerData.setData(playerId, "entity_id", -1);
+        }
+        //TODO: removing from aiManager w/o checking if necessary
+        if (!isServer()) {
+            commandInterface.removePlayerEntity(playerId);
+        }
         spat.removeFromParent();
         space.removeAll(spat);
+    }
+
+    /**
+     * disables an entity so that it is not displayed
+     * @param id
+     */
+    public void disableEntity(long id) {
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Disabling entity: {0}", id);
+        if (isServer()) {
+            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Broadcast removing entity: {0}", id);
+            syncManager.broadcast(new ServerDisableEntityMessage(id));
+        }
+        Spatial spat = getEntity(id);
+        spat.removeFromParent();
+        space.removeAll(spat);
+    }
+
+    /**
+     * reenables an entity after it has been disabled
+     * @param id
+     * @param location
+     * @param rotation
+     */
+    public void enableEntity(long id, Vector3f location, Quaternion rotation) {
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Enabling entity: {0}", id);
+        if (isServer()) {
+            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Broadcast removing entity: {0}", id);
+            syncManager.broadcast(new ServerEnableEntityMessage(id, location, rotation));
+        }
+        Spatial spat = getEntity(id);
+        setEntityTranslation(spat, location, rotation);
+        worldRoot.attachChild(spat);
+        space.addAll(spat);
+    }
+
+    /**
+     * sets the translation of an entity based on its type
+     * @param entityModel
+     * @param location
+     * @param rotation
+     */
+    private void setEntityTranslation(Spatial entityModel, Vector3f location, Quaternion rotation) {
+        if (entityModel.getControl(RigidBodyControl.class) != null) {
+            entityModel.getControl(RigidBodyControl.class).setPhysicsLocation(location);
+            entityModel.getControl(RigidBodyControl.class).setPhysicsRotation(rotation.toRotationMatrix());
+        } else if (entityModel.getControl(CharacterControl.class) != null) {
+            entityModel.getControl(CharacterControl.class).setPhysicsLocation(location);
+            entityModel.getControl(CharacterControl.class).setViewDirection(rotation.mult(Vector3f.UNIT_Z).multLocal(1, 0, 1).normalizeLocal());
+        } else if (entityModel.getControl(VehicleControl.class) != null) {
+            entityModel.getControl(VehicleControl.class).setPhysicsLocation(location);
+            entityModel.getControl(VehicleControl.class).setPhysicsRotation(rotation.toRotationMatrix());
+        } else {
+            entityModel.setLocalTranslation(location);
+            entityModel.setLocalRotation(rotation);
+        }
     }
 
     /**
@@ -500,6 +555,7 @@ public class WorldManager {
         }
         long curEntity = PlayerData.getLongData(playerId, "entity_id");
         int groupId = PlayerData.getIntData(playerId, "group_id");
+        //reset current entity
         if (curEntity != -1) {
             Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Player {0} exiting current entity {1}", new Object[]{playerId, curEntity});
             Spatial curEntitySpat = getEntity(curEntity);
@@ -512,7 +568,7 @@ public class WorldManager {
             }
         }
         PlayerData.setData(playerId, "entity_id", entityId);
-        //id -1 means enter no entity
+        //if we entered an entity, configure its controls, id -1 means enter no entity
         if (entityId != -1) {
             Spatial spat = getEntity(entityId);
             spat.setUserData("player_id", playerId);
@@ -545,7 +601,7 @@ public class WorldManager {
             if (groupId == myGroupId && playerId != myPlayerId) {
                 commandInterface.removePlayerEntity(playerId);
             }
-            if(playerId==myPlayerId){
+            if (playerId == myPlayerId) {
                 commandInterface.setUserEntity(null);
             }
         }
@@ -708,6 +764,53 @@ public class WorldManager {
 
     public void playWorldEffect(long id, String effectName, Vector3f location, Quaternion rotation, Vector3f endLocation, Quaternion endRotation, float time) {
         syncManager.broadcast(new ServerEffectMessage(id, effectName, location, rotation, endLocation, endRotation, time));
+    }
+
+    /**
+     * does a ray test that starts at the entity location and extends in its
+     * view direction by length, stores collision location in supplied
+     * storeLocation vector, if collision object is an entity, returns entity
+     * @param entity
+     * @param length
+     * @param storeVector
+     * @return
+     */
+    public Spatial doRayTest(Spatial entity, float length, Vector3f storeLocation) {
+        MovementControl control = entity.getControl(MovementControl.class);
+        Vector3f startLocation = control.getLocation();
+        Vector3f endLocation = control.getLocation().add(control.getAimDirection().normalize().multLocal(5));
+        List<PhysicsRayTestResult> results = getPhysicsSpace().rayTest(startLocation, endLocation);
+        for (Iterator<PhysicsRayTestResult> it = results.iterator(); it.hasNext();) {
+            PhysicsRayTestResult physicsRayTestResult = it.next();
+            Spatial found = getEntity(physicsRayTestResult.getCollisionObject());
+            if (found == entity) {
+                continue;
+            }
+            if (storeLocation != null) {
+                storeLocation.set(FastMath.interpolateLinear(physicsRayTestResult.getHitFraction(), startLocation, endLocation));
+            }
+            return found;
+        }
+        return null;
+    }
+
+    /**
+     * does a ray test, stores collision location in supplied storeLocation vector, if collision
+     * object is an entity, returns entity
+     * @param storeLocation
+     * @return
+     */
+    public Spatial doRayTest(Vector3f startLocation, Vector3f endLocation, Vector3f storeLocation) {
+        List<PhysicsRayTestResult> results = getPhysicsSpace().rayTest(startLocation, endLocation);
+        for (Iterator<PhysicsRayTestResult> it = results.iterator(); it.hasNext();) {
+            PhysicsRayTestResult physicsRayTestResult = it.next();
+            Spatial entity = getEntity(physicsRayTestResult.getCollisionObject());
+            if (storeLocation != null) {
+                storeLocation.set(FastMath.interpolateLinear(physicsRayTestResult.getHitFraction(), startLocation, endLocation));
+            }
+            return entity;
+        }
+        return null;
     }
 
     public void update(float tpf) {

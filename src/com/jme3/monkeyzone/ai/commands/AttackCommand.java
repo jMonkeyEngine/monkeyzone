@@ -55,7 +55,8 @@ public class AttackCommand extends AbstractCommand {
 
     @Override
     public TargetResult setTargetEntity(Spatial spatial) {
-        if (spatial.getUserData("group_id") != entity.getUserData("group_id")) {
+        int groupId = (Integer) spatial.getUserData("group_id");
+        if (groupId != -1 && groupId != entity.getUserData("group_id")) {
             return super.setTargetEntity(spatial);
         }
         return TargetResult.Deny;
