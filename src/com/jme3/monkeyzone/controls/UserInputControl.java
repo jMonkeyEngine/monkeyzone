@@ -37,9 +37,10 @@ import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
-import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.renderer.Camera;
@@ -54,19 +55,18 @@ import java.io.IOException;
  * input there, only used on client for current user entity.
  * @author normenhansen
  */
-public class UserInputControl implements Control, ActionListener {
+public class UserInputControl implements Control, ActionListener, AnalogListener {
     //TODO: add support for joysticks, mouse axis etc. and localization
 
     private InputManager inputManager;
     private Spatial spatial = null;
     private ManualControl manualControl = null;
     private boolean enabled = true;
-    private float aimX = 0;
-    private float aimY = 0;
     private float moveX = 0;
     private float moveY = 0;
     private float moveZ = 0;
     private float steerX = 0;
+    private float steerY = 0;
     private Camera cam;
     private Vector3f vectorA = new Vector3f();
     private Vector3f vectorB = new Vector3f();
@@ -88,6 +88,10 @@ public class UserInputControl implements Control, ActionListener {
         inputManager.addMapping("UserInput_Space_Key", new KeyTrigger(KeyInput.KEY_SPACE));
         inputManager.addMapping("UserInput_Enter_Key", new KeyTrigger(KeyInput.KEY_RETURN));
         inputManager.addMapping("UserInput_Left_Mouse", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addMapping("UserInput_Mouse_Axis_X_Left", new MouseAxisTrigger(MouseInput.AXIS_X, true));
+        inputManager.addMapping("UserInput_Mouse_Axis_X_Right", new MouseAxisTrigger(MouseInput.AXIS_X, false));
+        inputManager.addMapping("UserInput_Mouse_Axis_Y_Up", new MouseAxisTrigger(MouseInput.AXIS_Y, true));
+        inputManager.addMapping("UserInput_Mouse_Axis_Y_Down", new MouseAxisTrigger(MouseInput.AXIS_Y, false));
         inputManager.addListener(this,
                 "UserInput_Left_Key",
                 "UserInput_Right_Key",
@@ -97,7 +101,11 @@ public class UserInputControl implements Control, ActionListener {
                 "UserInput_Right_Arrow_Key",
                 "UserInput_Space_Key",
                 "UserInput_Enter_Key",
-                "UserInput_Left_Mouse");
+                "UserInput_Left_Mouse",
+                "UserInput_Mouse_Axis_X_Left",
+                "UserInput_Mouse_Axis_X_Right",
+                "UserInput_Mouse_Axis_Y_Up",
+                "UserInput_Mouse_Axis_Y_Down");
     }
 
     public void setSpatial(Spatial spatial) {
@@ -121,43 +129,87 @@ public class UserInputControl implements Control, ActionListener {
     }
 
     public void update(float tpf) {
+//        steerX = 0;
+//        manualControl.steerX(0);
 //        TODO: add switch to enable/disable rotate with cam
-        vectorA.set(cam.getLeft()).multLocal(elimY).multLocal(-1);
-        vectorB.set(manualControl.getAimDirection()).multLocal(elimY);
-        float angle = FastMath.HALF_PI - vectorA.angleBetween(vectorB);
-        if (angle > 0.1f) {
-            manualControl.steerX(angle < 1 ? angle : 1);
-        } else if (angle < -0.1f) {
-            manualControl.steerX(angle > -1 ? angle : -1);
+//        vectorA.set(cam.getLeft()).multLocal(elimY).multLocal(-1);
+//        vectorB.set(manualControl.getAimDirection()).multLocal(elimY);
+//        float angle = FastMath.HALF_PI - vectorA.angleBetween(vectorB);
+//        if (angle > 0.1f) {
+//            manualControl.steerX(angle < 1 ? angle : 1);
+//        } else if (angle < -0.1f) {
+//            manualControl.steerX(angle > -1 ? angle : -1);
+//        } else {
+//            manualControl.steerX(0);
+//        }
+
+        //'trick' to apply steering when it has been set by onAnalog and reset it to zero after
+        if (steerX != 0) {
+            steerX = 0;
         } else {
-            manualControl.steerX(0);
+            manualControl.steerX(steerX);
         }
+        if (steerY != 0) {
+            steerY = 0;
+        } else {
+            manualControl.steerY(steerY);
+        }
+        Vector3f location = manualControl.getLocation();
+        cam.setLocation(location);
+        cam.lookAt(location.addLocal(manualControl.getAimDirection()), Vector3f.UNIT_Y);
     }
 
     public void render(RenderManager rm, ViewPort vp) {
+    }
+
+    public void onAnalog(String binding, float value, float tpf) {
+        if (!isEnabled() || manualControl == null) {
+            return;
+        }
+        if (binding.equals("UserInput_Mouse_Axis_X_Left")) {
+            steerX = value / tpf;
+            steerX = steerX > 1 ? 1 : steerX;
+            manualControl.steerX(steerX);
+        }
+        else if(binding.equals("UserInput_Mouse_Axis_X_Right")) {
+            steerX = value / tpf;
+            steerX = steerX > 1 ? 1 : steerX;
+            manualControl.steerX(-steerX);
+        }
+        else if(binding.equals("UserInput_Mouse_Axis_Y_Up")) {
+            steerY = value / tpf;
+            steerY = steerY > 1 ? 1 : steerY;
+            manualControl.steerY(steerY);
+        }
+        else if(binding.equals("UserInput_Mouse_Axis_Y_Down")) {
+            steerY = value / tpf;
+            steerY = steerY > 1 ? 1 : steerY;
+            manualControl.steerY(-steerY);
+        }
     }
 
     public void onAction(String binding, boolean value, float tpf) {
         if (!isEnabled() || manualControl == null) {
             return;
         }
-        if (binding.equals("UserInput_Left_Arrow_Key")) {
-            if (value) {
-                steerX += 1;
-                manualControl.steerX(steerX);
-            } else {
-                steerX -= 1;
-                manualControl.steerX(steerX);
-            }
+        /*if (binding.equals("UserInput_Left_Arrow_Key")) {
+        if (value) {
+        steerX += 1;
+        manualControl.steerX(steerX);
+        } else {
+        steerX -= 1;
+        manualControl.steerX(steerX);
+        }
         } else if (binding.equals("UserInput_Right_Arrow_Key")) {
-            if (value) {
-                steerX -= 1;
-                manualControl.steerX(steerX);
-            } else {
-                steerX += 1;
-                manualControl.steerX(steerX);
-            }
-        } else if (binding.equals("UserInput_Left_Key")) {
+        if (value) {
+        steerX -= 1;
+        manualControl.steerX(steerX);
+        } else {
+        steerX += 1;
+        manualControl.steerX(steerX);
+        }
+        } else */
+        if (binding.equals("UserInput_Left_Key")) {
             if (value) {
                 moveX += 1;
                 manualControl.moveX(moveX);

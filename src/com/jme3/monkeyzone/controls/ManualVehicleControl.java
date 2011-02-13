@@ -52,7 +52,8 @@ public class ManualVehicleControl extends NetworkedManualControl {
     private float speed = 800f;
     private float steer = 0;
     private float accelerate = 0;
-    private Vector3f forward = new Vector3f();
+    private Vector3f tempVec1 = new Vector3f();
+    private Vector3f tempVec2 = new Vector3f();
 
     public ManualVehicleControl() {
     }
@@ -88,7 +89,11 @@ public class ManualVehicleControl extends NetworkedManualControl {
     }
 
     public Vector3f getAimDirection() {
-        return control.getForwardVector(forward);
+        return control.getForwardVector(tempVec1);
+    }
+
+    public Vector3f getLocation() {
+        return control.getPhysicsLocation(tempVec2);
     }
 
     @Override
