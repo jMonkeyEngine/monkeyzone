@@ -183,8 +183,9 @@ public class ClientCommandInterface implements ActionListener {
      * @param id
      */
     public void removePlayerEntity(long id) {
-        players.remove(id);
+        selectedEntities.remove(players.remove(id));
         setSelectionMenu(currentSelectionMenu);
+        updateCommandMenu();
     }
 
     /**
@@ -486,6 +487,29 @@ public class ClientCommandInterface implements ActionListener {
     }
 
     /**
+     * does a ray test, stores collision location in supplied vector, if collision
+     * object is an entity, returns entity
+     * @param location
+     * @return
+     */
+    private Spatial doRayTest(Vector3f location) {
+        if (userEntity == null) {
+            return null;
+        }
+        ManualControl control = userEntity.getControl(ManualControl.class);
+        Vector3f startLocation = new Vector3f(control.getLocation());
+        Vector3f endLocation = startLocation.add(control.getAimDirection().mult(100));
+        List<PhysicsRayTestResult> results = world.getPhysicsSpace().rayTest(startLocation, endLocation);
+        for (Iterator<PhysicsRayTestResult> it = results.iterator(); it.hasNext();) {
+            PhysicsRayTestResult physicsRayTestResult = it.next();
+            Spatial entity = world.getEntity(physicsRayTestResult.getCollisionObject());
+            location.set(startLocation.add(control.getAimDirection().mult(physicsRayTestResult.getHitFraction() * 100)));
+            return entity;
+        }
+        return null;
+    }
+
+    /**
      * issues a command with a spatial target to the selected entities
      * @param command
      * @param spatial
@@ -544,26 +568,4 @@ public class ClientCommandInterface implements ActionListener {
         }
     }
 
-    /**
-     * does a ray test, stores collision location in supplied vector, if collision
-     * object is an entity, returns entity
-     * @param location
-     * @return
-     */
-    private Spatial doRayTest(Vector3f location) {
-        if (userEntity == null) {
-            return null;
-        }
-        ManualControl control = userEntity.getControl(ManualControl.class);
-        Vector3f startLocation = new Vector3f(control.getLocation());
-        Vector3f endLocation = startLocation.add(control.getAimDirection().mult(100));
-        List<PhysicsRayTestResult> results = world.getPhysicsSpace().rayTest(startLocation, endLocation);
-        for (Iterator<PhysicsRayTestResult> it = results.iterator(); it.hasNext();) {
-            PhysicsRayTestResult physicsRayTestResult = it.next();
-            Spatial entity = world.getEntity(physicsRayTestResult.getCollisionObject());
-            location.set(startLocation.add(control.getAimDirection().mult(physicsRayTestResult.getHitFraction() * 100)));
-            return entity;
-        }
-        return null;
-    }
 }
