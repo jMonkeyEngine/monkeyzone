@@ -86,7 +86,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
     }
     private WorldManager worldManager;
     private ClientEffectsManager effectsManager;
-    private ClientCommandInterface aiManager;
+    private ClientCommandInterface commandInterface;
     private Nifty nifty;
     private NiftyJmeDisplay niftyDisplay;
     private TextRenderer statusText;
@@ -114,9 +114,9 @@ public class ClientMain extends SimpleApplication implements ScreenController {
 //        chaseCam.setTrailingEnabled(true);
 
         //ai manager for controlling units
-        aiManager = new ClientCommandInterface(nifty.getScreen("default_hud"), inputManager);
+        commandInterface = new ClientCommandInterface(nifty.getScreen("default_hud"), inputManager);
         //world manager, manages entites and server commands
-        worldManager = new WorldManager(this, rootNode, bulletState.getPhysicsSpace(), client, aiManager);
+        worldManager = new WorldManager(this, rootNode, bulletState.getPhysicsSpace(), client, commandInterface);
         //adding/creating controls later attached to user controlled spatial
 //        worldManager.addUserControl(chaseCam);
         worldManager.addUserControl(new UserInputControl(inputManager, cam));
@@ -356,7 +356,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
     public void simpleUpdate(float tpf) {
         effectsManager.update(tpf);
         worldManager.update(tpf);
-        aiManager.update(tpf);
+        commandInterface.update(tpf);
     }
 
     @Override

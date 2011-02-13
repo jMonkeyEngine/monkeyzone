@@ -107,7 +107,7 @@ public class WorldManager {
     private PhysicsSpace space;
     private List<Control> userControls = new LinkedList<Control>();
     private PhysicsSyncManager syncManager;
-    private ClientCommandInterface aiManager;
+    private ClientCommandInterface commandInterface;
 
     public WorldManager(Application app, Node rootNode, PhysicsSpace space, Server server) {
         this.app = app;
@@ -129,7 +129,7 @@ public class WorldManager {
         this.assetManager = app.getAssetManager();
         this.space = space;
         this.client = client;
-        this.aiManager = aiManager;
+        this.commandInterface = aiManager;
         //TODO: criss-crossing of references between ai and world manager not nice..
         aiManager.setWorldManager(this);
         syncManager = new PhysicsSyncManager(app, client);
@@ -477,7 +477,7 @@ public class WorldManager {
         Long playerId = (Long) spat.getUserData("player_id");
         //TODO: removing from aiManager w/o checking if necessary
         if (!isServer()) {
-            aiManager.removePlayerEntity(playerId);
+            commandInterface.removePlayerEntity(playerId);
         }
         removeTransientControls(spat);
         removeAIControls(spat);
@@ -523,6 +523,7 @@ public class WorldManager {
                     //move controls for local user to new spatial
                     if (playerId == getMyPlayerId()) {
                         addUserControls(spat);
+                        commandInterface.setUserEntity(spat);
                     }
                 } else {
                     makeManualControl(entityId, null);
@@ -537,12 +538,15 @@ public class WorldManager {
             }
             //TODO: groupid as client id
             if (groupId == myGroupId && playerId != myPlayerId) {
-                aiManager.setPlayerEntity(playerId, spat);
+                commandInterface.setPlayerEntity(playerId, spat);
             }
         } else {
             //TODO: groupid as client id
             if (groupId == myGroupId && playerId != myPlayerId) {
-                aiManager.removePlayerEntity(playerId);
+                commandInterface.removePlayerEntity(playerId);
+            }
+            if(playerId==myPlayerId){
+                commandInterface.setUserEntity(null);
             }
         }
     }
