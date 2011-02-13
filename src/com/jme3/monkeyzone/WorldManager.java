@@ -778,7 +778,7 @@ public class WorldManager {
     public Spatial doRayTest(Spatial entity, float length, Vector3f storeLocation) {
         MovementControl control = entity.getControl(MovementControl.class);
         Vector3f startLocation = control.getLocation();
-        Vector3f endLocation = control.getLocation().add(control.getAimDirection().normalize().multLocal(5));
+        Vector3f endLocation = startLocation.add(control.getAimDirection().normalize().multLocal(length));
         List<PhysicsRayTestResult> results = getPhysicsSpace().rayTest(startLocation, endLocation);
         for (Iterator<PhysicsRayTestResult> it = results.iterator(); it.hasNext();) {
             PhysicsRayTestResult physicsRayTestResult = it.next();

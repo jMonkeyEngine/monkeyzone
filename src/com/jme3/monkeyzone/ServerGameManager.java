@@ -31,8 +31,6 @@
  */
 package com.jme3.monkeyzone;
 
-import com.jme3.bullet.PhysicsSpace;
-import com.jme3.bullet.collision.PhysicsRayTestResult;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -42,7 +40,6 @@ import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.scene.Spatial;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,12 +54,10 @@ public class ServerGameManager {
     private boolean running;
     String mapName;
     String[] modelNames;
-    PhysicsSpace space;
 
-    public ServerGameManager(PhysicsSyncManager server, WorldManager worldManager, PhysicsSpace space) {
-        this.server = server;
+    public ServerGameManager(WorldManager worldManager) {
         this.worldManager = worldManager;
-        this.space = space;
+        this.server = worldManager.getSyncManager();
     }
 
     /**
@@ -161,7 +156,7 @@ public class ServerGameManager {
                     worldManager.enterEntity(player_id, characterId);
                     worldManager.enableEntity(characterId, myEntity.getWorldTranslation().add(Vector3f.UNIT_Y), myEntity.getWorldRotation());
                 }
-            }else{
+            } else {
                 if (curEntityId != characterId) {
                     worldManager.enterEntity(player_id, characterId);
                     worldManager.enableEntity(characterId, myEntity.getWorldTranslation().add(Vector3f.UNIT_Y), myEntity.getWorldRotation());
@@ -174,26 +169,22 @@ public class ServerGameManager {
                 Logger.getLogger(ServerGameManager.class.getName()).log(Level.WARNING, "Cannot shoot when not character!");
                 return;
             }
-            //doing raytest for shooting.. 
-            List<PhysicsRayTestResult> list = space.rayTest(control.getPhysicsLocation(), control.getPhysicsLocation().add(control.getViewDirection().mult(10)));
             worldManager.playWorldEffect("Effects/GunShotA.j3o", myEntity.getWorldTranslation(), 0.1f);
-            for (Iterator<PhysicsRayTestResult> it = list.iterator(); it.hasNext();) {
-                PhysicsRayTestResult physicsRayTestResult = it.next();
-                long targetId = worldManager.getEntityId(physicsRayTestResult.getCollisionObject());
-                if (targetId != -1 && targetId != entityId) {
-                    Spatial targetSpatial = worldManager.getEntity(targetId);
-                    Float hp = (Float) targetSpatial.getUserData("HitPoints");
-                    if (hp != null) {
-                        hp -= 10;
-                        worldManager.playWorldEffect("Effects/ExplosionA.j3o", targetSpatial.getWorldTranslation(), 2.0f);
-                        worldManager.setEntityUserData(targetId, "HitPoints", hp);
-                        if (hp <= 0) {
-                            worldManager.removeEntity(targetId);
-                            worldManager.playWorldEffect("Effects/ExplosionB.j3o", targetSpatial.getWorldTranslation(), 2.0f);
-                        }
+            Vector3f hitLocation = new Vector3f();
+            Spatial hitEntity = worldManager.doRayTest(myEntity, 10, hitLocation);
+            if (hitEntity != null) {
+                long targetId = (Long) hitEntity.getUserData("entity_id");
+                Float hp = (Float) hitEntity.getUserData("HitPoints");
+                if (hp != null) {
+                    hp -= 10;
+                    worldManager.playWorldEffect("Effects/ExplosionA.j3o", hitLocation, 2.0f);
+                    worldManager.setEntityUserData(targetId, "HitPoints", hp);
+                    if (hp <= 0) {
+                        worldManager.removeEntity(targetId);
+                        worldManager.playWorldEffect("Effects/ExplosionB.j3o", hitEntity.getWorldTranslation(), 2.0f);
                     }
-                    return;
                 }
+                return;
             }
         }
     }
