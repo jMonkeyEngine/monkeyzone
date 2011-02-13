@@ -46,6 +46,8 @@ public interface ManualControl extends Control {
 
     public Vector3f getAimDirection();
 
+    public Vector3f getLocation();
+
     public void moveX(float value);
 
     public void moveY(float value);
