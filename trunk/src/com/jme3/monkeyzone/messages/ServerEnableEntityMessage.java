@@ -29,61 +29,37 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.monkeyzone.controls;
+package com.jme3.monkeyzone.messages;
 
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.monkeyzone.WorldManager;
+import com.jme3.network.physicssync.PhysicsSyncMessage;
+import com.jme3.network.serializing.Serializable;
 
 /**
- * Basic interface for autonomous movement controls, these are used by AI to move entities.
- * When a NavigationControl is available on the spatial, it should be used by
- * the AutonomousControl to navigate.
+ * used by the server to add an entity on the client
  * @author normenhansen
  */
-public interface AutonomousControl extends MovementControl {
+@Serializable()
+public class ServerEnableEntityMessage extends PhysicsSyncMessage {
 
-    /**
-     * aim at location, return false if not possible (max view range, obstacles)
-     * @param direction
-     * @return
-     */
-    public void aimAt(Vector3f direction);
+    public long entityId;
+    public Vector3f location;
+    public Quaternion rotation;
 
-    /**
-     * do action x, same as button press for human player
-     * @param action
-     */
-    public void performAction(int action, boolean activate);
+    public ServerEnableEntityMessage() {
+    }
 
-    /**
-     * move to location by means of this control, should use NavigationControl
-     * if available
-     * @param location
-     * @return false if already at location, uses radius from NavigationControl if it exists
-     */
-    public void moveTo(Vector3f location);
+    public ServerEnableEntityMessage(long id, Vector3f location, Quaternion rotation) {
+        this.syncId = -1;
+        this.entityId = id;
+        this.location = location;
+        this.rotation = rotation;
+    }
 
-    /**
-     * checks if this entity is moving
-     * @return
-     */
-    public boolean isMoving();
-
-    /**
-     * gets the current target location of this entity
-     * @return
-     */
-    public Vector3f getTargetLocation();
-
-    /**
-     * gets the current location of this entity
-     * @return
-     */
-    public Vector3f getLocation();
-
-    /**
-     * gets the aim direction of this entity
-     * @return
-     */
-    public Vector3f getAimDirection();
-
+    public void applyData(Object obj) {
+        WorldManager manager = (WorldManager) obj;
+        manager.enableEntity(entityId, location, rotation);
+    }
 }

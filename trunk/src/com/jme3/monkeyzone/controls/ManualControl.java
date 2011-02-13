@@ -32,13 +32,12 @@
 package com.jme3.monkeyzone.controls;
 
 import com.jme3.math.Vector3f;
-import com.jme3.scene.control.Control;
 
 /**
- * Interface for manual controls, used by humans locally and via network
+ * Interface for manual movement controls, used by humans locally and via network
  * @author normenhansen
  */
-public interface ManualControl extends Control {
+public interface ManualControl extends MovementControl {
 
     public void steerX(float value);
 

@@ -90,11 +90,15 @@ public class ServerGameManager {
         for (Iterator<PlayerData> it = PlayerData.getPlayers().iterator(); it.hasNext();) {
             PlayerData playerData = it.next();
             long entityId = worldManager.addNewEntity("Models/Sinbad/Sinbad.j3o", new Vector3f(i * 3, 3, 0), new Quaternion());
+            playerData.setData("character_entity_id", entityId);
             worldManager.enterEntity(playerData.getId(), entityId);
 
-            long entitayId = worldManager.addNewEntity("Models/Sinbad/Sinbad.j3o", new Vector3f(i * 3, 3, 3), new Quaternion());
             long playearId = worldManager.addNewPlayer(PlayerData.getIntData(playerData.getId(), "group_id"), "AI", 0);
+            long entitayId = worldManager.addNewEntity("Models/Sinbad/Sinbad.j3o", new Vector3f(i * 3, 3, 3), new Quaternion());
+            PlayerData.setData(playearId, "character_entity_id", entitayId);
             worldManager.enterEntity(playearId, entitayId);
+
+            worldManager.addNewEntity("Models/Ferrari/Car.j3o", new Vector3f(i * 3, 3, -3), new Quaternion());
             i++;
         }
         return true;
@@ -144,16 +148,24 @@ public class ServerGameManager {
             Logger.getLogger(ServerGameManager.class.getName()).log(Level.WARNING, "Cannot find player id for entity performing action!");
             return;
         }
-        //switch car and character on pressing enter
+        //enter entity
         if (action == ActionMessage.ENTER_ACTION && pressed) {
-            if (myEntity.getControl(CharacterControl.class) != null) {
-                long entity_id = worldManager.addNewEntity("Models/Ferrari/Car.j3o", myEntity.getWorldTranslation().add(Vector3f.UNIT_Y), myEntity.getWorldRotation());
-                worldManager.enterEntity(player_id, entity_id);
-                worldManager.removeEntity(entityId);
-            } else {
-                long entity_id = worldManager.addNewEntity("Models/Sinbad/Sinbad.j3o", myEntity.getWorldTranslation().add(Vector3f.UNIT_Y), myEntity.getWorldRotation());
-                worldManager.enterEntity(player_id, entity_id);
-                worldManager.removeEntity(entityId);
+            long characterId = PlayerData.getLongData(player_id, "character_entity_id");
+            long curEntityId = (Long) myEntity.getUserData("entity_id");
+            Spatial entity = worldManager.doRayTest(myEntity, 4, null);
+            if (entity != null && (Long) entity.getUserData("player_id") == -1l) {
+                if (curEntityId == characterId) {
+                    worldManager.disableEntity(characterId);
+                    worldManager.enterEntity(player_id, (Long) entity.getUserData("entity_id"));
+                } else {
+                    worldManager.enterEntity(player_id, characterId);
+                    worldManager.enableEntity(characterId, myEntity.getWorldTranslation().add(Vector3f.UNIT_Y), myEntity.getWorldRotation());
+                }
+            }else{
+                if (curEntityId != characterId) {
+                    worldManager.enterEntity(player_id, characterId);
+                    worldManager.enableEntity(characterId, myEntity.getWorldTranslation().add(Vector3f.UNIT_Y), myEntity.getWorldRotation());
+                }
             }
         } //shoot on space
         else if (action == ActionMessage.SHOOT_ACTION && pressed) {

@@ -125,7 +125,7 @@ public class AutonomousVehicleControl extends NetworkedAutonomousControl {
     }
 
     @Override
-    public Vector3f getCurrentLocation() {
+    public Vector3f getLocation() {
         return vehicle.getPhysicsLocation(vector);
     }
 
