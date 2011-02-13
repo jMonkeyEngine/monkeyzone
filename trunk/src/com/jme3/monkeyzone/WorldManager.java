@@ -343,9 +343,9 @@ public class WorldManager {
             long entityId = PlayerData.getLongData(id, "entity_id");
             if (entityId != -1) {
                 enterEntity(id, -1);
-                //TODO: check if character, removing all entities on logout ^^..
-                removeEntity(entityId);
             }
+            long characterId = PlayerData.getLongData(id, "character_entity_id");
+            removeEntity(characterId);
         }
         PlayerData.remove(id);
     }
