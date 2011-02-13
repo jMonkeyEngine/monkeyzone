@@ -63,7 +63,6 @@ public class ManualCharacterControl extends NetworkedManualControl {
     private float strafeAmount = 0;
     private float speed = 10f * Globals.PHYSICS_FPS;
     private Vector3f tempVec = new Vector3f();
-    private boolean gotInput = false;
 
     public ManualCharacterControl() {
     }
@@ -75,21 +74,16 @@ public class ManualCharacterControl extends NetworkedManualControl {
     @Override
     public void doSteerX(float amount) {
         rotAmountX = amount;
-        gotInput = true;
     }
 
     @Override
     public void doSteerY(float amount) {
         rotAmountY = amount;
-        gotInput = true;
     }
 
     @Override
     public void doMoveX(float amount) {
         strafeAmount = amount;
-        walkDirection.set(viewDirection).multLocal(speed * walkAmount);
-        walkDirection.addLocal(directionLeft.mult(speed * strafeAmount));
-        gotInput = true;
     }
 
     @Override
@@ -99,9 +93,6 @@ public class ManualCharacterControl extends NetworkedManualControl {
     @Override
     public void doMoveZ(float amount) {
         walkAmount = amount;
-        walkDirection.set(viewDirection).multLocal(speed * walkAmount);
-        walkDirection.addLocal(directionLeft.mult(speed * strafeAmount));
-        gotInput = true;
     }
 
     @Override
@@ -151,39 +142,38 @@ public class ManualCharacterControl extends NetworkedManualControl {
             return;
         }
 
-        //when we didnt get any new input we get directions from the control,
-        //they might have been updated by network sync
-        if (!gotInput) {
+        //update if sync changed the directions
+        if (!characterControl.getWalkDirection().equals(walkDirection) || !characterControl.getViewDirection().equals(viewDirection)) {
             walkDirection.set(characterControl.getWalkDirection());
-            viewDirection.set(characterControl.getViewDirection());
+            viewDirection.set(characterControl.getViewDirection()).normalizeLocal();
             directionLeft.set(viewDirection).normalizeLocal();
             ROTATE_90.multLocal(directionLeft);
         }
+
+        walkDirection.set(viewDirection).multLocal(speed * walkAmount);
+        walkDirection.addLocal(directionLeft.mult(speed * strafeAmount));
 
         if (rotAmountX != 0) {
             //rotate all vectors around the rotation amount
             directionQuat.fromAngleAxis((FastMath.PI) * tpf * rotAmountX, Vector3f.UNIT_Y);
             directionQuat.multLocal(walkDirection);
             directionQuat.multLocal(viewDirection);
-            directionQuat.multLocal(viewDirection);
             directionQuat.multLocal(directionLeft);
         }
         if (rotAmountY != 0) {
-            if (viewDirection.getY() < 1 && viewDirection.getY() > -1) {
+            directionQuat.fromAngleAxis((FastMath.PI) * tpf * rotAmountY, directionLeft);
+            directionQuat.multLocal(viewDirection);
+            if (viewDirection.getY() > 0.3f || viewDirection.getY() < -0.3f) {
                 //rotate all vectors around the rotation amount
-                directionQuat.fromAngleAxis((FastMath.PI) * tpf * rotAmountY, Vector3f.UNIT_X);
-                directionQuat.multLocal(walkDirection);
+                directionQuat.fromAngleAxis((FastMath.PI) * tpf * -rotAmountY, directionLeft);
                 directionQuat.multLocal(viewDirection);
-                directionQuat.multLocal(viewDirection);
-                directionQuat.multLocal(directionLeft);
             }
         }
         characterControl.setWalkDirection(walkDirection);
         characterControl.setViewDirection(viewDirection);
         //TODO: setting spatial rotation to avoid tilting
-        spatial.getLocalRotation().lookAt(tempVec.set(viewDirection).multLocal(1,0,1), Vector3f.UNIT_Y);
+        spatial.getLocalRotation().lookAt(tempVec.set(viewDirection).multLocal(1, 0, 1), Vector3f.UNIT_Y);
         spatial.setLocalRotation(spatial.getLocalRotation());
-        gotInput = false;
     }
 
     public void render(RenderManager rm, ViewPort vp) {
