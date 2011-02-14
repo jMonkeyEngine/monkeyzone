@@ -9,7 +9,7 @@ Names of flags / data used in game:
 
 Programmatic UserData of entities:
 - (long) entity_id
-- (long) group_id
+- (int) group_id
 - (long) player_id
 
 Programmatic PlayerData:
