@@ -29,24 +29,29 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.monkeyzone;
+package com.jme3.monkeyzone.controls;
 
-import com.jme3.bullet.collision.PhysicsRayTestResult;
+import com.jme3.export.JmeExporter;
+import com.jme3.export.JmeImporter;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.math.Vector3f;
+import com.jme3.monkeyzone.WorldManager;
 import com.jme3.monkeyzone.ai.commands.AttackCommand;
 import com.jme3.monkeyzone.ai.Command;
 import com.jme3.monkeyzone.ai.commands.FollowCommand;
 import com.jme3.monkeyzone.ai.commands.MoveCommand;
 import com.jme3.monkeyzone.ai.SphereTrigger;
 import com.jme3.monkeyzone.controls.CommandControl;
-import com.jme3.monkeyzone.controls.ManualControl;
+import com.jme3.renderer.RenderManager;
+import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.control.Control;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -60,7 +65,7 @@ import java.util.logging.Logger;
  * Manages the client input and UI for AI players
  * @author normenhansen
  */
-public class ClientCommandInterface implements ActionListener {
+public class UserCommandControl implements Control, ActionListener {
 
     protected Screen screen;
     protected TextRenderer[] selectionTexts = new TextRenderer[10];
@@ -74,6 +79,7 @@ public class ClientCommandInterface implements ActionListener {
     protected SelectionMenu currentSelectionMenu = SelectionMenu.Main;
     protected WorldManager world;
     protected Spatial userEntity;
+    protected boolean enabled = true;
 
     protected enum SelectionMenu {
 
@@ -84,7 +90,7 @@ public class ClientCommandInterface implements ActionListener {
         NavPoints
     }
 
-    public ClientCommandInterface(Screen screen, InputManager inputManager) {
+    public UserCommandControl(Screen screen, InputManager inputManager) {
         this(inputManager);
         this.screen = screen;
         for (int i = 0; i < 10; i++) {
@@ -95,7 +101,7 @@ public class ClientCommandInterface implements ActionListener {
         updateCommandMenu();
     }
 
-    public ClientCommandInterface(InputManager inputManager) {
+    public UserCommandControl(InputManager inputManager) {
         this.inputManager = inputManager;
         inputManager.addMapping("Client_Key_SHIFT", new KeyTrigger(KeyInput.KEY_RSHIFT), new KeyTrigger(KeyInput.KEY_LSHIFT));
         inputManager.addMapping("Client_Key_0", new KeyTrigger(KeyInput.KEY_0));
@@ -186,14 +192,6 @@ public class ClientCommandInterface implements ActionListener {
         selectedEntities.remove(players.remove(id));
         setSelectionMenu(currentSelectionMenu);
         updateCommandMenu();
-    }
-
-    /**
-     * sets the current entity of the user, called from WorldManager
-     * @param spatial
-     */
-    public void setUserEntity(Spatial spatial) {
-        this.userEntity = spatial;
     }
 
     /**
@@ -449,9 +447,9 @@ public class ClientCommandInterface implements ActionListener {
                 Class<? extends Command> class1 = it.next();
                 commandTexts[i].changeText("F" + i + " - " + class1.newInstance().getName() + "  ");
             } catch (InstantiationException ex) {
-                Logger.getLogger(ClientCommandInterface.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(UserCommandControl.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IllegalAccessException ex) {
-                Logger.getLogger(ClientCommandInterface.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(UserCommandControl.class.getName()).log(Level.SEVERE, null, ex);
             }
             if (i > 10) {
                 return;
@@ -496,7 +494,7 @@ public class ClientCommandInterface implements ActionListener {
             Spatial spatial1 = it.next();
             CommandControl commandControl = spatial1.getControl(CommandControl.class);
             if (commandControl == null) {
-                Logger.getLogger(ClientCommandInterface.class.getName()).log(Level.WARNING, "Cannot apply command");
+                Logger.getLogger(UserCommandControl.class.getName()).log(Level.WARNING, "Cannot apply command");
                 continue;
             }
             try {
@@ -509,9 +507,9 @@ public class ClientCommandInterface implements ActionListener {
                     commandControl.addCommand(commandInst);
                 }
             } catch (InstantiationException ex) {
-                Logger.getLogger(ClientCommandInterface.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(UserCommandControl.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IllegalAccessException ex) {
-                Logger.getLogger(ClientCommandInterface.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(UserCommandControl.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -538,10 +536,39 @@ public class ClientCommandInterface implements ActionListener {
                     commandControl.addCommand(commandInst);
                 }
             } catch (InstantiationException ex) {
-                Logger.getLogger(ClientCommandInterface.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(UserCommandControl.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IllegalAccessException ex) {
-                Logger.getLogger(ClientCommandInterface.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(UserCommandControl.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
+
+
+    public void setSpatial(Spatial spatial) {
+        userEntity = spatial;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void render(RenderManager rm, ViewPort vp) {
+    }
+
+    public Control cloneForSpatial(Spatial spatial) {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    public void write(JmeExporter ex) throws IOException {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    public void read(JmeImporter im) throws IOException {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
 }

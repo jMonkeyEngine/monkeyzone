@@ -31,6 +31,7 @@
  */
 package com.jme3.monkeyzone;
 
+import com.jme3.monkeyzone.controls.UserCommandControl;
 import com.jme3.app.Application;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.DesktopAssetManager;
@@ -71,7 +72,9 @@ import com.jme3.monkeyzone.messages.ServerRemovePlayerMessage;
 import com.jme3.network.connection.Client;
 import com.jme3.network.connection.Server;
 import com.jme3.network.physicssync.PhysicsSyncManager;
+import com.jme3.network.physicssync.PhysicsSyncMessage;
 import com.jme3.network.physicssync.SyncCharacterMessage;
+import com.jme3.network.physicssync.SyncMessageValidator;
 import com.jme3.network.physicssync.SyncRigidBodyMessage;
 import jme3tools.navmesh.NavMesh;
 import jme3tools.navmesh.util.NavMeshGenerator;
@@ -95,7 +98,7 @@ import jme3tools.optimize.GeometryBatchFactory;
  * running on server, used to apply network data on client and server.
  * @author normenhansen
  */
-public class WorldManager {
+public class WorldManager implements SyncMessageValidator {
 
     private Server server;
     private Client client;
@@ -112,7 +115,7 @@ public class WorldManager {
     private PhysicsSpace space;
     private List<Control> userControls = new LinkedList<Control>();
     private PhysicsSyncManager syncManager;
-    private ClientCommandInterface commandInterface;
+    private UserCommandControl commandInterface;
 
     public WorldManager(Application app, Node rootNode, PhysicsSpace space, Server server) {
         this.app = app;
@@ -128,7 +131,7 @@ public class WorldManager {
                 ManualControlMessage.class);
     }
 
-    public WorldManager(Application app, Node rootNode, PhysicsSpace space, Client client, ClientCommandInterface aiManager) {
+    public WorldManager(Application app, Node rootNode, PhysicsSpace space, Client client, UserCommandControl aiManager) {
         this.app = app;
         this.rootNode = rootNode;
         this.assetManager = app.getAssetManager();
@@ -579,7 +582,6 @@ public class WorldManager {
                     //move controls for local user to new spatial
                     if (playerId == getMyPlayerId()) {
                         addUserControls(spat);
-                        commandInterface.setUserEntity(spat);
                     }
                 } else {
                     makeManualControl(entityId, null);
@@ -600,9 +602,6 @@ public class WorldManager {
             //TODO: groupid as client id
             if (groupId == myGroupId && playerId != myPlayerId) {
                 commandInterface.removePlayerEntity(playerId);
-            }
-            if (playerId == myPlayerId) {
-                commandInterface.setUserEntity(null);
             }
         }
     }
@@ -811,6 +810,19 @@ public class WorldManager {
             return entity;
         }
         return null;
+    }
+
+    /**
+     * validates messages before they are sent, called from PhysicsSyncManager
+     * @param message
+     * @return
+     */
+    public boolean checkMessage(PhysicsSyncMessage message) {
+        //TODO: add checks for maximum acceleration etc.
+        if (message.syncId >= 0 && getEntity(message.syncId) == null) {
+            return false;
+        }
+        return true;
     }
 
     public void update(float tpf) {
