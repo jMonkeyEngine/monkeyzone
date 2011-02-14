@@ -31,11 +31,12 @@
  */
 package com.jme3.monkeyzone.controls;
 
+import com.jme3.bullet.PhysicsSpace;
+import com.jme3.bullet.PhysicsTickListener;
 import com.jme3.bullet.control.VehicleControl;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.network.connection.Client;
-import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
@@ -45,7 +46,7 @@ import com.jme3.scene.Spatial;
  * a vehicle if available on the Spatial.
  * @author normenhansen
  */
-public class ManualVehicleControl extends NetworkedManualControl {
+public class ManualVehicleControl extends NetworkedManualControl implements PhysicsTickListener {
 
     private Spatial spatial;
     private VehicleControl control;
@@ -54,6 +55,9 @@ public class ManualVehicleControl extends NetworkedManualControl {
     private float accelerate = 0;
     private Vector3f tempVec1 = new Vector3f();
     private Vector3f tempVec2 = new Vector3f();
+    private Vector3f tempVec3 = new Vector3f();
+    private boolean hover = false;
+    private boolean added = false;
 
     public ManualVehicleControl() {
     }
@@ -72,7 +76,11 @@ public class ManualVehicleControl extends NetworkedManualControl {
 
     @Override
     public void doMoveX(float amount) {
-        steer = amount * FastMath.QUARTER_PI * 0.5f;
+        if (!hover) {
+            steer = amount * FastMath.QUARTER_PI * 0.5f;
+        } else {
+            steer = amount;
+        }
     }
 
     @Override
@@ -100,6 +108,9 @@ public class ManualVehicleControl extends NetworkedManualControl {
     public void setSpatial(Spatial spatial) {
         this.spatial = spatial;
         if (spatial == null) {
+            if (added) {
+                control.getPhysicsSpace().removeTickListener(this);
+            }
             return;
         }
         this.control = spatial.getControl(VehicleControl.class);
@@ -109,6 +120,10 @@ public class ManualVehicleControl extends NetworkedManualControl {
         Float spatialSpeed = (Float) spatial.getUserData("Speed");
         if (spatialSpeed != null) {
             speed = spatialSpeed;
+        }
+        Integer hoverControl = (Integer) spatial.getUserData("HoverControl");
+        if (hoverControl != null && hoverControl == 1) {
+            hover = true;
         }
     }
 
@@ -127,8 +142,61 @@ public class ManualVehicleControl extends NetworkedManualControl {
         if (!enabled) {
             return;
         }
+        if (hover) {
+            if (!added) {
+                control.getPhysicsSpace().addTickListener(this);
+                added = true;
+            }
+            return;
+        }
         control.accelerate(accelerate);
         control.steer(steer);
+    }
+
+    public void prePhysicsTick(PhysicsSpace space, float f) {
+        if (!enabled || !hover) {
+            return;
+        }
+        Vector3f angVel = control.getAngularVelocity();
+        float rotationVelocity = angVel.getY();
+        Vector3f dir = control.getForwardVector(tempVec2).multLocal(1, 0, 1).normalizeLocal();
+        control.getLinearVelocity(tempVec3);
+        Vector3f linearVelocity = tempVec3.multLocal(1, 0, 1);
+
+        if (steer != 0) {
+            if (rotationVelocity < 1 && rotationVelocity > -1) {
+                control.applyTorque(tempVec1.set(0, steer * control.getMass() * 20, 0));
+            }
+        } else {
+            // counter the steering value!
+            if (rotationVelocity > 0.2f) {
+                control.applyTorque(tempVec1.set(0, -control.getMass() * 20, 0));
+            } else if (rotationVelocity < -0.2f) {
+                control.applyTorque(tempVec1.set(0, control.getMass() * 20, 0));
+            }
+        }
+        if (accelerate > 0) {
+            // counter force that will adjust velocity
+            // if we are not going where we want to go.
+            // this will prevent "drifting" and thus improve control
+            // of the vehicle
+            float d = dir.dot(linearVelocity.normalize());
+            Vector3f counter = dir.project(linearVelocity).normalizeLocal().negateLocal().multLocal(1 - d);
+            control.applyForce(counter.multLocal(control.getMass() * 10), Vector3f.ZERO);
+
+            if (linearVelocity.length() < 30) {
+                control.applyForce(dir.multLocal(accelerate), Vector3f.ZERO);
+            }
+        } else {
+            // counter the acceleration value
+            if (linearVelocity.length() > FastMath.ZERO_TOLERANCE) {
+                linearVelocity.normalizeLocal().negateLocal();
+                control.applyForce(linearVelocity.mult(control.getMass() * 10), Vector3f.ZERO);
+            }
+        }
+    }
+
+    public void physicsTick(PhysicsSpace space, float f) {
     }
 
     public void render(RenderManager rm, ViewPort vp) {

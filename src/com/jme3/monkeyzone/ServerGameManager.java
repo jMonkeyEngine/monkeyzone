@@ -96,7 +96,7 @@ public class ServerGameManager {
             worldManager.enterEntity(playearId, entitayId);
 
             //create a vehicle
-            worldManager.addNewEntity("Models/Ferrari/Car.j3o", new Vector3f(i * 3, 3, -3), new Quaternion());
+            worldManager.addNewEntity("Models/HoverTank/HoverTank.j3o", new Vector3f(i * 3, 3, -3), new Quaternion());
             i++;
         }
         return true;
