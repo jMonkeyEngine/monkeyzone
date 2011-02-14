@@ -80,7 +80,8 @@ public class ServerGameManager {
         worldManager.createNavMesh();
         worldManager.preloadModels(modelNames);
         worldManager.attachLevel();
-        //add all players and create character entites for them, then enter the entites
+        
+        //create character entities for all players, then enter the entites
         int i = 0;
         for (Iterator<PlayerData> it = PlayerData.getPlayers().iterator(); it.hasNext();) {
             PlayerData playerData = it.next();
@@ -88,11 +89,13 @@ public class ServerGameManager {
             playerData.setData("character_entity_id", entityId);
             worldManager.enterEntity(playerData.getId(), entityId);
 
+            //create new ai player for user
             long playearId = worldManager.addNewPlayer(PlayerData.getIntData(playerData.getId(), "group_id"), "AI", 0);
             long entitayId = worldManager.addNewEntity("Models/Sinbad/Sinbad.j3o", new Vector3f(i * 3, 3, 3), new Quaternion());
             PlayerData.setData(playearId, "character_entity_id", entitayId);
             worldManager.enterEntity(playearId, entitayId);
 
+            //create a vehicle
             worldManager.addNewEntity("Models/Ferrari/Car.j3o", new Vector3f(i * 3, 3, -3), new Quaternion());
             i++;
         }
@@ -145,46 +148,61 @@ public class ServerGameManager {
         }
         //enter entity
         if (action == ActionMessage.ENTER_ACTION && pressed) {
-            long characterId = PlayerData.getLongData(player_id, "character_entity_id");
-            long curEntityId = (Long) myEntity.getUserData("entity_id");
-            Spatial entity = worldManager.doRayTest(myEntity, 4, null);
-            if (entity != null && (Long) entity.getUserData("player_id") == -1l) {
-                if (curEntityId == characterId) {
-                    worldManager.disableEntity(characterId);
-                    worldManager.enterEntity(player_id, (Long) entity.getUserData("entity_id"));
-                } else {
-                    worldManager.enterEntity(player_id, characterId);
-                    worldManager.enableEntity(characterId, myEntity.getWorldTranslation().add(Vector3f.UNIT_Y), myEntity.getWorldRotation());
-                }
+            performEnterEntity(player_id, myEntity);
+        } else if (action == ActionMessage.SHOOT_ACTION && pressed) {
+            performShoot(myEntity);
+        }
+    }
+
+    /**
+     * handle player performing "enter entity" action
+     * @param player_id
+     * @param myEntity
+     */
+    private void performEnterEntity(long player_id, Spatial myEntity) {
+        long characterId = PlayerData.getLongData(player_id, "character_entity_id");
+        long curEntityId = (Long) myEntity.getUserData("entity_id");
+        Spatial entity = worldManager.doRayTest(myEntity, 4, null);
+        if (entity != null && (Long) entity.getUserData("player_id") == -1l) {
+            if (curEntityId == characterId) {
+                worldManager.disableEntity(characterId);
+                worldManager.enterEntity(player_id, (Long) entity.getUserData("entity_id"));
             } else {
-                if (curEntityId != characterId) {
-                    worldManager.enterEntity(player_id, characterId);
-                    worldManager.enableEntity(characterId, myEntity.getWorldTranslation().add(Vector3f.UNIT_Y), myEntity.getWorldRotation());
-                }
+                worldManager.enterEntity(player_id, characterId);
+                worldManager.enableEntity(characterId, myEntity.getWorldTranslation().add(Vector3f.UNIT_Y), myEntity.getWorldRotation());
             }
-        } //shoot on space
-        else if (action == ActionMessage.SHOOT_ACTION && pressed) {
-            CharacterControl control = myEntity.getControl(CharacterControl.class);
-            if (control == null) {
-                Logger.getLogger(ServerGameManager.class.getName()).log(Level.WARNING, "Cannot shoot when not character!");
-                return;
+        } else {
+            if (curEntityId != characterId) {
+                worldManager.enterEntity(player_id, characterId);
+                worldManager.enableEntity(characterId, myEntity.getWorldTranslation().add(Vector3f.UNIT_Y), myEntity.getWorldRotation());
             }
-            worldManager.playWorldEffect("Effects/GunShotA.j3o", myEntity.getWorldTranslation(), 0.1f);
-            Vector3f hitLocation = new Vector3f();
-            Spatial hitEntity = worldManager.doRayTest(myEntity, 10, hitLocation);
-            if (hitEntity != null) {
-                long targetId = (Long) hitEntity.getUserData("entity_id");
-                Float hp = (Float) hitEntity.getUserData("HitPoints");
-                if (hp != null) {
-                    hp -= 10;
-                    worldManager.playWorldEffect("Effects/ExplosionA.j3o", hitLocation, 2.0f);
-                    worldManager.setEntityUserData(targetId, "HitPoints", hp);
-                    if (hp <= 0) {
-                        worldManager.removeEntity(targetId);
-                        worldManager.playWorldEffect("Effects/ExplosionB.j3o", hitEntity.getWorldTranslation(), 2.0f);
-                    }
+        }
+    }
+
+    /**
+     * handle entity shooting
+     * @param myEntity
+     */
+    private void performShoot(Spatial myEntity) {
+        CharacterControl control = myEntity.getControl(CharacterControl.class);
+        if (control == null) {
+            Logger.getLogger(ServerGameManager.class.getName()).log(Level.WARNING, "Cannot shoot when not character!");
+            return;
+        }
+        worldManager.playWorldEffect("Effects/GunShotA.j3o", myEntity.getWorldTranslation(), 0.1f);
+        Vector3f hitLocation = new Vector3f();
+        Spatial hitEntity = worldManager.doRayTest(myEntity, 10, hitLocation);
+        if (hitEntity != null) {
+            long targetId = (Long) hitEntity.getUserData("entity_id");
+            Float hp = (Float) hitEntity.getUserData("HitPoints");
+            if (hp != null) {
+                hp -= 10;
+                worldManager.playWorldEffect("Effects/ExplosionA.j3o", hitLocation, 2.0f);
+                worldManager.setEntityUserData(targetId, "HitPoints", hp);
+                if (hp <= 0) {
+                    worldManager.removeEntity(targetId);
+                    worldManager.playWorldEffect("Effects/ExplosionB.j3o", hitEntity.getWorldTranslation(), 2.0f);
                 }
-                return;
             }
         }
     }
