@@ -49,7 +49,6 @@ import java.util.logging.Logger;
 
 /**
  * Handles the network message transfer for the client in a threadsafe way
- * TODO: time stamping/late applying
  * @author normenhansen
  */
 public class ClientNetListener implements MessageListener, ConnectionListener {

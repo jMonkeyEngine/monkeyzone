@@ -59,7 +59,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The client Main class, also the screen controller for most parts of the GUI
+ * The client Main class, also the screen controller for most parts of the
+ * login and lobby GUI
  * @author normenhansen
  */
 public class ClientMain extends SimpleApplication implements ScreenController {
