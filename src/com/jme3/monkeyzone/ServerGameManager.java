@@ -147,7 +147,7 @@ public class ServerGameManager {
             return;
         }
         //enter entity
-        if (action == ActionMessage.ENTER_ACTION && pressed) {
+        if (action == ActionMessage.ENTER_ACTION && !pressed) {
             performEnterEntity(player_id, myEntity);
         } else if (action == ActionMessage.SHOOT_ACTION && pressed) {
             performShoot(myEntity);

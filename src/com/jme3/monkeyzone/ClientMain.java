@@ -31,6 +31,7 @@
  */
 package com.jme3.monkeyzone;
 
+import com.jme3.monkeyzone.controls.UserCommandControl;
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.input.ChaseCamera;
@@ -86,7 +87,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
     }
     private WorldManager worldManager;
     private ClientEffectsManager effectsManager;
-    private ClientCommandInterface commandInterface;
+    private UserCommandControl commandControl;
     private Nifty nifty;
     private NiftyJmeDisplay niftyDisplay;
     private TextRenderer statusText;
@@ -114,12 +115,13 @@ public class ClientMain extends SimpleApplication implements ScreenController {
 //        chaseCam.setTrailingEnabled(true);
 
         //ai manager for controlling units
-        commandInterface = new ClientCommandInterface(nifty.getScreen("default_hud"), inputManager);
+        commandControl = new UserCommandControl(nifty.getScreen("default_hud"), inputManager);
         //world manager, manages entites and server commands
-        worldManager = new WorldManager(this, rootNode, bulletState.getPhysicsSpace(), client, commandInterface);
+        worldManager = new WorldManager(this, rootNode, bulletState.getPhysicsSpace(), client, commandControl);
         //adding/creating controls later attached to user controlled spatial
 //        worldManager.addUserControl(chaseCam);
         worldManager.addUserControl(new UserInputControl(inputManager, cam));
+        worldManager.addUserControl(commandControl);
         worldManager.addUserControl(new DefaultHUDControl(nifty.getScreen("default_hud")));
         //effects manager for playing effects
         effectsManager = new ClientEffectsManager(assetManager, audioRenderer, worldManager);
@@ -356,7 +358,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
     public void simpleUpdate(float tpf) {
         effectsManager.update(tpf);
         worldManager.update(tpf);
-        commandInterface.update(tpf);
+        commandControl.update(tpf);
     }
 
     @Override

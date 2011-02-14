@@ -64,6 +64,7 @@ public class PhysicsSyncManager implements MessageListener {
     private Server server;
     private Client client;
     private float syncFrequency = 0.25f;
+    LinkedList<SyncMessageValidator> validators = new LinkedList<SyncMessageValidator>();
     HashMap<Long, Object> syncObjects = new HashMap<Long, Object>();
     double time = 0;
     double offset = Double.MIN_VALUE;
@@ -141,7 +142,7 @@ public class PhysicsSyncManager implements MessageListener {
         syncObjects.remove(id);
     }
 
-    public void clearObjects(){
+    public void clearObjects() {
         syncObjects.clear();
     }
 
@@ -291,13 +292,26 @@ public class PhysicsSyncManager implements MessageListener {
             app.enqueue(new Callable<Void>() {
 
                 public Void call() throws Exception {
-                    //TODO: add some kind of callback interface to check for validity
+                    for (Iterator<SyncMessageValidator> it = validators.iterator(); it.hasNext();) {
+                        SyncMessageValidator syncMessageValidator = it.next();
+                        if (!syncMessageValidator.checkMessage((PhysicsSyncMessage) message)) {
+                            return null;
+                        }
+                    }
                     broadcast((PhysicsSyncMessage) message);
                     doMessage((PhysicsSyncMessage) message);
                     return null;
                 }
             });
         }
+    }
+
+    public void addMessageValidator(SyncMessageValidator validator) {
+        validators.add(validator);
+    }
+
+    public void removeMessageValidator(SyncMessageValidator validator) {
+        validators.remove(validator);
     }
 
     public Server getServer() {
