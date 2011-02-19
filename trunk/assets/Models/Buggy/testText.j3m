@@ -1,5 +1,0 @@
-Material My Material : Common/MatDefs/Misc/SimpleTextured.j3md {
-     MaterialParameters {
-        ColorMap : Models/Ferrari/Car.jpg
-     }
-}
