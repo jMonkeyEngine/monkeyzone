@@ -31,6 +31,9 @@
  */
 package com.jme3.monkeyzone;
 
+import com.jme3.app.Application;
+import com.jme3.app.state.AbstractAppState;
+import com.jme3.app.state.AppStateManager;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -47,7 +50,7 @@ import java.util.logging.Logger;
  * Manages the actual gameplay on the server side
  * @author normenhansen
  */
-public class ServerGameManager {
+public class ServerGameManager extends AbstractAppState {
 
     PhysicsSyncManager server;
     WorldManager worldManager;
@@ -55,8 +58,10 @@ public class ServerGameManager {
     String mapName;
     String[] modelNames;
 
-    public ServerGameManager(WorldManager worldManager) {
-        this.worldManager = worldManager;
+    @Override
+    public void initialize(AppStateManager stateManager, Application app) {
+        super.initialize(stateManager, app);
+        this.worldManager = app.getStateManager().getState(WorldManager.class);
         this.server = worldManager.getSyncManager();
     }
 
@@ -80,7 +85,7 @@ public class ServerGameManager {
         worldManager.createNavMesh();
         worldManager.preloadModels(modelNames);
         worldManager.attachLevel();
-        
+
         //create character entities for all players, then enter the entites
         int i = 0;
         for (Iterator<PlayerData> it = PlayerData.getPlayers().iterator(); it.hasNext();) {
@@ -96,7 +101,7 @@ public class ServerGameManager {
             worldManager.enterEntity(playearId, entitayId);
 
             //create a vehicle
-            worldManager.addNewEntity("Models/HoverTank/HoverTank.j3o", new Vector3f(i * 3, 3, -3), new Quaternion());
+            worldManager.addNewEntity("Models/Buggy/Buggy.j3o", new Vector3f(i * 3, 3, -3), new Quaternion());
             i++;
         }
         return true;

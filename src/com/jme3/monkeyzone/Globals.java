@@ -49,7 +49,6 @@ public class Globals {
     public static final float NETWORK_MAX_PHYSICS_DELAY = 0.25f;
     public static final int SCENE_FPS = 60;
     public static final float PHYSICS_FPS = 1f / 30f;
-    public static final boolean PHYSICS_DETERMINISTIC = false;
     public static final boolean PHYSICS_THREADED = true; //only applies for client, server doesnt render anyway
     public static final int DEFAULT_PORT_TCP = 6143;
     public static final int DEFAULT_PORT_UDP = 6143;

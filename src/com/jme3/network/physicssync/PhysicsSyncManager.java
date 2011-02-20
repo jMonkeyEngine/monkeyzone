@@ -32,6 +32,7 @@
 package com.jme3.network.physicssync;
 
 import com.jme3.app.Application;
+import com.jme3.app.state.AbstractAppState;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.control.VehicleControl;
@@ -59,7 +60,7 @@ import java.util.logging.Logger;
  * <p></p>
  * @author normenhansen
  */
-public class PhysicsSyncManager implements MessageListener {
+public class PhysicsSyncManager extends AbstractAppState implements MessageListener {
 
     private Server server;
     private Client client;
@@ -88,6 +89,7 @@ public class PhysicsSyncManager implements MessageListener {
      * sync info on the server.
      * @param tpf
      */
+    @Override
     public void update(float tpf) {
         time += tpf;
         if (time < 0) {

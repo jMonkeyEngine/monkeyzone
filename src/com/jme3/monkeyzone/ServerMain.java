@@ -33,6 +33,10 @@ package com.jme3.monkeyzone;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.monkeyzone.messages.ActionMessage;
+import com.jme3.monkeyzone.messages.AutoControlMessage;
+import com.jme3.monkeyzone.messages.ManualControlMessage;
+import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.renderer.RenderManager;
 import com.jme3.system.AppSettings;
 import java.io.IOException;
@@ -71,6 +75,7 @@ public class ServerMain extends SimpleApplication {
     }
     private WorldManager worldManager;
     private ServerGameManager gameManager;
+    private PhysicsSyncManager syncManager;
     private ServerNetListener listenerManager;
     private BulletAppState bulletState;
 
@@ -85,16 +90,25 @@ public class ServerMain extends SimpleApplication {
         }
         bulletState = new BulletAppState();
         getStateManager().attach(bulletState);
-        bulletState.getPhysicsSpace().setDeterministic(Globals.PHYSICS_DETERMINISTIC);
         bulletState.getPhysicsSpace().setAccuracy(Globals.PHYSICS_FPS);
-        worldManager = new WorldManager(this, rootNode, bulletState.getPhysicsSpace(), server);
-        gameManager = new ServerGameManager(worldManager);
+
+        syncManager = new PhysicsSyncManager(app, server);
+        syncManager.setSyncFrequency(Globals.NETWORK_SYNC_FREQUENCY);
+        syncManager.setMessageTypes(AutoControlMessage.class,
+                ActionMessage.class,
+                ManualControlMessage.class);
+        stateManager.attach(syncManager);
+        worldManager = new WorldManager(this, rootNode);
+        stateManager.attach(worldManager);
+        syncManager.addObject(-1, worldManager);
+        gameManager = new ServerGameManager();
+        stateManager.attach(gameManager);
         listenerManager = new ServerNetListener(this, server, worldManager, gameManager);
     }
 
     @Override
     public void simpleUpdate(float tpf) {
-        worldManager.update(tpf);
+//        worldManager.update(tpf);
     }
 
     @Override
