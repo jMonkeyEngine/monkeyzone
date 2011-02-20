@@ -41,6 +41,7 @@ import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.renderer.Camera;
@@ -137,9 +138,12 @@ public class UserInputControl implements Control, ActionListener, AnalogListener
         } else {
             manualControl.steerY(steerY);
         }
-        Vector3f location = manualControl.getLocation();
-        cam.setLocation(location);
-        cam.lookAt(location.addLocal(manualControl.getAimDirection()), Vector3f.UNIT_Y);
+        //TODO: replace with special spatial
+        Vector3f currentUp = spatial.getWorldRotation().mult(Vector3f.UNIT_Y);
+        Vector3f camLocation = spatial.getWorldTranslation().add(currentUp);
+        cam.setLocation(camLocation);
+        cam.setRotation(spatial.getWorldRotation());
+        cam.lookAt(camLocation.addLocal(manualControl.getAimDirection()), spatial.getWorldRotation().mult(Vector3f.UNIT_Y));
     }
 
     public void render(RenderManager rm, ViewPort vp) {
