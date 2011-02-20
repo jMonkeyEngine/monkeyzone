@@ -150,20 +150,20 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         //ai manager for controlling units
         commandControl = new UserCommandControl(nifty.getScreen("default_hud"), inputManager);
         //world manager, manages entites and server commands
-        worldManager = new WorldManager(this,rootNode, commandControl);
+        worldManager = new WorldManager(this, rootNode, commandControl);
         //adding/creating controls later attached to user controlled spatial
         worldManager.addUserControl(new UserInputControl(inputManager, cam));
         worldManager.addUserControl(commandControl);
         worldManager.addUserControl(new DefaultHUDControl(nifty.getScreen("default_hud")));
-        //register effects manager with sync manager so that messages can apply their data
-        worldManager.getSyncManager().addObject(-2, effectsManager);
-        syncManager.addObject(-1, worldManager);
         stateManager.attach(worldManager);
-
         //effects manager for playing effects
         effectsManager = new ClientEffectsManager();
         stateManager.attach(effectsManager);
-        
+        //register effects manager and world manager with sync manager so that messages can apply their data
+        syncManager.addObject(-2, effectsManager);
+        syncManager.addObject(-1, worldManager);
+
+
         listenerManager = new ClientNetListener(this, client, worldManager, effectsManager);
     }
 
