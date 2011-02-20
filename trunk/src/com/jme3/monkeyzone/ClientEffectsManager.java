@@ -31,6 +31,9 @@
  */
 package com.jme3.monkeyzone;
 
+import com.jme3.app.Application;
+import com.jme3.app.state.AbstractAppState;
+import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.audio.AudioNode;
 import com.jme3.audio.AudioRenderer;
@@ -52,7 +55,7 @@ import java.util.logging.Logger;
  * TODO: allow limiting effects count created in lists/world.
  * @author normenhansen
  */
-public class ClientEffectsManager {
+public class ClientEffectsManager extends AbstractAppState {
 
     private AssetManager assetManager;
     private AudioRenderer audioRenderer;
@@ -60,10 +63,12 @@ public class ClientEffectsManager {
     private HashMap<String, LinkedList<Node>> emitters = new HashMap<String, LinkedList<Node>>();
     private HashMap<Long, EmitterData> liveEmitters = new HashMap<Long, EmitterData>();
 
-    public ClientEffectsManager(AssetManager assetManager, AudioRenderer audioRenderer, WorldManager worldManager) {
-        this.assetManager = assetManager;
-        this.audioRenderer = audioRenderer;
-        this.worldManager = worldManager;
+    @Override
+    public void initialize(AppStateManager stateManager, Application app) {
+        super.initialize(stateManager, app);
+        this.assetManager = app.getAssetManager();
+        this.audioRenderer = app.getAudioRenderer();
+        this.worldManager = app.getStateManager().getState(WorldManager.class);
     }
 
     /**
@@ -177,6 +182,7 @@ public class ClientEffectsManager {
         }
     }
 
+    @Override
     public void update(float tpf) {
         //TODO: moving effects
         for (Iterator<Entry<Long, EmitterData>> it = liveEmitters.entrySet().iterator(); it.hasNext();) {

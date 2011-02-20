@@ -33,8 +33,10 @@ package com.jme3.monkeyzone;
 
 import com.jme3.monkeyzone.controls.UserCommandControl;
 import com.jme3.app.Application;
+import com.jme3.app.state.AbstractAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.DesktopAssetManager;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.collision.PhysicsRayTestResult;
@@ -57,9 +59,6 @@ import com.jme3.monkeyzone.ai.SphereTrigger;
 import com.jme3.monkeyzone.ai.TriggerControl;
 import com.jme3.monkeyzone.controls.CommandControl;
 import com.jme3.monkeyzone.controls.MovementControl;
-import com.jme3.monkeyzone.messages.AutoControlMessage;
-import com.jme3.monkeyzone.messages.ActionMessage;
-import com.jme3.monkeyzone.messages.ManualControlMessage;
 import com.jme3.monkeyzone.messages.ServerAddEntityMessage;
 import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
 import com.jme3.monkeyzone.messages.ServerDisableEntityMessage;
@@ -73,9 +72,7 @@ import com.jme3.network.connection.Client;
 import com.jme3.network.connection.Server;
 import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.network.physicssync.PhysicsSyncMessage;
-import com.jme3.network.physicssync.SyncCharacterMessage;
 import com.jme3.network.physicssync.SyncMessageValidator;
-import com.jme3.network.physicssync.SyncRigidBodyMessage;
 import jme3tools.navmesh.NavMesh;
 import jme3tools.navmesh.util.NavMeshGenerator;
 import com.jme3.scene.Geometry;
@@ -98,7 +95,7 @@ import jme3tools.optimize.GeometryBatchFactory;
  * running on server, used to apply network data on client and server.
  * @author normenhansen
  */
-public class WorldManager implements SyncMessageValidator {
+public class WorldManager extends AbstractAppState implements SyncMessageValidator {
 
     private Server server;
     private Client client;
@@ -117,46 +114,25 @@ public class WorldManager implements SyncMessageValidator {
     private PhysicsSyncManager syncManager;
     private UserCommandControl commandInterface;
 
-    public WorldManager(Application app, Node rootNode, PhysicsSpace space, Server server) {
+    public WorldManager(Application app, Node rootNode) {
         this.app = app;
         this.rootNode = rootNode;
         this.assetManager = app.getAssetManager();
-        this.space = space;
-        this.server = server;
-        syncManager = new PhysicsSyncManager(app, server);
-        syncManager.setSyncFrequency(Globals.NETWORK_SYNC_FREQUENCY);
-        syncManager.addObject(-1, this);
-        syncManager.setMessageTypes(AutoControlMessage.class,
-                ActionMessage.class,
-                ManualControlMessage.class);
+        this.space = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
+        this.server = app.getStateManager().getState(PhysicsSyncManager.class).getServer();
+        syncManager = app.getStateManager().getState(PhysicsSyncManager.class);
     }
 
-    public WorldManager(Application app, Node rootNode, PhysicsSpace space, Client client, UserCommandControl aiManager) {
+    public WorldManager(Application app, Node rootNode, UserCommandControl aiManager) {
         this.app = app;
         this.rootNode = rootNode;
         this.assetManager = app.getAssetManager();
-        this.space = space;
-        this.client = client;
+        this.space = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
+        this.client = app.getStateManager().getState(PhysicsSyncManager.class).getClient();
         this.commandInterface = aiManager;
         //TODO: criss-crossing of references between ai and world manager not nice..
         aiManager.setWorldManager(this);
-        syncManager = new PhysicsSyncManager(app, client);
-        syncManager.setMaxDelay(Globals.NETWORK_MAX_PHYSICS_DELAY);
-        syncManager.addObject(-1, this);
-        syncManager.setMessageTypes(AutoControlMessage.class,
-                ManualControlMessage.class,
-                ActionMessage.class,
-                SyncCharacterMessage.class,
-                SyncRigidBodyMessage.class,
-                ServerEntityDataMessage.class,
-                ServerEnterEntityMessage.class,
-                ServerAddEntityMessage.class,
-                ServerAddPlayerMessage.class,
-                ServerEffectMessage.class,
-                ServerEnableEntityMessage.class,
-                ServerDisableEntityMessage.class,
-                ServerRemoveEntityMessage.class,
-                ServerRemovePlayerMessage.class);
+        syncManager = app.getStateManager().getState(PhysicsSyncManager.class);
     }
 
     public boolean isServer() {
@@ -825,7 +801,7 @@ public class WorldManager implements SyncMessageValidator {
         return true;
     }
 
+    @Override
     public void update(float tpf) {
-        syncManager.update(tpf);
     }
 }

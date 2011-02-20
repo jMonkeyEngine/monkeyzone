@@ -34,12 +34,26 @@ package com.jme3.monkeyzone;
 import com.jme3.monkeyzone.controls.UserCommandControl;
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.input.ChaseCamera;
 import com.jme3.monkeyzone.controls.DefaultHUDControl;
 import com.jme3.monkeyzone.controls.UserInputControl;
+import com.jme3.monkeyzone.messages.ActionMessage;
+import com.jme3.monkeyzone.messages.AutoControlMessage;
 import com.jme3.monkeyzone.messages.ChatMessage;
+import com.jme3.monkeyzone.messages.ManualControlMessage;
+import com.jme3.monkeyzone.messages.ServerAddEntityMessage;
+import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
+import com.jme3.monkeyzone.messages.ServerDisableEntityMessage;
+import com.jme3.monkeyzone.messages.ServerEffectMessage;
+import com.jme3.monkeyzone.messages.ServerEnableEntityMessage;
+import com.jme3.monkeyzone.messages.ServerEnterEntityMessage;
+import com.jme3.monkeyzone.messages.ServerEntityDataMessage;
+import com.jme3.monkeyzone.messages.ServerRemoveEntityMessage;
+import com.jme3.monkeyzone.messages.ServerRemovePlayerMessage;
 import com.jme3.monkeyzone.messages.StartGameMessage;
 import com.jme3.network.connection.Client;
+import com.jme3.network.physicssync.PhysicsSyncManager;
+import com.jme3.network.physicssync.SyncCharacterMessage;
+import com.jme3.network.physicssync.SyncRigidBodyMessage;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.renderer.RenderManager;
 import com.jme3.system.AppSettings;
@@ -87,6 +101,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         app.start();
     }
     private WorldManager worldManager;
+    private PhysicsSyncManager syncManager;
     private ClientEffectsManager effectsManager;
     private UserCommandControl commandControl;
     private Nifty nifty;
@@ -106,7 +121,6 @@ public class ClientMain extends SimpleApplication implements ScreenController {
             bulletState.setThreadingType(BulletAppState.ThreadingType.PARALLEL);
         }
         getStateManager().attach(bulletState);
-        bulletState.getPhysicsSpace().setDeterministic(Globals.PHYSICS_DETERMINISTIC);
         bulletState.getPhysicsSpace().setAccuracy(Globals.PHYSICS_FPS);
         inputManager.setCursorVisible(true);
         flyCam.setEnabled(false);
@@ -115,19 +129,41 @@ public class ClientMain extends SimpleApplication implements ScreenController {
 //        chaseCam.setChasingSensitivity(100);
 //        chaseCam.setTrailingEnabled(true);
 
+        syncManager = new PhysicsSyncManager(app, client);
+        syncManager.setMaxDelay(Globals.NETWORK_MAX_PHYSICS_DELAY);
+        syncManager.setMessageTypes(AutoControlMessage.class,
+                ManualControlMessage.class,
+                ActionMessage.class,
+                SyncCharacterMessage.class,
+                SyncRigidBodyMessage.class,
+                ServerEntityDataMessage.class,
+                ServerEnterEntityMessage.class,
+                ServerAddEntityMessage.class,
+                ServerAddPlayerMessage.class,
+                ServerEffectMessage.class,
+                ServerEnableEntityMessage.class,
+                ServerDisableEntityMessage.class,
+                ServerRemoveEntityMessage.class,
+                ServerRemovePlayerMessage.class);
+        stateManager.attach(syncManager);
+
         //ai manager for controlling units
         commandControl = new UserCommandControl(nifty.getScreen("default_hud"), inputManager);
         //world manager, manages entites and server commands
-        worldManager = new WorldManager(this, rootNode, bulletState.getPhysicsSpace(), client, commandControl);
+        worldManager = new WorldManager(this,rootNode, commandControl);
         //adding/creating controls later attached to user controlled spatial
-//        worldManager.addUserControl(chaseCam);
         worldManager.addUserControl(new UserInputControl(inputManager, cam));
         worldManager.addUserControl(commandControl);
         worldManager.addUserControl(new DefaultHUDControl(nifty.getScreen("default_hud")));
-        //effects manager for playing effects
-        effectsManager = new ClientEffectsManager(assetManager, audioRenderer, worldManager);
         //register effects manager with sync manager so that messages can apply their data
         worldManager.getSyncManager().addObject(-2, effectsManager);
+        syncManager.addObject(-1, worldManager);
+        stateManager.attach(worldManager);
+
+        //effects manager for playing effects
+        effectsManager = new ClientEffectsManager();
+        stateManager.attach(effectsManager);
+        
         listenerManager = new ClientNetListener(this, client, worldManager, effectsManager);
     }
 
@@ -357,9 +393,6 @@ public class ClientMain extends SimpleApplication implements ScreenController {
 
     @Override
     public void simpleUpdate(float tpf) {
-        effectsManager.update(tpf);
-        worldManager.update(tpf);
-        commandControl.update(tpf);
     }
 
     @Override
