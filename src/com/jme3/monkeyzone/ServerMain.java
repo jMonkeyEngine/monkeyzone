@@ -91,16 +91,19 @@ public class ServerMain extends SimpleApplication {
         bulletState = new BulletAppState();
         getStateManager().attach(bulletState);
         bulletState.getPhysicsSpace().setAccuracy(Globals.PHYSICS_FPS);
-
+        //create sync manager
         syncManager = new PhysicsSyncManager(app, server);
         syncManager.setSyncFrequency(Globals.NETWORK_SYNC_FREQUENCY);
         syncManager.setMessageTypes(AutoControlMessage.class,
                 ActionMessage.class,
                 ManualControlMessage.class);
         stateManager.attach(syncManager);
+        //cerate world manager
         worldManager = new WorldManager(this, rootNode);
         stateManager.attach(worldManager);
+        //register world manager with sync manager so that messages can apply their data
         syncManager.addObject(-1, worldManager);
+        //create server side game manager
         gameManager = new ServerGameManager();
         stateManager.attach(gameManager);
         listenerManager = new ServerNetListener(this, server, worldManager, gameManager);
