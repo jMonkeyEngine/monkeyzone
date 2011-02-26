@@ -1,11 +1,25 @@
---------------------
-MonkeyZone Dev Infos
---------------------
+--------------
+Designer Infos
+--------------
 
+Editable UserData of entity Spatials:
+- (float) HitPoints
+- (float) MaxHitPoints
+- (float) Speed
 
------------------------------------
-Names of flags / data used in game:
------------------------------------
+Entity Spatial marking Node names:
+- AimNode
+ - CameraAttachment
+ - ShootAttachment
+
+Level Spatial marking Node names:
+- StartPoint
+- PowerSource
+- MetalField
+
+---------------
+Developer Infos
+---------------
 
 Programmatic UserData of entities:
 - (long) entity_id
@@ -17,13 +31,3 @@ Programmatic PlayerData:
 - (int) group_id
 - (long) entity_id
 - (long) character_entity_id
-
-Editable UserData of entity Spatials:
-- (float) HitPoints
-- (float) MaxHitPoints
-- (float) Speed
-
-Level Spatial marking Node names:
-- StartPoint
-- PowerSource
-- MetalField
