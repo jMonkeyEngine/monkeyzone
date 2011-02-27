@@ -321,19 +321,19 @@ public class UserCommandControl implements Control, ActionListener {
         currentSelectionMenu = key;
         switch (currentSelectionMenu) {
             case Main:
-                selectionTexts[1].changeText("1 - Offensive Units");
+                selectionTexts[1].setText("1 - Offensive Units");
 //                selectionTexts[2].changeText("2 - Defensive Units");
 //                selectionTexts[3].changeText("3 - Builder Units");
 //                selectionTexts[4].changeText("4 - Nav Points");
-                selectionTexts[2].changeText("");
-                selectionTexts[3].changeText("");
-                selectionTexts[4].changeText("");
-                selectionTexts[5].changeText("");
-                selectionTexts[6].changeText("");
-                selectionTexts[7].changeText("");
-                selectionTexts[8].changeText("");
-                selectionTexts[9].changeText("");
-                selectionTexts[0].changeText("");
+                selectionTexts[2].setText("");
+                selectionTexts[3].setText("");
+                selectionTexts[4].setText("");
+                selectionTexts[5].setText("");
+                selectionTexts[6].setText("");
+                selectionTexts[7].setText("");
+                selectionTexts[8].setText("");
+                selectionTexts[9].setText("");
+                selectionTexts[0].setText("");
                 break;
             case Offensive:
                 clearSelectionMenu();
@@ -344,16 +344,16 @@ public class UserCommandControl implements Control, ActionListener {
                     if (i >= 10) {
                         i = 0;
                         if (selectedEntities.contains(entry.getValue())) {
-                            selectionTexts[i].changeText(i + " - " + entry.getValue().getName() + " *");
+                            selectionTexts[i].setText(i + " - " + entry.getValue().getName() + " *");
                         } else {
-                            selectionTexts[i].changeText(i + " - " + entry.getValue().getName());
+                            selectionTexts[i].setText(i + " - " + entry.getValue().getName());
                         }
                         return;
                     } else {
                         if (selectedEntities.contains(entry.getValue())) {
-                            selectionTexts[i].changeText(i + " - " + entry.getValue().getName() + " *");
+                            selectionTexts[i].setText(i + " - " + entry.getValue().getName() + " *");
                         } else {
-                            selectionTexts[i].changeText(i + " - " + entry.getValue().getName());
+                            selectionTexts[i].setText(i + " - " + entry.getValue().getName());
                         }
                     }
                 }
@@ -367,7 +367,7 @@ public class UserCommandControl implements Control, ActionListener {
     private void clearSelectionMenu() {
         for (int i = 0; i < selectionTexts.length; i++) {
             TextRenderer textRenderer = selectionTexts[i];
-            textRenderer.changeText("");
+            textRenderer.setText("");
         }
     }
 
@@ -445,7 +445,7 @@ public class UserCommandControl implements Control, ActionListener {
             i++;
             try {
                 Class<? extends Command> class1 = it.next();
-                commandTexts[i].changeText("F" + i + " - " + class1.newInstance().getName() + "  ");
+                commandTexts[i].setText("F" + i + " - " + class1.newInstance().getName() + "  ");
             } catch (InstantiationException ex) {
                 Logger.getLogger(UserCommandControl.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IllegalAccessException ex) {
@@ -463,7 +463,7 @@ public class UserCommandControl implements Control, ActionListener {
     private void clearCommandMenu() {
         for (int i = 0; i < commandTexts.length; i++) {
             TextRenderer textRenderer = commandTexts[i];
-            textRenderer.changeText("");
+            textRenderer.setText("");
         }
     }
 
