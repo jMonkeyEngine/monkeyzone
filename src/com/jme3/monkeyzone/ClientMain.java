@@ -58,8 +58,8 @@ import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.renderer.RenderManager;
 import com.jme3.system.AppSettings;
 import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.controls.dynamic.LabelCreator;
-import de.lessvoid.nifty.controls.textfield.controller.TextFieldControl;
+import de.lessvoid.nifty.controls.dynamic.TextCreator;
+import de.lessvoid.nifty.controls.textfield.TextFieldControl;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
@@ -195,7 +195,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         enqueue(new Callable<Void>() {
 
             public Void call() throws Exception {
-                statusText.changeText(text);
+                statusText.setText(text);
                 return null;
             }
         });
@@ -216,7 +216,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
                     Element element = it.next();
                     element.markForRemoval();//disable();
                 }
-                LabelCreator labelCreator = new LabelCreator("unknown player");
+                TextCreator labelCreator = new TextCreator("unknown player");
                 labelCreator.setStyle("my-listbox-item-style");
                 for (Iterator<PlayerData> it = players.iterator(); it.hasNext();) {
                     PlayerData data = it.next();
@@ -239,7 +239,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
             public Void call() throws Exception {
                 Screen screen = nifty.getScreen("lobby");
                 Element panel = screen.findElementByName("layer").findElementByName("bottom_panel").findElementByName("chat_panel").findElementByName("chat_list").findElementByName("chat_list_panel");
-                LabelCreator labelCreator = new LabelCreator(text);
+                TextCreator labelCreator = new TextCreator(text);
                 labelCreator.setStyle("my-listbox-item-style");
                 labelCreator.create(nifty, screen, panel);
                 return null;
@@ -285,7 +285,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
             return;
         }
         listenerManager.setName(userName);
-        statusText.changeText("Connecting..");
+        statusText.setText("Connecting..");
         try {
             client.connect(Globals.DEFAULT_SERVER, Globals.DEFAULT_PORT_TCP, Globals.DEFAULT_PORT_UDP);
             client.start();
@@ -343,7 +343,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
 
                         public Void call() throws Exception {
                             nifty.gotoScreen("load_level");
-                            statusText.changeText("Loading Terrain..");
+                            statusText.setText("Loading Terrain..");
                             return null;
                         }
                     }).get();
@@ -351,7 +351,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
                     enqueue(new Callable<Void>() {
 
                         public Void call() throws Exception {
-                            statusText.changeText("Creating NavMesh..");
+                            statusText.setText("Creating NavMesh..");
                             return null;
                         }
                     }).get();
@@ -359,7 +359,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
                     enqueue(new Callable<Void>() {
 
                         public Void call() throws Exception {
-                            statusText.changeText("Loading Models..");
+                            statusText.setText("Loading Models..");
                             return null;
                         }
                     }).get();
@@ -368,7 +368,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
 
                         public Void call() throws Exception {
                             worldManager.attachLevel();
-                            statusText.changeText("Done Loading!");
+                            statusText.setText("Done Loading!");
                             nifty.gotoScreen("default_hud");
                             inputManager.setCursorVisible(false);
 //                            chaseCam.setDragToRotate(false);
