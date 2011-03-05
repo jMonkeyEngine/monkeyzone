@@ -18,30 +18,30 @@
                     <onStartScreen  name="fade" startColor="#0000" endColor="#000f" length="1500"/>
                     <onEndScreen name="move" mode="out" direction="bottom" length="300" startDelay="0" inherit="true"/>
                 </effect>
-                <label text="Welcome to MonkeyZone!" >
+                <text style="nifty-label" text="Welcome to MonkeyZone!" >
                     <effect>
                         <onStartScreen name="fade" startColor="#0000" endColor="#000f" length="1500" startDelay="250"/>
                     </effect>
-                </label>
-                <label text=""/>
+                </text>
+                <text style="nifty-label" text=""/>
                 <image align="center" valign="center" filename="Interface/Images/logo.gif" >
                     <effect>
                         <onStartScreen name="fade" startColor="#0000" endColor="#000f" length="1500" startDelay="250"/>
                     </effect>
                 </image>
-                <label text=""/>
-                <label text="Enter Username" valign="center"/>
+                <text style="nifty-label" text=""/>
+                <text style="nifty-label" text="Enter Username" valign="center"/>
                 <control id="username_text" name="textfield" align="center" valign="center" width="60%">
                     <interact onEnter="connect()"/>
                 </control>
-                <label text=""/>
+                <text style="nifty-label" text=""/>
                 <control id="start_button" name="button" label="Start Game" align="center">
                     <interact onClick="connect()"/>
                     <effect>
                         <onStartScreen name="fade" startColor="#0000" endColor="#000f" length="1500" startDelay="250"/>
                     </effect>
                 </control>
-                <label text=""/>
+                <text style="nifty-label" text=""/>
                 <text id="status_text" font="aurulent-sans-17.fnt" color="#ffff" text="" align="center" valign="center" >
                     <effect>
                         <onStartScreen name="fade" startColor="#0000" endColor="#000f" length="1500" startDelay="250"/>
@@ -55,7 +55,7 @@
         <layer id="layer" childLayout="vertical">
             <panel id="panel" childLayout="horizontal">
                 <panel id="players_panel" height="100%" width="320px" valign="center" style="nifty-panel" childLayout="vertical">
-                    <label text="Players Online" valign="center"/>
+                    <text style="nifty-label" text="Players Online" valign="center"/>
                     <panel id="panel" childLayout="horizontal">
                         <control id="players_list" name="listBox" horizontal="false" width="*" height="100%" childLayout="vertical" visibleToMouse="true">
                             <panel id="panel" childLayout="vertical" visibleToMouse="true" width="100%" padding="20px" >
@@ -64,26 +64,26 @@
                     </panel>
                 </panel>
                 <panel id="main_panel" height="100%" width="*" valign="center" style="nifty-panel" childLayout="vertical">
-                    <label id="game_name" text="Welcome to MonkeyZone!" valign="center"/>
-                    <label text="" valign="center"/>
-                    <label text="To play, everybody has to connect first" valign="center"/>
-                    <label text="then press the start game button" valign="center"/>
-                    <label text="the game will launch for all clients." valign="center"/>
-                    <label text="" valign="center"/>
-                    <label text="When theres no players online anymore, the game" valign="center"/>
-                    <label text="will stop and can be started again." valign="center"/>
-                    <label text="" valign="center"/>
-                    <label text="Have Fun!" valign="center"/>
+                    <text style="nifty-label" id="game_name" text="Welcome to MonkeyZone!" valign="center"/>
+                    <text style="nifty-label" text="" valign="center"/>
+                    <text style="nifty-label" text="To play, everybody has to connect first" valign="center"/>
+                    <text style="nifty-label" text="then press the start game button" valign="center"/>
+                    <text style="nifty-label" text="the game will launch for all clients." valign="center"/>
+                    <text style="nifty-label" text="" valign="center"/>
+                    <text style="nifty-label" text="When theres no players online anymore, the game" valign="center"/>
+                    <text style="nifty-label" text="will stop and can be started again." valign="center"/>
+                    <text style="nifty-label" text="" valign="center"/>
+                    <text style="nifty-label" text="Have Fun!" valign="center"/>
                 </panel>
                 <panel id="maps_panel" height="100%" width="300px" valign="center" style="nifty-panel" childLayout="vertical">
-                    <label text="Available Maps" valign="center"/>
+                    <text style="nifty-label" text="Available Maps" valign="center"/>
                     <panel id="panel" childLayout="horizontal">
                         <control id="maps_list" name="listBox" horizontal="false" height="100%" childLayout="vertical" visibleToMouse="true">
                             <panel id="panel" childLayout="vertical" visibleToMouse="true" width="100%" padding="20px" >
                             </panel>
                         </control>
                     </panel>
-                    <label text="" valign="center"/>
+                    <text style="nifty-label" text="" valign="center"/>
                     <control id="start_server_button" name="button" label="Start Game" align="center">
                         <interact onClick="startGame()"/>
                     </control>
@@ -123,8 +123,8 @@
                     <onStartScreen name="move" mode="in" direction="top" length="300" startDelay="0" inherit="true"/>
                     <onEndScreen name="move" mode="out" direction="bottom" length="300" startDelay="0" inherit="true"/>
                 </effect>
-                <label text="Loading Level" />
-                <label text=""/>
+                <text style="nifty-label" text="Loading Level" />
+                <text style="nifty-label" text=""/>
                 <text id="status_text" font="aurulent-sans-17.fnt" color="#ffff" text="Loading.." align="center" valign="center" />
             </panel>
         </layer>
