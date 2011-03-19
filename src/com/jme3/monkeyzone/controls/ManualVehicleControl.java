@@ -36,7 +36,7 @@ import com.jme3.bullet.PhysicsTickListener;
 import com.jme3.bullet.control.VehicleControl;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
-import com.jme3.network.connection.Client;
+import com.jme3.network.Client;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;

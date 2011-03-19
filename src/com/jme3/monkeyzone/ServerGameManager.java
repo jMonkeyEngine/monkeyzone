@@ -76,11 +76,7 @@ public class ServerGameManager extends AbstractAppState {
         mapName = map;
         //TODO: parse client side string, create preload model list automatically
         modelNames = new String[]{"Models/HoverTank/HoverTank.j3o", "Models/Sinbad/Sinbad.j3o", "Models/Ferrari/Car.j3o", "Models/Buggy/Buggy.j3o"};
-        try {
-            server.getServer().broadcast(new StartGameMessage(mapName, modelNames));
-        } catch (IOException ex) {
-            Logger.getLogger(ServerGameManager.class.getName()).log(Level.SEVERE, "Cannot broadcast startgame: {0}", ex);
-        }
+        server.getServer().broadcast(new StartGameMessage(mapName, modelNames));
         worldManager.loadLevel(mapName);
         worldManager.createNavMesh();
         worldManager.preloadModels(modelNames);
@@ -116,11 +112,7 @@ public class ServerGameManager extends AbstractAppState {
         }
         mapName = "null";
         modelNames = new String[]{};
-        try {
-            server.getServer().broadcast(new StartGameMessage(mapName, modelNames));
-        } catch (IOException ex) {
-            Logger.getLogger(ServerGameManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        server.getServer().broadcast(new StartGameMessage(mapName, modelNames));
         worldManager.closeLevel();
         running = false;
         return true;

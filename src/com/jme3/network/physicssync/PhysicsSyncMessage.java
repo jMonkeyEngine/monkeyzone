@@ -31,7 +31,7 @@
  */
 package com.jme3.network.physicssync;
 
-import com.jme3.network.message.Message;
+import com.jme3.network.Message;
 import com.jme3.network.serializing.Serializable;
 
 /**
@@ -41,7 +41,7 @@ import com.jme3.network.serializing.Serializable;
  * @author normenhansen
  */
 @Serializable()
-public abstract class PhysicsSyncMessage extends Message {
+public abstract class PhysicsSyncMessage implements Message {
 
     public long syncId = -1;
     public double time;
@@ -51,6 +51,10 @@ public abstract class PhysicsSyncMessage extends Message {
 
     public PhysicsSyncMessage(long id) {
         this.syncId = id;
+    }
+
+    public boolean isReliable() {
+        return true;
     }
 
     public abstract void applyData(Object object);

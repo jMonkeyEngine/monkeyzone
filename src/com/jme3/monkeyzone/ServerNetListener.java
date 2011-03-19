@@ -38,11 +38,12 @@ import com.jme3.monkeyzone.messages.HandshakeMessage;
 import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
 import com.jme3.monkeyzone.messages.ServerJoinMessage;
 import com.jme3.monkeyzone.messages.StartGameMessage;
-import com.jme3.network.connection.Client;
-import com.jme3.network.connection.Server;
-import com.jme3.network.events.ConnectionListener;
-import com.jme3.network.events.MessageListener;
-import com.jme3.network.message.Message;
+import com.jme3.network.Client;
+import com.jme3.network.Server;
+import com.jme3.network.ConnectionListener;
+import com.jme3.network.HostedConnection;
+import com.jme3.network.MessageListener;
+import com.jme3.network.Message;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
@@ -53,10 +54,10 @@ import java.util.logging.Logger;
  * Handles the network message transfer for the server in a threadsafe way
  * @author normenhansen
  */
-public class ServerNetListener implements MessageListener, ConnectionListener {
+public class ServerNetListener implements MessageListener<HostedConnection>, ConnectionListener {
 
     ServerMain app;
-    com.jme3.network.connection.Server server;
+    com.jme3.network.Server server;
     WorldManager worldManager;
     ServerGameManager gameManager;
 
@@ -69,8 +70,8 @@ public class ServerNetListener implements MessageListener, ConnectionListener {
         server.addMessageListener(this, HandshakeMessage.class, ClientJoinMessage.class, ChatMessage.class, StartGameMessage.class, ActionMessage.class);
     }
 
-    public void clientConnected(Client client) {
-        int clientId = client.getClientID();
+    public void connectionAdded(Server serverr, HostedConnection client) {
+        int clientId = (int) client.getId();
         if (!ServerClientData.exsists(clientId)) {
             ServerClientData.add(clientId);
         } else {
@@ -79,8 +80,8 @@ public class ServerNetListener implements MessageListener, ConnectionListener {
         }
     }
 
-    public void clientDisconnected(Client client) {
-        final int clientId = client.getClientID();
+    public void connectionRemoved(Server serverr, HostedConnection client) {
+        final int clientId = (int) client.getId();
         final long playerId = ServerClientData.getPlayerId(clientId);
         ServerClientData.remove(clientId);
         app.enqueue(new Callable<Void>() {
@@ -88,12 +89,8 @@ public class ServerNetListener implements MessageListener, ConnectionListener {
             public Void call() throws Exception {
                 String name = PlayerData.getStringData(playerId, "name");
                 worldManager.removePlayer(playerId);
-                try {
-                    server.broadcast(new ChatMessage("Server", name + " left the game"));
-                    Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Broadcast player left message");
-                } catch (IOException ex) {
-                    Logger.getLogger(ServerNetListener.class.getName()).log(Level.SEVERE, "{0}", ex);
-                }
+                server.broadcast(new ChatMessage("Server", name + " left the game"));
+                Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Broadcast player left message");
                 if (PlayerData.getHumanPlayers().isEmpty()) {
                     gameManager.stopGame();
                 }
@@ -102,30 +99,22 @@ public class ServerNetListener implements MessageListener, ConnectionListener {
         });
     }
 
-    public void messageReceived(Message message) {
+    public void messageReceived(HostedConnection source, Message message) {
         if (message instanceof HandshakeMessage) {
             HandshakeMessage msg = (HandshakeMessage) message;
             Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Got handshake message");
             if (msg.protocol_version != Globals.PROTOCOL_VERSION) {
-                try {
-                    msg.getClient().kick("Connection Protocol Mismatch - Update Client");
+                    source.close("Connection Protocol Mismatch - Update Client");
                     Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Client protocol mismatch, disconnecting");
                     return;
-                } catch (IOException ex) {
-                    Logger.getLogger(ServerNetListener.class.getName()).log(Level.SEVERE, "Error kickig client with bad protocol version {0}", ex);
-                }
             }
             msg.server_version = Globals.SERVER_VERSION;
-            try {
-                msg.getClient().send(msg);
+                source.send(msg);
                 Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Sent back handshake message");
-            } catch (IOException ex) {
-                Logger.getLogger(ServerNetListener.class.getName()).log(Level.SEVERE, "Error sending back handshake message {0}", ex);
-            }
         } else if (message instanceof ClientJoinMessage) {
             final ClientJoinMessage msg = (ClientJoinMessage) message;
             Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Got client join message");
-            final int clientId = msg.getClient().getClientID();
+            final int clientId = (int)source.getId();
             //TODO: login user/pass check
             if (!ServerClientData.exsists(clientId)) {
                 Logger.getLogger(ServerNetListener.class.getName()).log(Level.WARNING, "Receiving join message from unknown client");
@@ -137,13 +126,9 @@ public class ServerNetListener implements MessageListener, ConnectionListener {
             ServerClientData.setConnected(clientId, true);
             ServerClientData.setPlayerId(clientId, newPlayerId);
             ServerJoinMessage serverJoinMessage = new ServerJoinMessage(newPlayerId, clientId, msg.name, false);
-            try {
-                server.broadcast(new ChatMessage("Server", msg.name + " joined the game"));
-                message.getClient().send(serverJoinMessage);
-                Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Login succesful - sent back join message");
-            } catch (IOException ex) {
-                Logger.getLogger(ServerNetListener.class.getName()).log(Level.SEVERE, "{0}", ex);
-            }
+            server.broadcast(new ChatMessage("Server", msg.name + " joined the game"));
+            source.send(serverJoinMessage);
+            Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Login succesful - sent back join message");
             //add the player
             app.enqueue(new Callable<Void>() {
 
@@ -154,7 +139,7 @@ public class ServerNetListener implements MessageListener, ConnectionListener {
                     for (Iterator<PlayerData> it = PlayerData.getPlayers().iterator(); it.hasNext();) {
                         PlayerData playerData = it.next();
                         if (playerData.getId() != newPlayerId) {
-                            worldManager.getSyncManager().send(msg.getClient(), new ServerAddPlayerMessage(playerData.getId(), playerData.getStringData("name"), playerData.getIntData("group_id"), playerData.getAiControl()));
+                            worldManager.getSyncManager().send(clientId, new ServerAddPlayerMessage(playerData.getId(), playerData.getStringData("name"), playerData.getIntData("group_id"), playerData.getAiControl()));
                             Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Send player {0} to client {1}", new Object[]{playerData.getId(), newPlayerId});
                         }
                     }
@@ -164,8 +149,8 @@ public class ServerNetListener implements MessageListener, ConnectionListener {
             });
         } else if (message instanceof ChatMessage) {
             ChatMessage msg = (ChatMessage) message;
-            int clientId = message.getClient().getClientID();
-            if (!checkClient(message)) {
+            int clientId = (int)source.getId();
+            if (!checkClient(clientId, message)) {
                 return;
             }
             try {
@@ -196,26 +181,16 @@ public class ServerNetListener implements MessageListener, ConnectionListener {
         }
     }
 
-    public void messageSent(Message message) {
-    }
-
-    public void objectReceived(Object object) {
-    }
-
-    public void objectSent(Object object) {
-    }
-
     /**
      * checks if the message client is valid, meaning logged in
      * @param message
      * @return
      */
-    private boolean checkClient(Message message) {
-        int clientId = message.getClient().getClientID();
+    private boolean checkClient(int clientId, Message message) {
         if (ServerClientData.exsists(clientId) && ServerClientData.isConnected(clientId)) {
             return true;
         } else {
-            Logger.getLogger(ServerNetListener.class.getName()).log(Level.WARNING, "Invalid client, reject data from client {0}", message.getClient());
+            Logger.getLogger(ServerNetListener.class.getName()).log(Level.WARNING, "Invalid client, reject data from client {0}", clientId);
             return false;
         }
     }

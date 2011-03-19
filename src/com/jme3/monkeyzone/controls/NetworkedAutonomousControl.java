@@ -36,7 +36,7 @@ import com.jme3.export.JmeImporter;
 import com.jme3.math.Vector3f;
 import com.jme3.monkeyzone.messages.AutoControlMessage;
 import com.jme3.monkeyzone.messages.ActionMessage;
-import com.jme3.network.connection.Client;
+import com.jme3.network.Client;
 import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.Control;
@@ -76,11 +76,7 @@ public abstract class NetworkedAutonomousControl implements AutonomousControl, N
 
     public void performAction(int action, boolean activate) {
         if (client != null) {
-            try {
-                client.send(new ActionMessage(entity_id, action, activate));
-            } catch (IOException ex) {
-                Logger.getLogger(NetworkedAutonomousControl.class.getName()).log(Level.SEVERE, "Cannot send auto control message: {0}", ex);
-            }
+            client.send(new ActionMessage(entity_id, action, activate));
         }
     }
 
@@ -94,11 +90,7 @@ public abstract class NetworkedAutonomousControl implements AutonomousControl, N
     }
 
     private void sendMoveSync() {
-        try {
-            client.send(new AutoControlMessage(entity_id, lastAimDirection, lastMoveToLocation));
-        } catch (IOException ex) {
-            Logger.getLogger(NetworkedAutonomousControl.class.getName()).log(Level.SEVERE, "Cannot send auto control message: {0}", ex);
-        }
+        client.send(new AutoControlMessage(entity_id, lastAimDirection, lastMoveToLocation));
     }
 
     public abstract void doAimAt(Vector3f direction);

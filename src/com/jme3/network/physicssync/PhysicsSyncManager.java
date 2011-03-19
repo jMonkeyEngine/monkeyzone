@@ -37,12 +37,12 @@ import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.control.VehicleControl;
 import com.jme3.bullet.objects.PhysicsRigidBody;
-import com.jme3.network.connection.Server;
-import com.jme3.network.connection.Client;
-import com.jme3.network.events.MessageListener;
-import com.jme3.network.message.Message;
+import com.jme3.network.Server;
+import com.jme3.network.Client;
+import com.jme3.network.HostedConnection;
+import com.jme3.network.Message;
+import com.jme3.network.MessageListener;
 import com.jme3.scene.Spatial;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -219,11 +219,7 @@ public class PhysicsSyncManager extends AbstractAppState implements MessageListe
             return;
         }
         msg.time = time;
-        try {
-            server.broadcast(msg);
-        } catch (IOException ex) {
-            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.SEVERE, "Cannot broadcast message: {0}", ex);
-        }
+        server.broadcast(msg);
     }
 
     /**
@@ -236,7 +232,7 @@ public class PhysicsSyncManager extends AbstractAppState implements MessageListe
             Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.SEVERE, "Broadcasting message on client {0}", msg);
             return;
         }
-        send(server.getClientByID(client), msg);
+        send(server.getConnection(client), msg);
     }
 
     /**
@@ -244,17 +240,13 @@ public class PhysicsSyncManager extends AbstractAppState implements MessageListe
      * @param client
      * @param msg
      */
-    public void send(Client client, PhysicsSyncMessage msg) {
+    public void send(HostedConnection client, PhysicsSyncMessage msg) {
         msg.time = time;
-        try {
-            if (client == null) {
-                Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.SEVERE, "Client null when sending: {0}", client);
-                return;
-            }
-            client.send(msg);
-        } catch (IOException ex) {
-            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.SEVERE, "Cannot broadcast message: {0}", ex);
+        if (client == null) {
+            Logger.getLogger(PhysicsSyncManager.class.getName()).log(Level.SEVERE, "Client null when sending: {0}", client);
+            return;
         }
+        client.send(msg);
     }
 
     /**
@@ -271,16 +263,7 @@ public class PhysicsSyncManager extends AbstractAppState implements MessageListe
         }
     }
 
-    public void messageSent(Message message) {
-    }
-
-    public void objectReceived(Object object) {
-    }
-
-    public void objectSent(Object object) {
-    }
-
-    public void messageReceived(final Message message) {
+    public void messageReceived(Object source, final Message message) {
         assert (message instanceof PhysicsSyncMessage);
         if (client != null) {
             app.enqueue(new Callable<Void>() {

@@ -36,6 +36,7 @@ import com.jme3.bullet.BulletAppState;
 import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.monkeyzone.messages.AutoControlMessage;
 import com.jme3.monkeyzone.messages.ManualControlMessage;
+import com.jme3.network.Network;
 import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.renderer.RenderManager;
 import com.jme3.system.AppSettings;
@@ -50,7 +51,7 @@ import java.util.logging.Logger;
  */
 public class ServerMain extends SimpleApplication {
 
-    private static com.jme3.network.connection.Server server;
+    private static com.jme3.network.Server server;
     private static ServerMain app;
 
     public static void main(String[] args) {
@@ -82,7 +83,7 @@ public class ServerMain extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         try {
-            server = new com.jme3.network.connection.Server(Globals.DEFAULT_PORT_TCP, Globals.DEFAULT_PORT_UDP);
+            server = Network.createServer(Globals.DEFAULT_PORT_TCP, Globals.DEFAULT_PORT_UDP);
             server.start();
         } catch (IOException ex) {
             Logger.getLogger(ServerMain.class.getName()).log(Level.SEVERE, "Cannot start server: {0}", ex);
@@ -121,10 +122,6 @@ public class ServerMain extends SimpleApplication {
     @Override
     public void destroy() {
         super.destroy();
-        try {
-            server.stop();
-        } catch (IOException ex) {
-            Logger.getLogger(ClientMain.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        server.close();
     }
 }

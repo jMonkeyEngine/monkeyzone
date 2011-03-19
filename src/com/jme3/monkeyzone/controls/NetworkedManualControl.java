@@ -35,7 +35,7 @@ import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.monkeyzone.messages.ManualControlMessage;
-import com.jme3.network.connection.Client;
+import com.jme3.network.Client;
 import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.Control;
@@ -107,11 +107,7 @@ public abstract class NetworkedManualControl implements ManualControl, NetworkAc
 
     public void performAction(int button, boolean pressed) {
         if (client != null) {
-            try {
-                client.send(new ActionMessage(entity_id, button, pressed));
-            } catch (IOException ex) {
-                Logger.getLogger(NetworkedManualControl.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            client.send(new ActionMessage(entity_id, button, pressed));
         }
     }
 
@@ -128,11 +124,7 @@ public abstract class NetworkedManualControl implements ManualControl, NetworkAc
     public abstract void doPerformAction(int button, boolean pressed);
 
     private void sendMoveSync() {
-        try {
-            client.send(new ManualControlMessage(entity_id, lastSteerX, lastSteerY, lastMoveX, lastMoveY, lastMoveZ));
-        } catch (IOException ex) {
-            Logger.getLogger(NetworkedManualControl.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        client.send(new ManualControlMessage(entity_id, lastSteerX, lastSteerY, lastMoveX, lastMoveY, lastMoveZ));
     }
 
     public void setEnabled(boolean enabled) {
