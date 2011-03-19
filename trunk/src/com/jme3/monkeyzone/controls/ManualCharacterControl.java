@@ -37,7 +37,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.monkeyzone.Globals;
 import com.jme3.monkeyzone.messages.ActionMessage;
-import com.jme3.network.connection.Client;
+import com.jme3.network.Client;
 import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;

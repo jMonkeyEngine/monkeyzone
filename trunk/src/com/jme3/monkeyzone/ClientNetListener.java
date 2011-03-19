@@ -38,11 +38,10 @@ import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
 import com.jme3.monkeyzone.messages.ServerJoinMessage;
 import com.jme3.monkeyzone.messages.ServerRemovePlayerMessage;
 import com.jme3.monkeyzone.messages.StartGameMessage;
-import com.jme3.network.connection.Client;
-import com.jme3.network.events.ConnectionListener;
-import com.jme3.network.events.MessageListener;
-import com.jme3.network.message.Message;
-import java.io.IOException;
+import com.jme3.network.Client;
+import com.jme3.network.ClientStateListener;
+import com.jme3.network.MessageListener;
+import com.jme3.network.Message;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,7 +50,7 @@ import java.util.logging.Logger;
  * Handles the network message transfer for the client in a threadsafe way
  * @author normenhansen
  */
-public class ClientNetListener implements MessageListener, ConnectionListener {
+public class ClientNetListener implements MessageListener, ClientStateListener {
 
     private ClientMain app;
     private Client client;
@@ -63,7 +62,7 @@ public class ClientNetListener implements MessageListener, ConnectionListener {
         this.app = app;
         this.client = client;
         this.worldManager = worldManager;
-        client.addConnectionListener(this);
+        client.addClientStateListener(this);
         client.addMessageListener(this, HandshakeMessage.class, ServerJoinMessage.class, StartGameMessage.class, ChatMessage.class, ServerAddPlayerMessage.class, ServerRemovePlayerMessage.class);
     }
 
@@ -74,13 +73,8 @@ public class ClientNetListener implements MessageListener, ConnectionListener {
 
             public Void call() throws Exception {
                 HandshakeMessage msg = new HandshakeMessage(Globals.PROTOCOL_VERSION, Globals.CLIENT_VERSION, -1);
-                try {
-                    client.send(msg);
-                    Logger.getLogger(ClientNetListener.class.getName()).log(Level.INFO, "Sent handshake message");
-                } catch (IOException ex) {
-                    setStatusText("Error sending handshake!");
-                    Logger.getLogger(ClientNetListener.class.getName()).log(Level.SEVERE, "While HandShake: {0}", ex);
-                }
+                client.send(msg);
+                Logger.getLogger(ClientNetListener.class.getName()).log(Level.INFO, "Sent handshake message");
                 return null;
             }
         });
@@ -90,7 +84,7 @@ public class ClientNetListener implements MessageListener, ConnectionListener {
         setStatusText("Server connection failed!");
     }
 
-    public void messageReceived(Message message) {
+    public void messageReceived(Object source, Message message) {
         if (message instanceof HandshakeMessage) {
             HandshakeMessage msg = (HandshakeMessage) message;
             Logger.getLogger(ClientNetListener.class.getName()).log(Level.INFO, "Got handshake message back");
@@ -98,12 +92,7 @@ public class ClientNetListener implements MessageListener, ConnectionListener {
                 setStatusText("Protocol mismatch - update client!");
                 Logger.getLogger(ClientNetListener.class.getName()).log(Level.INFO, "Client protocol mismatch, disconnecting");
             }
-            try {
-                client.send(new ClientJoinMessage(name, pass));
-            } catch (IOException ex) {
-                setStatusText("Error sending join!");
-                Logger.getLogger(ClientNetListener.class.getName()).log(Level.SEVERE, "While Join: {0}", ex);
-            }
+            client.send(new ClientJoinMessage(name, pass));
         } else if (message instanceof ServerJoinMessage) {
             final ServerJoinMessage msg = (ServerJoinMessage) message;
             if (!msg.rejected) {
@@ -134,15 +123,6 @@ public class ClientNetListener implements MessageListener, ConnectionListener {
         } else if (message instanceof ServerRemovePlayerMessage) {
             app.updatePlayerData();
         }
-    }
-
-    public void messageSent(Message message) {
-    }
-
-    public void objectReceived(Object object) {
-    }
-
-    public void objectSent(Object object) {
     }
 
     private void setStatusText(String text) {

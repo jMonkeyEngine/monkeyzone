@@ -50,7 +50,8 @@ import com.jme3.monkeyzone.messages.ServerEntityDataMessage;
 import com.jme3.monkeyzone.messages.ServerRemoveEntityMessage;
 import com.jme3.monkeyzone.messages.ServerRemovePlayerMessage;
 import com.jme3.monkeyzone.messages.StartGameMessage;
-import com.jme3.network.connection.Client;
+import com.jme3.network.Network;
+import com.jme3.network.NetworkClient;
 import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.network.physicssync.SyncCharacterMessage;
 import com.jme3.network.physicssync.SyncRigidBodyMessage;
@@ -107,7 +108,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
     private Nifty nifty;
     private NiftyJmeDisplay niftyDisplay;
     private TextRenderer statusText;
-    private Client client;
+    private NetworkClient client;
     private ClientNetListener listenerManager;
     private BulletAppState bulletState;
 //    private ChaseCamera chaseCam;
@@ -115,7 +116,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
     @Override
     public void simpleInitApp() {
         startNifty();
-        client = new Client();
+        client = Network.createClient();
         bulletState = new BulletAppState();
         if (Globals.PHYSICS_THREADED) {
             bulletState.setThreadingType(BulletAppState.ThreadingType.PARALLEL);
@@ -267,11 +268,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
 
     //FIXME: nifty cannot find sendChat() when sendChat(String text) is existing too
     public void sendMessage(String text) {
-        try {
-            client.send(new ChatMessage(text));
-        } catch (IOException ex) {
-            Logger.getLogger(ClientMain.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        client.send(new ChatMessage(text));
     }
 
     /**
@@ -287,7 +284,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         listenerManager.setName(userName);
         statusText.setText("Connecting..");
         try {
-            client.connect(Globals.DEFAULT_SERVER, Globals.DEFAULT_PORT_TCP, Globals.DEFAULT_PORT_UDP);
+            client.connectToServer(Globals.DEFAULT_SERVER, Globals.DEFAULT_PORT_TCP, Globals.DEFAULT_PORT_UDP, Globals.DEFAULT_PORT_UDP+1000);
             client.start();
         } catch (IOException ex) {
             setStatusText(ex.getMessage());
@@ -309,11 +306,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
      */
     public void startGame() {
         //TODO: map selection
-        try {
-            client.send(new StartGameMessage("Scenes/MonkeyZone.j3o"));
-        } catch (IOException ex) {
-            Logger.getLogger(ClientMain.class.getName()).log(Level.SEVERE, "Cannot send start game message: {0}", ex);
-        }
+        client.send(new StartGameMessage("Scenes/MonkeyZone.j3o"));
     }
 
     /**
@@ -402,7 +395,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
     @Override
     public void destroy() {
         try {
-            client.disconnect();
+            client.close();
         } catch (Exception ex) {
             Logger.getLogger(ClientMain.class.getName()).log(Level.SEVERE, null, ex);
         }
