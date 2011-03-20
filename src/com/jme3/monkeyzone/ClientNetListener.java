@@ -80,7 +80,7 @@ public class ClientNetListener implements MessageListener, ClientStateListener {
         });
     }
 
-    public void clientDisconnected(Client clienst) {
+    public void clientDisconnected(Client clienst, DisconnectInfo info) {
         setStatusText("Server connection failed!");
     }
 
