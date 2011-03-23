@@ -284,7 +284,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         listenerManager.setName(userName);
         statusText.setText("Connecting..");
         try {
-            client.connectToServer(Globals.DEFAULT_SERVER, Globals.DEFAULT_PORT_TCP, Globals.DEFAULT_PORT_UDP, Globals.DEFAULT_PORT_UDP+1000);
+            client.connectToServer(Globals.DEFAULT_SERVER, Globals.DEFAULT_PORT_TCP, Globals.DEFAULT_PORT_UDP);
             client.start();
         } catch (IOException ex) {
             setStatusText(ex.getMessage());
