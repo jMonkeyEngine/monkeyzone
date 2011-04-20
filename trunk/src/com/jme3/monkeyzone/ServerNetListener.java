@@ -38,13 +38,11 @@ import com.jme3.monkeyzone.messages.HandshakeMessage;
 import com.jme3.monkeyzone.messages.ServerAddPlayerMessage;
 import com.jme3.monkeyzone.messages.ServerJoinMessage;
 import com.jme3.monkeyzone.messages.StartGameMessage;
-import com.jme3.network.Client;
 import com.jme3.network.Server;
 import com.jme3.network.ConnectionListener;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Message;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
@@ -104,17 +102,17 @@ public class ServerNetListener implements MessageListener<HostedConnection>, Con
             HandshakeMessage msg = (HandshakeMessage) message;
             Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Got handshake message");
             if (msg.protocol_version != Globals.PROTOCOL_VERSION) {
-                    source.close("Connection Protocol Mismatch - Update Client");
-                    Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Client protocol mismatch, disconnecting");
-                    return;
+                source.close("Connection Protocol Mismatch - Update Client");
+                Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Client protocol mismatch, disconnecting");
+                return;
             }
             msg.server_version = Globals.SERVER_VERSION;
-                source.send(msg);
-                Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Sent back handshake message");
+            source.send(msg);
+            Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Sent back handshake message");
         } else if (message instanceof ClientJoinMessage) {
             final ClientJoinMessage msg = (ClientJoinMessage) message;
             Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Got client join message");
-            final int clientId = (int)source.getId();
+            final int clientId = (int) source.getId();
             //TODO: login user/pass check
             if (!ServerClientData.exsists(clientId)) {
                 Logger.getLogger(ServerNetListener.class.getName()).log(Level.WARNING, "Receiving join message from unknown client");
@@ -149,7 +147,7 @@ public class ServerNetListener implements MessageListener<HostedConnection>, Con
             });
         } else if (message instanceof ChatMessage) {
             ChatMessage msg = (ChatMessage) message;
-            int clientId = (int)source.getId();
+            int clientId = (int) source.getId();
             if (!checkClient(clientId, message)) {
                 return;
             }
