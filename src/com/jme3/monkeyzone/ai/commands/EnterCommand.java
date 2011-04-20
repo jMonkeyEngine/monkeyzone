@@ -65,15 +65,16 @@ public class EnterCommand extends AbstractCommand {
         timer += tpf;
         if ((Long) targetEntity.getUserData("player_id") == -1l) {
             targetLocation = targetEntity.getWorldTranslation();
-//            if (targetLocation.subtract(entity.getWorldTranslation()).length() > 3) {
-            entity.getControl(AutonomousControl.class).moveTo(targetLocation);
-//            } else {
-            entity.getControl(AutonomousControl.class).aimAt(targetLocation);
-            if (timer > 1) {
-                entity.getControl(AutonomousControl.class).performAction(ActionMessage.ENTER_ACTION, true);
-                timer = 0;
+            if (targetLocation.subtract(entity.getWorldTranslation()).length() > 4) {
+                entity.getControl(AutonomousControl.class).moveTo(targetLocation);
+                entity.getControl(AutonomousControl.class).aimAt(targetLocation);
+            } else {
+                entity.getControl(AutonomousControl.class).aimAt(targetLocation);
+//                if (timer > 0.5f) {
+                    entity.getControl(AutonomousControl.class).performAction(ActionMessage.ENTER_ACTION, true);
+//                    timer = 0;
+//                }
             }
-//            }
             return State.Blocking;
         } else {
             return State.Finished;
