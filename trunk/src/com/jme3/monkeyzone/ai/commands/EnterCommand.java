@@ -67,13 +67,12 @@ public class EnterCommand extends AbstractCommand {
             targetLocation = targetEntity.getWorldTranslation();
             if (targetLocation.subtract(entity.getWorldTranslation()).length() > 4) {
                 entity.getControl(AutonomousControl.class).moveTo(targetLocation);
-                entity.getControl(AutonomousControl.class).aimAt(targetLocation);
             } else {
                 entity.getControl(AutonomousControl.class).aimAt(targetLocation);
-//                if (timer > 0.5f) {
+                if (timer > 0.5f) {
                     entity.getControl(AutonomousControl.class).performAction(ActionMessage.ENTER_ACTION, true);
-//                    timer = 0;
-//                }
+                    timer = 0;
+                }
             }
             return State.Blocking;
         } else {
