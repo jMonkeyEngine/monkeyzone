@@ -29,30 +29,58 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.jme3.monkeyzone;
+package com.jme3.monkeyzone.ai.commands;
+
+import com.jme3.math.Vector3f;
+import com.jme3.monkeyzone.ai.AbstractCommand;
+import com.jme3.monkeyzone.controls.AutonomousControl;
+import com.jme3.monkeyzone.messages.ActionMessage;
+import com.jme3.scene.Spatial;
 
 /**
- * contains version info and various global variables
+ *
  * @author normenhansen
  */
-public class Globals {
+public class EnterCommand extends AbstractCommand {
 
-    public static final String VERSION = "MonkeyZone v0.1";
-//    public static final String DEFAULT_SERVER = "192.168.1.24";
-    public static final String DEFAULT_SERVER = "127.0.0.1";
-//    public static final String DEFAULT_SERVER = "jmonkeyengine.com";
-//    public static final String DEFAULT_SERVER = "128.238.56.114";
-    public static final int PROTOCOL_VERSION = 1;
-    public static final int CLIENT_VERSION = 1;
-    public static final int SERVER_VERSION = 1;
+    float timer = 0;
 
-    public static final float NETWORK_SYNC_FREQUENCY = 0.25f;
-    public static final float NETWORK_MAX_PHYSICS_DELAY = 0.25f;
-    public static final int SCENE_FPS = 60;
-    public static final float PHYSICS_FPS = 1f / 30f;
-    //only applies for client, server doesnt render anyway
-    public static final boolean PHYSICS_THREADED = true;
-    public static final boolean PHYSICS_DEBUG = false;
-    public static final int DEFAULT_PORT_TCP = 6143;
-    public static final int DEFAULT_PORT_UDP = 6143;
+    @Override
+    public TargetResult setTargetLocation(Vector3f location) {
+        return TargetResult.Deny;
+    }
+
+    @Override
+    public TargetResult setTargetEntity(Spatial spatial) {
+        Long playerId = spatial.getUserData("player_id");
+        if (playerId == -1l) {
+            targetLocation = spatial.getWorldTranslation();
+            return super.setTargetEntity(spatial);
+        }
+        return TargetResult.Deny;
+    }
+
+    @Override
+    public State doCommand(float tpf) {
+        timer += tpf;
+        if ((Long) targetEntity.getUserData("player_id") == -1l) {
+            targetLocation = targetEntity.getWorldTranslation();
+//            if (targetLocation.subtract(entity.getWorldTranslation()).length() > 3) {
+            entity.getControl(AutonomousControl.class).moveTo(targetLocation);
+//            } else {
+            entity.getControl(AutonomousControl.class).aimAt(targetLocation);
+            if (timer > 1) {
+                entity.getControl(AutonomousControl.class).performAction(ActionMessage.ENTER_ACTION, true);
+                timer = 0;
+            }
+//            }
+            return State.Blocking;
+        } else {
+            return State.Finished;
+        }
+    }
+
+    public String getName() {
+        return "Enter";
+    }
 }

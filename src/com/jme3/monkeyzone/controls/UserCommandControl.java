@@ -44,7 +44,7 @@ import com.jme3.monkeyzone.ai.Command;
 import com.jme3.monkeyzone.ai.commands.FollowCommand;
 import com.jme3.monkeyzone.ai.commands.MoveCommand;
 import com.jme3.monkeyzone.ai.SphereTrigger;
-import com.jme3.monkeyzone.controls.CommandControl;
+import com.jme3.monkeyzone.ai.commands.EnterCommand;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
@@ -437,6 +437,7 @@ public class UserCommandControl implements Control, ActionListener {
         if (selectedEntities.size() > 0) {
             commands.add(MoveCommand.class);
             commands.add(FollowCommand.class);
+            commands.add(EnterCommand.class);
             commands.add(AttackCommand.class);
         }
         clearCommandMenu();

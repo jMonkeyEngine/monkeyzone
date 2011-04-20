@@ -123,6 +123,9 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         }
         getStateManager().attach(bulletState);
         bulletState.getPhysicsSpace().setAccuracy(Globals.PHYSICS_FPS);
+        if(Globals.PHYSICS_DEBUG){
+            bulletState.getPhysicsSpace().enableDebug(assetManager);
+        }
         inputManager.setCursorVisible(true);
         flyCam.setEnabled(false);
 //        chaseCam = new ChaseCamera(cam, inputManager);
