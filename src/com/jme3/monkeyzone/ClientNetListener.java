@@ -68,16 +68,9 @@ public class ClientNetListener implements MessageListener, ClientStateListener {
 
     public void clientConnected(Client clienst) {
         setStatusText("Requesting login..");
-        //FIXME: (SpiderMonkey) cannot call client.send() from connectionListener, doing via opengl queue..
-        app.enqueue(new Callable<Void>() {
-
-            public Void call() throws Exception {
-                HandshakeMessage msg = new HandshakeMessage(Globals.PROTOCOL_VERSION, Globals.CLIENT_VERSION, -1);
-                client.send(msg);
-                Logger.getLogger(ClientNetListener.class.getName()).log(Level.INFO, "Sent handshake message");
-                return null;
-            }
-        });
+        HandshakeMessage msg = new HandshakeMessage(Globals.PROTOCOL_VERSION, Globals.CLIENT_VERSION, -1);
+        client.send(msg);
+        Logger.getLogger(ClientNetListener.class.getName()).log(Level.INFO, "Sent handshake message");
     }
 
     public void clientDisconnected(Client clienst, DisconnectInfo info) {
@@ -91,6 +84,7 @@ public class ClientNetListener implements MessageListener, ClientStateListener {
             if (msg.protocol_version != Globals.PROTOCOL_VERSION) {
                 setStatusText("Protocol mismatch - update client!");
                 Logger.getLogger(ClientNetListener.class.getName()).log(Level.INFO, "Client protocol mismatch, disconnecting");
+                return;
             }
             client.send(new ClientJoinMessage(name, pass));
         } else if (message instanceof ServerJoinMessage) {
