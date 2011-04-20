@@ -71,6 +71,7 @@ public class AutonomousVehicleControl extends NetworkedAutonomousControl {
 
     @Override
     public void doAimAt(Vector3f direction) {
+        aimDirection.set(direction);
     }
 
     @Override
@@ -155,14 +156,15 @@ public class AutonomousVehicleControl extends NetworkedAutonomousControl {
                 } else {
                     vehicle.steer(angle < 1 ? angle : 1 * FastMath.QUARTER_PI * 0.5f);
                 }
-                vehicle.accelerate(speed);
+                //TODO: limiting speed for now.. :D
+                vehicle.accelerate(speed * 0.3f);
             } else {
                 if (angle > 0) {
                     vehicle.steer(-FastMath.QUARTER_PI * 0.5f);
                 } else {
                     vehicle.steer(FastMath.QUARTER_PI * 0.5f);
                 }
-                vehicle.accelerate(-speed);
+                vehicle.accelerate(-speed * 0.3f);
             }
             vehicle.brake(0);
         }

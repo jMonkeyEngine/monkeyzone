@@ -755,18 +755,23 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
         Vector3f startLocation = control.getLocation();
         Vector3f endLocation = startLocation.add(control.getAimDirection().normalize().multLocal(length));
         List<PhysicsRayTestResult> results = getPhysicsSpace().rayTest(startLocation, endLocation);
+        Spatial found = null;
+        float dist = Float.MAX_VALUE;
         for (Iterator<PhysicsRayTestResult> it = results.iterator(); it.hasNext();) {
             PhysicsRayTestResult physicsRayTestResult = it.next();
-            Spatial found = getEntity(physicsRayTestResult.getCollisionObject());
-            if (found == entity) {
+            Spatial object = getEntity(physicsRayTestResult.getCollisionObject());
+            if (object == entity) {
                 continue;
             }
-            if (storeLocation != null) {
-                storeLocation.set(FastMath.interpolateLinear(physicsRayTestResult.getHitFraction(), startLocation, endLocation));
+            if (physicsRayTestResult.getHitFraction() < dist) {
+                dist = physicsRayTestResult.getHitFraction();
+                if (storeLocation != null) {
+                    FastMath.interpolateLinear(physicsRayTestResult.getHitFraction(), startLocation, endLocation, storeLocation);
+                }
+                found = object;
             }
-            return found;
         }
-        return null;
+        return found;
     }
 
     /**
@@ -777,15 +782,21 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
      */
     public Spatial doRayTest(Vector3f startLocation, Vector3f endLocation, Vector3f storeLocation) {
         List<PhysicsRayTestResult> results = getPhysicsSpace().rayTest(startLocation, endLocation);
+        //TODO: sorting of results
+        Spatial found = null;
+        float dist = Float.MAX_VALUE;
         for (Iterator<PhysicsRayTestResult> it = results.iterator(); it.hasNext();) {
             PhysicsRayTestResult physicsRayTestResult = it.next();
-            Spatial entity = getEntity(physicsRayTestResult.getCollisionObject());
-            if (storeLocation != null) {
-                storeLocation.set(FastMath.interpolateLinear(physicsRayTestResult.getHitFraction(), startLocation, endLocation));
+            Spatial object = getEntity(physicsRayTestResult.getCollisionObject());
+            if (physicsRayTestResult.getHitFraction() < dist) {
+                dist = physicsRayTestResult.getHitFraction();
+                if (storeLocation != null) {
+                    FastMath.interpolateLinear(physicsRayTestResult.getHitFraction(), startLocation, endLocation, storeLocation);
+                }
+                found = object;
             }
-            return entity;
         }
-        return null;
+        return found;
     }
 
     /**

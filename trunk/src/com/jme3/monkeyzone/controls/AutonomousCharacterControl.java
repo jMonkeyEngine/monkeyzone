@@ -66,6 +66,8 @@ public class AutonomousCharacterControl extends NetworkedAutonomousControl {
 
     @Override
     public void doAimAt(Vector3f direction) {
+        aimDirection.set(direction);
+//        characterControl.setViewDirection(direction);
     }
 
     @Override

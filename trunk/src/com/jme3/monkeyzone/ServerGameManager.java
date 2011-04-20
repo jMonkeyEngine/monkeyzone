@@ -97,7 +97,7 @@ public class ServerGameManager extends AbstractAppState {
             worldManager.enterEntity(playearId, entitayId);
 
             //create a vehicle
-            worldManager.addNewEntity("Models/Buggy/Buggy.j3o", new Vector3f(i * 3, 3, -3), new Quaternion());
+            worldManager.addNewEntity("Models/Ferrari/Car.j3o", new Vector3f(i * 3, 3, -3), new Quaternion());
             i++;
         }
         return true;
@@ -144,7 +144,7 @@ public class ServerGameManager extends AbstractAppState {
             return;
         }
         //enter entity
-        if (action == ActionMessage.ENTER_ACTION && !pressed) {
+        if (action == ActionMessage.ENTER_ACTION && pressed) {
             performEnterEntity(player_id, myEntity);
         } else if (action == ActionMessage.SHOOT_ACTION && pressed) {
             performShoot(myEntity);
