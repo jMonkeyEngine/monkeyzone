@@ -152,7 +152,6 @@ public class AutonomousVehicleControl extends NetworkedAutonomousControl {
             ROTATE_RIGHT.multLocal(vector4);
             plane.setOriginNormal(spatial.getWorldTranslation(), vector4);
             float angle = 1 - vector3.dot(vector2);
-            System.out.println("angle:" + angle);
 
             float anglemult = FastMath.PI / 4.0f;
             float speedmult = 0.3f;
