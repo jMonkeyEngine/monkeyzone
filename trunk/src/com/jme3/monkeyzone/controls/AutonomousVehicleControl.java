@@ -151,26 +151,29 @@ public class AutonomousVehicleControl extends NetworkedAutonomousControl {
             vector4.set(vector3);
             ROTATE_RIGHT.multLocal(vector4);
             plane.setOriginNormal(spatial.getWorldTranslation(), vector4);
-            float angle = 1 - vector3.dot(vector2);
 
-            float anglemult = FastMath.PI / 4.0f;
-            float speedmult = 0.3f;
+            float dot = 1 - vector3.dot(vector2);
+            float angle = vector3.angleBetween(vector2);
 
+            float anglemult = 1;//FastMath.PI / 4.0f;
+            float speedmult = 0.3f;//0.3f;
+
+            if (angle > FastMath.QUARTER_PI) {
+                angle = FastMath.QUARTER_PI;
+            }
             //left or right
             if (plane.whichSide(targetLocation) == Plane.Side.Negative) {
                 anglemult *= -1;
             }
-
             //backwards
-            if (angle > 1) {
+            if (dot > 1) {
                 speedmult *= -1;
                 anglemult *= -1;
-                angle = 1;
             }
-
             vehicle.steer(angle * anglemult);
             vehicle.accelerate(speed * speedmult);
             vehicle.brake(0);
+
         }
     }
 
