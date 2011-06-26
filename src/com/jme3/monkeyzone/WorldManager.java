@@ -253,8 +253,9 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
         //TODO: navmesh only for debug
         Geometry navGeom = new Geometry("NavMesh");
         navGeom.setMesh(optiMesh);
-        Material green = new Material(assetManager, "Common/MatDefs/Misc/WireColor.j3md");
+        Material green = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         green.setColor("Color", ColorRGBA.Green);
+        green.getAdditionalRenderState().setWireframe(true);
         navGeom.setMaterial(green);
 
         worldRoot.attachChild(navGeom);
