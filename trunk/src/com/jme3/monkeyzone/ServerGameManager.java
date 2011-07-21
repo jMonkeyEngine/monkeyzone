@@ -75,7 +75,7 @@ public class ServerGameManager extends AbstractAppState {
         running = true;
         mapName = map;
         //TODO: parse client side string, create preload model list automatically
-        modelNames = new String[]{"Models/HoverTank/HoverTank.j3o", "Models/Sinbad/Sinbad.j3o", "Models/Ferrari/Car.j3o", "Models/Buggy/Buggy.j3o"};
+        modelNames = new String[]{"Models/HoverTank/HoverTank.j3o", "Models/Sinbad/Sinbad.j3o", "Models/Ferrari/Car.j3o"};//, "Models/Buggy/Buggy.j3o"
         server.getServer().broadcast(new StartGameMessage(mapName, modelNames));
         worldManager.loadLevel(mapName);
         worldManager.createNavMesh();
