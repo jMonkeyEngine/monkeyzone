@@ -13,7 +13,7 @@
 
     <screen id="load_game" controller="com.jme3.monkeyzone.ClientMain">
         <layer id="layer" childLayout="center">
-            <panel id="panel" height="400px" width="350px" align="center" valign="center" style="nifty-panel" childLayout="vertical">
+            <panel id="panel" height="300px" width="350px" align="center" valign="center" style="nifty-panel" childLayout="vertical">
                 <effect>
                     <onStartScreen  name="fade" startColor="#0000" endColor="#000f" length="1500"/>
                     <onEndScreen name="move" mode="out" direction="bottom" length="300" startDelay="0" inherit="true"/>
@@ -125,7 +125,7 @@
                 </effect>
                 <text style="nifty-label" text="Loading Level" />
                 <text style="nifty-label" text=""/>
-                <text id="status_text" font="aurulent-sans-16.fnt" color="#ffff" text="Loading.." align="center" valign="center" />
+                <text id="status_text" font="aurulent-sans-16.fnt" color="#ffff" text="Loading..." align="center" valign="center" />
             </panel>
         </layer>
     </screen>
@@ -144,19 +144,37 @@
                     <text id="status_text_08" font="aurulent-sans-16.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
                     <text id="status_text_09" font="aurulent-sans-16.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
                     <text id="status_text_00" font="aurulent-sans-16.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
+					<effect>
+						<onStartScreen name="move" mode="in" direction="top" length="200" startDelay="0" inherit="true"/>
+						<onEndScreen name="move" mode="out" direction="top" length="200" startDelay="400" inherit="true"/>
+					</effect>
                 </panel>
                 <panel id="top_panel_right" height="60px" width="10%" align="right" valign="top" style="nifty-panel" childLayout="horizontal">
                     <text id="status_text_01" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="left" valign="center" />
+					<effect>
+						<onStartScreen name="move" mode="in" direction="right" length="200" startDelay="200" inherit="true"/>
+						<onEndScreen name="move" mode="out" direction="right" length="100" startDelay="200" inherit="true"/>
+					</effect>
                 </panel>
             </panel>
-            <panel id="buffer_panel" width="100%">
+            <panel id="buffer_panel" width="100%" childLayout="center">            
 
             </panel>
+			<panel id="crosshair_panel" align="center" valign="center" childLayout="vertical">					
+				<effect>
+					<onStartScreen name="fade" mode="in" length="400" startDelay="200" inherit="true"/>
+				</effect>
+				<text id="crosshair" font="aurulent-sans-16.fnt" color="#fff8" text="-( -+- )-" align="center" valign="center" />
+			</panel>
             <panel id="panel_bottom" childLayout="horizontal">
-                <panel id="bottom_panel_left" height="250px" width="200px" align="left" valign="bottom" style="nifty-panel" childLayout="vertical">
+                <panel id="bottom_panel_left" height="120px" width="200px" align="left" valign="bottom" style="nifty-panel" childLayout="vertical">
                     <text id="status_text_01" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />
                     <text id="status_text_02" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />
-                    <text id="status_text_03" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />
+                    <text id="status_text_03" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />	
+					<effect>
+						<onStartScreen name="move" mode="in" direction="bottom" length="200" startDelay="400" inherit="true"/>
+						<onEndScreen name="move" mode="out" direction="bottom" length="200" startDelay="0" inherit="true"/>
+					</effect>
                 </panel>
                 <panel id="buffer_panel">
 
@@ -172,6 +190,10 @@
                     <text id="status_text_08" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />
                     <text id="status_text_09" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />
                     <text id="status_text_00" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />
+					<effect>
+						<onStartScreen name="move" mode="in" direction="bottom" length="400" startDelay="600" inherit="true"/>
+						<onEndScreen name="move" mode="out" direction="bottom" length="200" startDelay="0" inherit="true"/>
+					</effect>
                 </panel>
             </panel>
         </layer>
