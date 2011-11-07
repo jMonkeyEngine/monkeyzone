@@ -31,7 +31,7 @@
  */
 package com.jme3.monkeyzone.messages;
 
-import com.jme3.network.message.Message;
+import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 
 /**
@@ -40,7 +40,7 @@ import com.jme3.network.serializing.Serializable;
  * @author normenhansen
  */
 @Serializable()
-public class HandshakeMessage extends Message {
+public class HandshakeMessage extends AbstractMessage {
 
     public int protocol_version;
     public int client_version;
