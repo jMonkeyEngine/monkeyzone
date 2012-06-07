@@ -57,7 +57,7 @@ public class ServerMain extends SimpleApplication {
     public static void main(String[] args) {
         AppSettings settings = new AppSettings(true);
         settings.setFrameRate(Globals.SCENE_FPS);
-        settings.setRenderer(AppSettings.NULL);
+        settings.setRenderer(null);
         //FIXME: strange way of setting null audio renderer..
         settings.setAudioRenderer(null);
         for (int i = 0; i < args.length; i++) {
