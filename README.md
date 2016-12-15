@@ -18,4 +18,4 @@ This is a game done by the jMonkeyEngine team made as a proof of concept for jMo
 
 ## License
 
-A short snippet describing the license (MIT, Apache, etc.)
+New BSD (3-clause) License. In other words, you do whatever makes you happy!
