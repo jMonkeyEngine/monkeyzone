@@ -1,0 +1,13 @@
+apply plugin: 'com.android.application'
+
+group   = 'org.jmonkeyengine'
+version = monkeyZoneVersion + '-' + monkeyZoneVersionTag
+
+sourceCompatibility = '1.6'
+
+repositories {
+    mavenCentral()
+    maven { url "http://nifty-gui.sourceforge.net/nifty-maven-repo" }
+    jcenter()
+    //maven { url "http://dl.bintray.com/jmonkeyengine/com.jme3" }
+}

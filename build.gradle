@@ -1,0 +1,29 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.1.0'
+    }
+}
+
+apply plugin: 'base'
+
+// This is applied to all sub projects
+subprojects {
+    if(!project.name.equals('monkeyzone-android')) {
+        apply from: rootProject.file('common.gradle')
+    } else {
+        apply from: rootProject.file('common-android-app.gradle')
+    }
+}
+
+task run(dependsOn: ':monkeyzone-desktop') {
+    description = 'Running Monkey Zone'
+}
+
+defaultTasks 'run'
+
+task wrapper(type: Wrapper, description: 'Creates and deploys the Gradle wrapper to the current directory.') {
+    gradleVersion = '3.2.1'
+}
