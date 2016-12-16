@@ -20,14 +20,14 @@ task run(dependsOn: 'build', type:JavaExec) {
 }
 
 dependencies {
-    compile group: jmeGroup, name: 'jme3-bullet', version: jmeVersion
-    compile group: jmeGroup, name: 'jme3-bullet-natives', version: jmeVersion
+    compile group: jme.group, name: 'jme3-bullet', version: jme.version
+    compile group: jme.group, name: 'jme3-bullet-natives', version: jme.version
     
     compile project(':monkeyzone-client')
     compile project(':monkeyzone-server')
     compile project(':monkeyzone-core')
     
-    runtime group: jmeGroup, name: 'jme3-desktop', version: jmeVersion
-    runtime group: jmeGroup, name: 'jme3-lwjgl', version: jmeVersion
+    runtime group: jme.group, name: 'jme3-desktop', version: jme.version
+    runtime group: jme.group, name: 'jme3-lwjgl', version: jme.version
     //runtime group: jmeGroup, name: 'jme3-lwjgl3', version: jmeVersion
 }

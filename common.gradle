@@ -1,7 +1,3 @@
-//
-// This file is to be applied to every subproject.
-//
-
 apply plugin: 'java'
 apply plugin: 'maven'
 
@@ -23,11 +19,11 @@ dependencies {
     
     testCompile group: 'junit', name: 'junit', version: '4.12'
     
-    compile group: jmeGroup, name: 'jme3-core', version: jmeVersion
-    compile group: jmeGroup, name: 'jme3-effects', version: jmeVersion
-    compile group: jmeGroup, name: 'jme3-networking', version: jmeVersion
-    compile group: jmeGroup, name: 'jme3-plugins', version: jmeVersion
-    compile group: jmeGroup, name: 'jme3-terrain', version: jmeVersion
-    compile group: jmeGroup, name: 'jme3-bullet', version: jmeVersion
-    compile group: jmeGroup, name: 'jme3-niftygui', version: jmeVersion
+    compile group: jme.group, name: 'jme3-core', version: jme.version
+    compile group: jme.group, name: 'jme3-effects', version: jme.version
+    compile group: jme.group, name: 'jme3-networking', version: jme.version
+    compile group: jme.group, name: 'jme3-plugins', version: jme.version
+    compile group: jme.group, name: 'jme3-terrain', version: jme.version
+    compile group: jme.group, name: 'jme3-bullet', version: jme.version
+    compile group: jme.group, name: 'jme3-niftygui', version: jme.version
 }

@@ -9,8 +9,11 @@ buildscript {
 
 apply plugin: 'base'
 
-// This is applied to all sub projects
 subprojects {
+    ext {
+        jme = [ group: 'com.jme3', version: '3.0.10' ]
+    }
+    
     if(!project.name.equals('monkeyzone-android')) {
         apply from: rootProject.file('common.gradle')
     } else {

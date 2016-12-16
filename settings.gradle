@@ -1,14 +1,9 @@
-/**
- * This is the global settings file used by all subprojects.
- **/
 rootProject.name = 'monkeyzone'
 
-// Core classes, should work on all java platforms
 include ':monkeyzone-core'
 include ':monkeyzone-client'
 include ':monkeyzone-server'
 
-// Platform dependent applications
 if(buildAndroidApp == "true"){
     include ':monkeyzone-android'
 }

@@ -1,3 +1,6 @@
 /nbproject/private/
 /monkeyzone-client/build/
 /monkeyzone-core/build/
+/.nb-gradle/private/
+/monkeyzone-server/build/
+/monkeyzone-desktop/build/
