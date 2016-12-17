@@ -1,4 +1,4 @@
 rootProject.name = 'monkeyzone'
 include ':monkeyzone-android'
-include ':monkeyzone-application'
-include ':monkeyzone-desktop'
+//include ':monkeyzone-application'
+//include ':monkeyzone-desktop'

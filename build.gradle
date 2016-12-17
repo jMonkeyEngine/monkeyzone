@@ -22,21 +22,21 @@ allprojects {
 		}
     }
 	dependencies {
-//		compile 'org.jmonkeyengine:jme3-core:3.1.0-beta1'
-//		compile 'org.jmonkeyengine:jme3-effects:3.1.0-beta1'
-//		compile 'org.jmonkeyengine:jme3-networking:3.1.0-beta1'
-//		compile 'org.jmonkeyengine:jme3-plugins:3.1.0-beta1'
-//		compile 'org.jmonkeyengine:jme3-jogg:3.1.0-beta1'
-//		compile 'org.jmonkeyengine:jme3-terrain:3.1.0-beta1'
+		compile 'org.jmonkeyengine:jme3-core:3.1.0-beta1'
+		compile 'org.jmonkeyengine:jme3-effects:3.1.0-beta1'
+		compile 'org.jmonkeyengine:jme3-networking:3.1.0-beta1'
+		compile 'org.jmonkeyengine:jme3-plugins:3.1.0-beta1'
+		compile 'org.jmonkeyengine:jme3-jogg:3.1.0-beta1'
+		compile 'org.jmonkeyengine:jme3-terrain:3.1.0-beta1'
 //		compile 'org.jmonkeyengine:jme3-jbullet:3.1.0-beta1'
-//		compile 'org.jmonkeyengine:jme3-bullet:3.1.0-beta1'
-//		compile 'org.jmonkeyengine:jme3-niftygui:3.1.0-beta1'
+		compile 'org.jmonkeyengine:jme3-bullet:3.1.0-beta1'
+		compile 'org.jmonkeyengine:jme3-niftygui:3.1.0-beta1'
 	}
 }
 
-task wrapper(type: Wrapper, description: 'Creates and deploys the Gradle wrapper to the current directory.') {
-    gradleVersion = '3.2.1'
-}
+//task wrapper(type: Wrapper, description: 'Creates and deploys the Gradle wrapper to the current directory.') {
+//    gradleVersion = '3.2.1'
+//}
 
 //task clean(type: Delete) {
 //    delete rootProject.buildDir
