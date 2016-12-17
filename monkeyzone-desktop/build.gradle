@@ -1,3 +1,12 @@
+apply plugin: 'java'
+//apply plugin: 'maven'
+
+group = 'org.jmonkeyengine'
+version = '1.0-SNAPSHOT'
+
+sourceCompatibility = '1.7'
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
 if (!hasProperty('mainClass')) {
     ext.mainClass = 'com.jme3.monkeyzone.MainApplication'
 }
@@ -9,25 +18,23 @@ task run(dependsOn: 'build', type:JavaExec) {
         jvmArgs "-XstartOnFirstThread"
         jvmArgs "-Djava.awt.headless=true"
     }
-    
     if (System.properties['java.util.logging.config.file'] != null) {
         systemProperty "java.util.logging.config.file", System.properties['java.util.logging.config.file']
     }
-
-    if( assertions  == "true" ){
+    if(assertions  == "true"){
         enableAssertions = true;
     }
 }
 
 dependencies {
-    compile group: jme.group, name: 'jme3-bullet', version: jme.version
-    compile group: jme.group, name: 'jme3-bullet-natives', version: jme.version
-    
-    compile project(':monkeyzone-client')
-    compile project(':monkeyzone-server')
-    compile project(':monkeyzone-core')
-    
-    runtime group: jme.group, name: 'jme3-desktop', version: jme.version
-    runtime group: jme.group, name: 'jme3-lwjgl', version: jme.version
-    //runtime group: jmeGroup, name: 'jme3-lwjgl3', version: jmeVersion
+	testCompile 'junit:junit:4.11'
+	compile fileTree(dir: 'libs', include: ['*.jar'])
+	compile project(':monkeyzone-application')
+	compile 'org.jmonkeyengine:jme3-desktop:3.1.0-beta1'
+//	compile 'org.jmonkeyengine:jme3-jogl:3.1.0-beta1'
+//	compile 'org.jmonkeyengine:jme3-lwjgl:3.1.0-beta1'
+	compile 'org.jmonkeyengine:jme3-lwjgl3:3.1.0-beta1'
+	compile 'org.jmonkeyengine:jme3-bullet-native:3.1.0-beta1'
 }
+
+defaultTasks 'run'

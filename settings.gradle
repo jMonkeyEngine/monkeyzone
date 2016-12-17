@@ -1,10 +1,4 @@
 rootProject.name = 'monkeyzone'
-
-include ':monkeyzone-core'
-include ':monkeyzone-client'
-include ':monkeyzone-server'
-
-if(buildAndroidApp == "true"){
-    include ':monkeyzone-android'
-}
+include ':monkeyzone-android'
+include ':monkeyzone-application'
 include ':monkeyzone-desktop'

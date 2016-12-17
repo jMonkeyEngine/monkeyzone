@@ -44,7 +44,7 @@ MAINTAINERS
 Current maintainers:
  * Normen Hansen ([GitHub - normen](https://github.com/normen) | [jMonkeyEngine - normen](https://hub.jmonkeyengine.org/users/normen))
  * Paul Speed ([GitHub - pspeed42](https://github.com/pspeed42) | [jMonkeyEngine - pspeed](https://hub.jmonkeyengine.org/users/pspeed))
- * RÃ©my Bouquet ([GitHub - Nehon](https://github.com/Nehon) | [jMonkeyEngine - nehon](https://hub.jmonkeyengine.org/users/nehon))
+ * Rémy Bouquet ([GitHub - Nehon](https://github.com/Nehon) | [jMonkeyEngine - nehon](https://hub.jmonkeyengine.org/users/nehon))
  * Mark Picknell ([GitHub - skidrunner](https://github.com/skidrunner) | [jMonkeyEngine - skidrunner](https://hub.jmonkeyengine.org/users/skidrunner))
 
 LICENSE
