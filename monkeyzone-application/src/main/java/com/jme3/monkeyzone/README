@@ -1,0 +1,33 @@
+--------------
+Designer Infos
+--------------
+
+Editable UserData of entity Spatials:
+- (float) HitPoints
+- (float) MaxHitPoints
+- (float) Speed
+
+Entity Spatial marking Node names:
+- AimNode
+ - CameraAttachment
+ - ShootAttachment
+
+Level Spatial marking Node names:
+- StartPoint
+- PowerSource
+- MetalField
+
+---------------
+Developer Infos
+---------------
+
+Programmatic UserData of entities:
+- (long) entity_id
+- (int) group_id
+- (long) player_id
+
+Programmatic PlayerData:
+- (long) id
+- (int) group_id
+- (long) entity_id
+- (long) character_entity_id

@@ -1,0 +1,16 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+group = 'org.jmonkeyengine'
+version = '1.0-SNAPSHOT'
+
+sourceCompatibility = '1.7'
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+repositories {
+
+}
+
+dependencies {
+
+}
