@@ -1,14 +1,53 @@
-# Ignore target at the top level
-# /target/
-#
-# Ignore child project's targets as well
-# /*/target/
-#
-# And any grandchildren ...
-# /*/*/target/
-# Or you can do:
-# target/
-# which matches 'target' in any sub folder
-
+# Gradle
+.gradle/
 build/
-.*/
+
+# Java
+.class
+hs_err_pid*
+
+# NetBeans IDE (jMonkeyEngine-SDK)
+.nb-gradle/
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+
+# Intellij IDE (Android Studio)
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/libraries
+.externalNativeBuild
+.navigation/
+captures/
+*.jks
+
+# Eclipse IDE
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
+.project
+.externalToolBuilders/
+*.launch
+.classpath
+.factorypath
+.target
+.texlipse
+.recommenders/
+proguard/
+
+# JDeveloper IDE
+.data/
+temp/
+classes/
+deploy/
+javadoc/
+cwallet.sso.lck

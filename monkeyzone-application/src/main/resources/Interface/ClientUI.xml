@@ -1,16 +1,150 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<nifty xmlns="http://nifty-gui.sourceforge.net/nifty.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://nifty-gui.sourceforge.net/nifty.xsd http://nifty-gui.sourceforge.net/nifty.xsd">
-    <useStyles filename="nifty-default-styles.xml" />
-    <useControls filename="nifty-default-controls.xml" />
-    <style id="my-listbox-item-style" base="nifty-listbox-item">
-        <effect>
-            <onCustom name="updateScrollpanelPositionToDisplayElement" target="listBoxStatic" oneShot="true" />
-        </effect>
-    </style>
-    
-    <screen id="null" controller="com.jme3.monkeyzone.ClientMain">
-    </screen>
-
+?xml version="1.0" encoding="UTF-8"?>
+<nifty xmlns="http://nifty-gui.lessvoid.com/nifty-gui">
+	
+	<useStyles filename="nifty-default-styles.xml" />
+	<useControls filename="nifty-default-controls.xml" />
+	
+	<controlDefinition name="iconListItem">
+		<panel childLayout="horizontal" width="100%" align="center">
+			<image id="#list-item-icon" width="32px" height="32px" />
+			<control id="#list-item-label" name="label" style="nifty-label" />
+		</panel>
+	</controlDefinition>
+	
+	<!--
+	  -- LOGIN
+	  -- TextField(userName)
+	  -- Label(status)
+	  -->
+	<screen id="login">
+		<layer childLayout="center">
+			<panel childLayout="vertical" style="nifty-panel" align="center" valign="center">
+				<control name="label" style="nifty-label" text="Welcome to MonkeyZone!" />
+				<panel height="10px" />
+				<image filename="Interface/Images/Logo.png" align="center" valign="center" />
+				<panel height="10px" />
+				<control name="label" style="nifty-label" text="UserName" />
+				<panel height="10px" />
+				<control id="userName" name="textField" />
+				<panel height="10px" />
+				<control name="button" label="Login">
+					<interact onClick="login()"/>
+				</control>
+				<panel height="10px" />
+				<control id="status" name="label" style="nifty-label" text="" />
+			</panel>
+		</layer>
+	</screen>
+	
+	<!--
+	  -- LOBBY
+	  -- ListBox(players)
+	  -- ListBox(maps)
+	  -- ChatControl(chat)
+	  -->
+	<screen id="lobby">
+		<layer childLayout="vertical">
+			<panel childLayout="horizontal">
+				<panel childLayout="vertical" style="nifty-panel">
+					<control name="label" style="nifty-label" text="Players Online" />
+					<panel height="10px" />
+					<control id="players" name="listBox" displayItems="8" selection="Disabled">
+						<!-- TODO: Add custom view -->
+					</control>
+				</panel>
+				<panel childLayout="vertical" style="nifty-panel">
+					<control name="label" style="nifty-label" text="Available Maps" />
+					<panel height="10px" />
+					<control id="maps" name="listBox" displayItems="8" selection="Single">
+						<!-- TODO: Add custom view -->
+					</control>
+					<control name="button" label="Start">
+						<interact onClick="startGame()"/>
+					</control>
+				</panel>
+			</panel>
+			<panel childLayout="horizontal" style="nifty-panel">
+				<control id="chat" name="nifty-chat" width="100%" height="*" lines="14" sendLabel="Send Message" />
+			</panel>
+		</layer>
+	</screen>
+	
+	<!--
+	  -- LOAD
+	  -- Label(status)
+	  -->
+	<screen id="load">
+		<layer childLayout="center">
+			<panel childLayout="vertical" style="nifty-panel">
+				<control name="label" style="nifty-label" text="Loading Map" />
+				<panel height="*" />
+				<control id="status" name="label" style="nifty-label" text="Loading..." />
+			</panel>
+		</layer>
+	</screen>
+	
+	<!--
+	  -- GAME
+	  -- Image(crosshair)
+	  -- Label(statusTopLeft%02d)
+	  -- Label(statusTopRight%02d)
+	  -- Label(statusBottomLeft%02d)
+	  -- Label(statusBottomRight%02d)
+	  -->
+	<screen id="game">
+		<layer childLayout="center">
+			<image id="crosshair" filename="Interface/Images/Crosshair.png" align="center" valign="center" />
+		</layer>
+		<layer childLayout="vertical">
+			<panel childLayout="horizontal">
+				<panel childLayout="horizontal">
+					<control id="statusTopLeft00" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusTopLeft01" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusTopLeft02" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusTopLeft03" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusTopLeft04" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusTopLeft05" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusTopLeft06" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusTopLeft07" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusTopLeft08" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusTopLeft09" name="label" style="nifty-label" text="[NULL]" />
+				</panel>
+				<panel width="*" />
+				<panel childLayout="horizontal">
+					<control id="statusTopRight00" name="label" style="nifty-label" text="[NULL]" />
+				</panel>
+			</panel>
+			<panel height="*" />
+			<panel childLayout="horizontal">
+				<panel childLayout="vertical">
+					<control id="statusBottomLeft00" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusBottomLeft01" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusBottomLeft02" name="label" style="nifty-label" text="[NULL]" />
+				</panel>
+				<panel width="*" />
+				<panel childLayout="vertical">
+					<control id="statusBottomRight00" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusBottomRight01" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusBottomRight02" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusBottomRight03" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusBottomRight04" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusBottomRight05" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusBottomRight06" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusBottomRight07" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusBottomRight08" name="label" style="nifty-label" text="[NULL]" />
+					<control id="statusBottomRight09" name="label" style="nifty-label" text="[NULL]" />
+				</panel>
+			</panel>
+		</layer>
+	</screen>
+	
+	<!--
+	<style id="my-listbox-item-style" base="nifty-listbox-item">
+	<effect>
+	<onCustom name="updateScrollpanelPositionToDisplayElement" target="listBoxStatic" oneShot="true" />
+	</effect>
+	</style>
+	
     <screen id="load_game" controller="com.jme3.monkeyzone.ClientMain">
         <layer id="layer" childLayout="center">
             <panel id="panel" height="300px" width="350px" align="center" valign="center" style="nifty-panel" childLayout="vertical">
@@ -198,4 +332,5 @@
             </panel>
         </layer>
     </screen>
+	-->
 </nifty>
