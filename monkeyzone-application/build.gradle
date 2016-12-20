@@ -1,16 +1,11 @@
-apply plugin: 'java'
-apply plugin: 'maven'
-
-group = 'org.jmonkeyengine'
-version = '1.0-SNAPSHOT'
-
-sourceCompatibility = '1.7'
-[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
-
 repositories {
 
 }
 
 dependencies {
-
+    runtime group: jme.group, name: 'jme3-desktop', version: jme.version
+    //runtime group: jme.group, name: 'jme3-jogl', version: jme.version
+    //runtime group: jme.group, name: 'jme3-lwjgl', version: jme.version
+    runtime group: jme.group, name: 'jme3-lwjgl3', version: jme.version
+    runtime group: jme.group, name: 'jme3-bullet-native', version: jme.version
 }

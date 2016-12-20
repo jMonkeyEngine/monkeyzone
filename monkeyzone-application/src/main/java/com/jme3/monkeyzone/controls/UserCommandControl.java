@@ -49,6 +49,7 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.Control;
+import de.lessvoid.nifty.controls.Label;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
 import java.io.IOException;
@@ -68,8 +69,8 @@ import java.util.logging.Logger;
 public class UserCommandControl implements Control, ActionListener {
 
     protected Screen screen;
-    protected TextRenderer[] selectionTexts = new TextRenderer[10];
-    protected TextRenderer[] commandTexts = new TextRenderer[10];
+    protected Label[] selectionTexts = new Label[10];
+    protected Label[] commandTexts = new Label[10];
     protected List<Class<? extends Command>> commands = new LinkedList<Class<? extends Command>>();
     protected HashMap<Long, Spatial> players = new HashMap<Long, Spatial>();
     protected List<Spatial> selectedEntities = new ArrayList<Spatial>();
@@ -94,8 +95,8 @@ public class UserCommandControl implements Control, ActionListener {
         this(inputManager);
         this.screen = screen;
         for (int i = 0; i < 10; i++) {
-            selectionTexts[i] = screen.findElementByName("layer").findElementByName("panel_bottom").findElementByName("bottom_panel_right").findElementByName("status_text_0" + i).getRenderer(TextRenderer.class);
-            commandTexts[i] = screen.findElementByName("layer").findElementByName("panel_top").findElementByName("top_panel_left").findElementByName("status_text_0" + i).getRenderer(TextRenderer.class);
+            selectionTexts[i] = screen.findNiftyControl("selection_text_0" + i, Label.class);
+            commandTexts[i] = screen.findNiftyControl("command_text_0" + i, Label.class);
         }
         setSelectionMenu(SelectionMenu.Main);
         updateCommandMenu();
@@ -366,8 +367,8 @@ public class UserCommandControl implements Control, ActionListener {
      */
     private void clearSelectionMenu() {
         for (int i = 0; i < selectionTexts.length; i++) {
-            TextRenderer textRenderer = selectionTexts[i];
-            textRenderer.setText("");
+            Label selectionText = selectionTexts[i];
+            selectionText.setText("");
         }
     }
 
@@ -463,8 +464,8 @@ public class UserCommandControl implements Control, ActionListener {
      */
     private void clearCommandMenu() {
         for (int i = 0; i < commandTexts.length; i++) {
-            TextRenderer textRenderer = commandTexts[i];
-            textRenderer.setText("");
+            Label commandText = commandTexts[i];
+            commandText.setText("");
         }
     }
 

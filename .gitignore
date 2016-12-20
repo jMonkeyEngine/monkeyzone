@@ -1,53 +1,14 @@
-# Gradle
-.gradle/
-build/
+#FOLDERS
+.gradle
+.idea
+gradle
+build
+out
 
-# Java
-.class
-hs_err_pid*
-
-# NetBeans IDE (jMonkeyEngine-SDK)
-.nb-gradle/
-nbproject/private/
-nbbuild/
-dist/
-nbdist/
-
-# Intellij IDE (Android Studio)
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/libraries
-.externalNativeBuild
-.navigation/
-captures/
-*.jks
-
-# Eclipse IDE
-.metadata
-bin/
-tmp/
-*.tmp
-*.bak
-*.swp
-*~.nib
+#FILES
+hs_err_pid*.log
 local.properties
-.settings/
-.loadpath
-.recommenders
-.project
-.externalToolBuilders/
-*.launch
-.classpath
-.factorypath
-.target
-.texlipse
-.recommenders/
-proguard/
+*.dll
 
-# JDeveloper IDE
-.data/
-temp/
-classes/
-deploy/
-javadoc/
-cwallet.sso.lck
+#IMPORTANT
+!libs/cai-nmgen-0.1.2.jar

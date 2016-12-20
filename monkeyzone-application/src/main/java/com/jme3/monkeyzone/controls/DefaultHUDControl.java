@@ -37,7 +37,7 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.Control;
-import de.lessvoid.nifty.elements.render.TextRenderer;
+import de.lessvoid.nifty.controls.Label;
 import de.lessvoid.nifty.screen.Screen;
 import java.io.IOException;
 
@@ -52,18 +52,18 @@ public class DefaultHUDControl implements HUDControl {
     protected Screen screen;
     protected float updateTime = 0.25f;
     protected float curTime = 1;
-    protected TextRenderer hitPoints;
-    protected TextRenderer speed;
-    protected TextRenderer vehicle;
+    protected Label hitPoints;
+    protected Label speed;
+    protected Label vehicle;
 
     public DefaultHUDControl(Screen screen) {
         this.screen = screen;
         if (screen == null) {
             throw new IllegalStateException("DefaultHUDControl nifty screen null!");
         }
-        hitPoints = screen.findElementByName("layer").findElementByName("panel_bottom").findElementByName("bottom_panel_left").findElementByName("status_text_01").getRenderer(TextRenderer.class);
-        speed = screen.findElementByName("layer").findElementByName("panel_bottom").findElementByName("bottom_panel_left").findElementByName("status_text_02").getRenderer(TextRenderer.class);
-        vehicle = screen.findElementByName("layer").findElementByName("panel_bottom").findElementByName("bottom_panel_left").findElementByName("status_text_03").getRenderer(TextRenderer.class);
+        hitPoints = screen.findNiftyControl("hitpoints_text", Label.class);
+        speed = screen.findNiftyControl("speed_text", Label.class);
+        vehicle = screen.findNiftyControl("vehicle_text", Label.class);
     }
 
     public void setSpatial(Spatial spatial) {

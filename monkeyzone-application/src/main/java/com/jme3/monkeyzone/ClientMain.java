@@ -59,16 +59,12 @@ import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.renderer.RenderManager;
 import com.jme3.system.AppSettings;
 import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.controls.dynamic.TextCreator;
-import de.lessvoid.nifty.controls.textfield.TextFieldControl;
-import de.lessvoid.nifty.elements.Element;
-import de.lessvoid.nifty.elements.render.TextRenderer;
+import de.lessvoid.nifty.controls.Label;
+import de.lessvoid.nifty.controls.ListBox;
+import de.lessvoid.nifty.controls.TextField;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -107,7 +103,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
     private UserCommandControl commandControl;
     private Nifty nifty;
     private NiftyJmeDisplay niftyDisplay;
-    private TextRenderer statusText;
+    private Label statusText;
     private NetworkClient client;
     private ClientNetListener listenerManager;
     private BulletAppState bulletState;
@@ -124,7 +120,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         getStateManager().attach(bulletState);
         bulletState.getPhysicsSpace().setAccuracy(Globals.PHYSICS_FPS);
         if(Globals.PHYSICS_DEBUG){
-            bulletState.getPhysicsSpace().enableDebug(assetManager);
+            bulletState.setDebugEnabled(true);
         }
         inputManager.setCursorVisible(true);
         flyCam.setEnabled(false);
@@ -187,7 +183,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        statusText = nifty.getScreen("load_game").findElementByName("layer").findElementByName("panel").findElementByName("status_text").getRenderer(TextRenderer.class);
+        statusText = nifty.getScreen("load_game").findNiftyControl("status_text", Label.class);
         guiViewPort.addProcessor(niftyDisplay);
     }
 
@@ -214,19 +210,11 @@ public class ClientMain extends SimpleApplication implements ScreenController {
 
             public Void call() throws Exception {
                 Screen screen = nifty.getScreen("lobby");
-                Element panel = screen.findElementByName("layer").findElementByName("panel").findElementByName("players_panel").findElementByName("players_list").findElementByName("panel");
-                List<PlayerData> players = PlayerData.getHumanPlayers();
-                for (Iterator<Element> it = new LinkedList<Element>(panel.getElements()).iterator(); it.hasNext();) {
-                    Element element = it.next();
-                    element.markForRemoval();//disable();
-                }
-                TextCreator labelCreator = new TextCreator("unknown player");
-                labelCreator.setStyle("my-listbox-item-style");
-                for (Iterator<PlayerData> it = players.iterator(); it.hasNext();) {
-                    PlayerData data = it.next();
+                ListBox playerList = screen.findNiftyControl("players_list", ListBox.class);
+                playerList.clear();
+                for(PlayerData data : PlayerData.getHumanPlayers()) {
                     Logger.getLogger(ClientMain.class.getName()).log(Level.INFO, "List player {0}", data);
-                    labelCreator.setText(data.getStringData("name"));
-                    labelCreator.create(nifty, screen, panel);
+                    playerList.addItem(data.getStringData("name"));
                 }
                 return null;
             }
@@ -241,11 +229,9 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         enqueue(new Callable<Void>() {
 
             public Void call() throws Exception {
-                Screen screen = nifty.getScreen("lobby");
-                Element panel = screen.findElementByName("layer").findElementByName("bottom_panel").findElementByName("chat_panel").findElementByName("chat_list").findElementByName("chat_list_panel");
-                TextCreator labelCreator = new TextCreator(text);
-                labelCreator.setStyle("my-listbox-item-style");
-                labelCreator.create(nifty, screen, panel);
+                Screen screen = nifty.getScreen("loby");
+                ListBox chatList = screen.findNiftyControl("chat_list", ListBox.class);
+                chatList.addItem(text);
                 return null;
             }
         });
@@ -260,8 +246,8 @@ public class ClientMain extends SimpleApplication implements ScreenController {
 
             public Void call() throws Exception {
                 Screen screen = nifty.getScreen("lobby");
-                TextFieldControl control = screen.findElementByName("layer").findElementByName("bottom_panel").findElementByName("chat_panel").findElementByName("chat_bottom_bar").findElementByName("chat_text").getControl(TextFieldControl.class);
-                String text = control.getText();
+                TextField control = screen.findNiftyControl("", TextField.class);
+                String text = control.getRealText();
                 sendMessage(text);
                 control.setText("");
                 return null;
@@ -279,7 +265,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
      */
     public void connect() {
         //TODO: not connect when already trying..
-        final String userName = nifty.getScreen("load_game").findElementByName("layer").findElementByName("panel").findElementByName("username_text").getControl(TextFieldControl.class).getText();
+        final String userName = nifty.getScreen("load_game").findNiftyControl("username_text", TextField.class).getRealText();
         if (userName.trim().length() == 0) {
             setStatusText("Username invalid");
             return;
@@ -319,7 +305,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
      * @param modelNames
      */
     public void loadLevel(final String name, final String[] modelNames) {
-        final TextRenderer statusText = nifty.getScreen("load_level").findElementByName("layer").findElementByName("panel").findElementByName("status_text").getRenderer(TextRenderer.class);
+        final Label statusText = nifty.getScreen("load_level").findNiftyControl("status_text", Label.class);
         if (name.equals("null")) {
             enqueue(new Callable<Void>() {
 
@@ -378,12 +364,15 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         }).start();
     }
 
+    @Override
     public void bind(Nifty nifty, Screen screen) {
     }
 
+    @Override
     public void onStartScreen() {
     }
 
+    @Override
     public void onEndScreen() {
     }
 

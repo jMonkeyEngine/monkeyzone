@@ -1,0 +1,28 @@
+group = 'org.jmonkeyengine'
+version = '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+    jcenter()
+    //maven { url "http://dl.bintray.com/jmonkeyengine/org.jmonkeyengine" }
+    maven { url "http://nifty-gui.sourceforge.net/nifty-maven-repo" }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+
+    compile fileTree(dir: rootProject.file('libs'), include:['*.jar'])
+
+    compile group: jme.group, name: 'jme3-core', version: jme.version
+    compile group: jme.group, name: 'jme3-effects', version: jme.version
+    compile group: jme.group, name: 'jme3-networking', version: jme.version
+    compile group: jme.group, name: 'jme3-plugins', version: jme.version
+    compile group: jme.group, name: 'jme3-jogg', version: jme.version
+    compile group: jme.group, name: 'jme3-terrain', version: jme.version
+    //compile group: jme.group, name: 'jme3-blender', version: jme.version
+    //compile group: jme.group, name: 'jme3-jbullet', version: jme.version
+    compile group: jme.group, name: 'jme3-bullet', version: jme.version
+    compile group: jme.group, name: 'jme3-niftygui', version: jme.version
+}
