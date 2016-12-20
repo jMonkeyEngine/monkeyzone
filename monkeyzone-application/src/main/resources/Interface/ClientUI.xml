@@ -16,7 +16,7 @@
                     </effect>
                 </text>
                 <text style="nifty-label" text=""/>
-                <image align="center" valign="center" filename="Interface/Images/logo.png" >
+                <image align="center" valign="center" filename="Interface/Images/logo.png" width="95px" height="95px" >
                     <effect>
                         <onStartScreen name="fade" startColor="#0000" endColor="#000f" length="1500" startDelay="250"/>
                     </effect>
