@@ -171,8 +171,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
      * starts the nifty gui system
      */
     private void startNifty() {
-        guiNode.detachAllChildren();
-        guiNode.attachChild(fpsText);
+        setDisplayStatView(false);
         niftyDisplay = new NiftyJmeDisplay(assetManager,
                 inputManager,
                 audioRenderer,
