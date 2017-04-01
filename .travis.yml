@@ -1,17 +1,48 @@
 language: java
+sudo: false
 
-./gradlew check
+branches:
+  only:
+  - master
+  - v3.1
 
-./gradlew assemble
+matrix:
+  include:
+  - os: linux
+    jdk: oraclejdk8
+    env: UPLOAD=true UPLOAD_NATIVE=true
+  - os: linux
+    jdk: openjdk7
+  - os: osx
+    env: UPLOAD_NATIVE=true
+
+addons:
+  ssh_known_hosts: github.com
+
+before_install:
+  - '[ -n "$UPLOAD" ] && git fetch --unshallow || :'
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
 cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
-    
-jdk:
-  - oraclejdk8
-  - oraclejdk7
+
+install:
+  - '[ -n "$UPLOAD_NATIVE" ] && ./gradlew
+  -PbuildNativeProjects=true assemble || ./gradlew assemble'
+
+script:
+  - ./gradlew check
+
+after_success:
+  - '[ "$TRAVIS_PULL_REQUEST" == "false" ] && [ -n "$UPLOAD_NATIVE" ] && ./private/upload_native.sh || :'
+  - '[ -n "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ -n "$UPLOAD" ] && ./gradlew bintrayUpload || :'
+
+notifications:
+  slack:
+    on_success: change
+    on_failure: always
