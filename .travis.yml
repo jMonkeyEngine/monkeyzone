@@ -4,7 +4,6 @@ sudo: false
 branches:
   only:
   - master
-  - v3.1
 
 matrix:
   include:
@@ -28,16 +27,8 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
 
-install:
-  - '[ -n "$UPLOAD_NATIVE" ] && ./gradlew
-  -PbuildNativeProjects=true assemble || ./gradlew assemble'
-
 script:
   - ./gradlew check
-
-after_success:
-  - '[ "$TRAVIS_PULL_REQUEST" == "false" ] && [ -n "$UPLOAD_NATIVE" ] && ./private/upload_native.sh || :'
-  - '[ -n "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ -n "$UPLOAD" ] && ./gradlew bintrayUpload || :'
 
 notifications:
   slack:
