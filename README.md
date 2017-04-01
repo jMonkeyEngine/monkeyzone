@@ -3,17 +3,19 @@
 
 [![README](https://github.com/SkidRunner/MonkeyZone/blob/master/README.png)]()
 
-## Introduction
+## Game Design Notes
 
-This is a game done by the jMonkeyEngine team made as a proof of concept for jMonkeyEngine3, its loosely based on an Activision RTS game from 1998.
+## Technical Highlights
 
-## Features
+## Art Direction
 
-## Installation
+## Running Locally
 
-## Troubleshooting
+## Supporting Technologies
+### Engine
+* [jMonkeyEngine](http://jmonkeyengine.org/)
 
-## Maintainers
+## Contributors
 
 | [![Normen Hansen](https://jme-hub-cdn-jmonkeyengineor.netdna-ssl.com/user_avatar/hub.jmonkeyengine.org/normen/120/337_1.png)](https://hub.jmonkeyengine.org/users/normen) | [![Paul Speed](https://jme-hub-cdn-jmonkeyengineor.netdna-ssl.com/user_avatar/hub.jmonkeyengine.org/pspeed/120/516_1.png)](https://hub.jmonkeyengine.org/users/pspeed) | [![Remy Bouquet](https://jme-hub-cdn-jmonkeyengineor.netdna-ssl.com/user_avatar/hub.jmonkeyengine.org/nehon/120/393_1.png)](https://hub.jmonkeyengine.org/users/nehon) | [![Mark Picknell](https://jme-hub-cdn-jmonkeyengineor.netdna-ssl.com/user_avatar/hub.jmonkeyengine.org/skidrunner/120/1937_1.png)](https://hub.jmonkeyengine.org/users/skidrunner) |
 |:---:|:---:|:---:|:---:|
