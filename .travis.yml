@@ -19,9 +19,6 @@ matrix:
 addons:
   ssh_known_hosts: github.com
 
-before_install:
-  - '[ -n "$UPLOAD" ] && git fetch --unshallow || :'
-
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
