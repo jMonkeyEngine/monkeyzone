@@ -28,7 +28,7 @@ cache:
     - $HOME/.gradle/wrapper/
 
 script:
-  - ./gradlew check
+  - gradle check
 
 notifications:
   slack:
