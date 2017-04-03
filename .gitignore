@@ -6,9 +6,17 @@ build
 out
 
 #FILES
-hs_err_pid*.log
+hs_err_pid*
 local.properties
+gradlew
+gradlew.bat
+
+#FILE TYPES
 *.dll
+*.jar
+*.tar.gz
+*.log
+*.class
 
 #IMPORTANT
 !libs/cai-nmgen-0.1.2.jar
