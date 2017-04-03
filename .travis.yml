@@ -1,19 +1,21 @@
 language: java
 sudo: false
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
 
 branches:
   only:
   - master
 
-matrix:
-  include:
-  - os: linux
-    jdk: oraclejdk8
-    env: UPLOAD=true UPLOAD_NATIVE=true
-  - os: linux
-    jdk: openjdk7
-  - os: osx
-    env: UPLOAD_NATIVE=true
+jdk:
+  - oraclejdk8
+  - oraclejdk7
+  - oraclejdk6
+  - openjdk8
+  - openjdk7
+  - openjdk6
 
 addons:
   ssh_known_hosts: github.com
