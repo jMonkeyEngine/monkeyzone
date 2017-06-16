@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nifty xmlns="http://nifty-gui.lessvoid.com/nifty-gui">
+    <useStyles filename="nifty-default-styles.xml" />
+    <useControls filename="nifty-default-controls.xml" />
+	
+	<screen id="screen_load">
+		<layer id="layer_background" childLayout="center">
+		</layer>
+		<layer id="layer_foreground" childLayout="center">
+		</layer>
+	</screen>
+	
+	<screen id="screen_menu">
+		<layer id="layer_background" childLayout="center">
+		</layer>
+		<layer id="layer_foreground" childLayout="center">
+		</layer>
+	</screen>
+	
+	<screen id="screen_join">
+		<layer id="layer_background" childLayout="center">
+		</layer>
+		<layer id="layer_foreground" childLayout="center">
+		</layer>
+	</screen>
+	
+	<screen id="screen_loby">
+		<layer id="layer_background" childLayout="center">
+		</layer>
+		<layer id="layer_foreground" childLayout="center">
+		</layer>
+	</screen>
+	
+	<screen id="screen_game" controller="com.jme3.fps.MainApplication">
+		<layer id="layer_background" childLayout="center" width="100%" height="100%">
+			
+		</layer>
+		<layer id="layer_foreground" childLayout="center" width="100%" height="100%">
+			<panel id="panel_buttons" childLayout="absolute" width="152px" height="224px" align="right" valign="bottom">
+				<control id="button_action" name="button" label="A" x="72px" y="0px" width="64px" height="64px">
+				</control>
+				<control id="button_weapon" name="button" label="W" x="36px" y="72px" width="64px" height="64px">
+					<interact onClick="placeBuilding()" />
+				</control>
+				<control id="button_crouch" name="button" label="C" x="0px" y="144px" width="64px" height="64px">
+				</control>
+				<control id="button_jump" name="button" label="J" x="72px" y="144px" width="64px" height="64px">
+				</control>
+			</panel>
+		</layer>
+	</screen>
+	<!--
+    <screen id="screen-game" controller="com.jme3.fps.ScreenState">
+		<layer id="background" childLayout="center">
+			<panel childLayout="absolute" align="right" valign="bottom" width="152px" height="224px">
+				<image filename="Interface/Images/Target.png" x="72px" y="0" width="64px" height="64px" />
+				<image filename="Interface/Images/Fire.png" x="36px" y="72px" width="64px" height="64px" />
+				<image filename="Interface/Images/Down.png" x="0" y="144px" width="64px" height="64px" />
+				<image filename="Interface/Images/Up.png" x="72px" y="144px" width="64px" height="64px" />
+			</panel>
+		</layer>
+		<layer id="foreground" childLayout="center" width="100%" height="100%" padding="0">
+			<panel childLayout="absolute" backgroundColor="#FFFFFF80" align="center" valign="top" width="256px" height="48px">
+				<panel id="health-outer" childLayout="center" backgroundColor="#FF8000FF" align="center" width="200px" height="20px" margin="8px,0px,4px,0px">
+					<panel id="health-inner" backgroundColor="#FF0000FF" align="center" width="120px" height="16px"/>
+				</panel>
+				<panel id="power-outer" backgroundColor="#FFFF00FF" align="center" width="240px" height="8px" margin="4px,0px,8px,0px" />
+			</panel>
+			
+			<image filename="Textures/DisplayCrosshairs.png" />
+			<panel childLayout="absolute" align="left" valign="bottom" width="256px" height="128px">
+				<image id="health" filename="Textures/DisplayHealthBar.png" x="38px" y="16px" width="110px" height="28px" />
+				<image id="rocket" filename="Textures/Rockets/DisplayRocket-20.png" x="0px" y="60px" width="245px" height="62px" />
+				<panel childLayout="center" x="187px" y="16px" width="58px" height="28px">
+					<text id="bullet" font="Interface/Fonts/LCDMono2.fnt" text="100" />
+				</panel>
+				<image filename="Textures/DisplayOverlay.png" x="0px" y="0px" />
+			</panel>
+		</layer>
+	</screen>
+	-->
+</nifty>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nifty xmlns="http://nifty-gui.lessvoid.com/nifty-gui">
+    <useStyles filename="nifty-default-styles.xml" />
+    <useControls filename="nifty-default-controls.xml" />
+	
+	<screen id="screen-test" controller="com.jme3.fps.MainApplication">
+		<layer childLayout="horizontal" width="100%" height="100%">
+			<panel childLayout="center" width="50%" height="100%">
+				<panel style="nifty-panel" childLayout="vertical">
+					<control id="label-move-origin" name="label" text="Origin ()" />
+					<control id="label-move-position" name="label" text="Position ()" />
+				</panel>
+			</panel>
+			<panel childLayout="center" width="50%" height="100%">
+				<panel style="nifty-panel" childLayout="vertical">
+					<control id="label-view-origin" name="label" text="Origin ()" />
+					<control id="label-view-position" name="label" text="Position ()" />
+				</panel>
+			</panel>
+		</layer>
+		<layer childLayout="absolute" width="100%" height="100%">
+			<image id ="image-joystick-back" filename="Textures/JoyStickBase.png" x="0px" y="0px" />
+		</layer>
+	</screen>

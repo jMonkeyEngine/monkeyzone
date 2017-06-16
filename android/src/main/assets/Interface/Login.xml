@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nifty xmlns="http://nifty-gui.lessvoid.com/nifty-gui">
+    <useStyles filename="nifty-default-styles.xml" />
+    <useControls filename="nifty-default-controls.xml" />
+    
+	<screen id="login">
+		<layer childLayout="center">
+			<panel childLayout="vertical" width="400px">
+				<text style="nifty-label" text="Monkey Zone"/>
+				<text style="nifty-label" text="Conquer the Monkiverse"/>
+				
+				<control name="label" text="Username" />
+				<control name="textfield" />
+				
+				<control name="button" label="Connect" />
+			</panel>
+		</layer>
+	</screen>
+	
+</nifty>
