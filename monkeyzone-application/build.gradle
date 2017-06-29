@@ -1,0 +1,11 @@
+repositories {
+
+}
+
+dependencies {
+    runtime group: jme.group, name: 'jme3-desktop', version: jme.version
+    //runtime group: jme.group, name: 'jme3-jogl', version: jme.version
+    //runtime group: jme.group, name: 'jme3-lwjgl', version: jme.version
+    runtime group: jme.group, name: 'jme3-lwjgl3', version: jme.version
+    runtime group: jme.group, name: 'jme3-bullet-native', version: jme.version
+}

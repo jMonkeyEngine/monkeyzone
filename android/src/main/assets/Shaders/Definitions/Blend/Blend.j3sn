@@ -1,0 +1,19 @@
+ShaderNodeDefinitions{
+	ShaderNodeDefinition Blend_ColorBurn {
+		Type: Fragment
+		Shader GLSL100: Common/MatDefs/ShaderNodes/Basic/colorMult.frag
+		Documentation{
+			Divides the inverted base color by the blend color, and then inverts the result.
+			@input base The base, or original color that will be blended with the blend color.
+			@input The blend color, which is combined with the base in some way based on the type of blend operation taking place.
+			@output result the resulting color
+		}
+		Input {
+			vec4 base
+			vec4 blend
+		}
+		Output {
+			vec4 result
+		}
+	}
+}

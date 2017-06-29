@@ -1,0 +1,35 @@
+language: java
+sudo: false
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
+
+branches:
+  only:
+  - master
+
+jdk:
+  - oraclejdk8
+  - oraclejdk7
+  - openjdk7
+
+addons:
+  ssh_known_hosts: github.com
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+script:
+  - gradle check
+
+notifications:
+  slack:
+    on_success: change
+    on_failure: always
