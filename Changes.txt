@@ -1,0 +1,19 @@
+2018-03-11
+Upgraded to JME3.2
+Added: Changes.txt
+Changed: nifty calls
+
+2017-??-??
+Upgraded to JME3.1
+Changed: 
+Because of the changes below, you must do a Clean and Build Project (Shift F11)
+Application from class to interface
+LegacyApplication implements Application
+SimpleApplication extends LegacyApplication
+Libraries: More might be required
+
+2016-??-??
+Upgraded for JME3.0
+???
+
+
