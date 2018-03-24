@@ -216,11 +216,9 @@ public class ClientMain extends SimpleApplication implements ScreenController {
 
             public Void call() throws Exception {
                 Screen screen = nifty.getScreen("lobby");
-                digger("Screen", screen);
                 List<PlayerData> players = PlayerData.getHumanPlayers();
                 //Element panel = screen.findElementById("layer").findElementById("panel").findElementById("players_panel").findElementById("players_list").findElementById("panel");
                 Element panel = screen.findElementById("panel").findElementById("players_panel").findElementById("players_list").findElementById("players_list");
-                digger("Panel", panel);
                 //for (Iterator<Element> it = new LinkedList<Element>(panel.getElements()).iterator(); it.hasNext();) {
                 for (Iterator<Element> it = panel.getChildren().iterator(); it.hasNext();) {
                     if (!it.hasNext()) System.out.println("it is empty");
@@ -247,39 +245,6 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         System.out.println();
     }
 
-    public void digger(Object obj, int k){
-        if (obj == null){
-            System.out.println("dis obj is null");
-        }
-        else if (obj instanceof Screen){
-            for (int j = 0;j < k;j++){
-                System.out.print("*");
-            }
-            Screen screen = (Screen)obj;
-            System.out.println("Screen ID=" + screen.getScreenId());
-            List list = screen.getLayerElements();
-            for(int i = 0;i < list.size();i++){
-                Object newObj = list.get(i);
-                digger(newObj, k + 1);
-            }
-        }
-        else if (obj instanceof Element){
-            for (int j = 0;j < k;j++){
-                System.out.print("*");
-            }
-            Element element = (Element)obj;
-            System.out.println("Element ID=" + element.getId());
-            List list = element.getChildren();
-            for(int i = 0;i < list.size();i++){
-                Object newObj = list.get(i);
-                digger(newObj, k + 1);
-            }
-        }
-        else{
-            System.out.println("obj=" + obj.getClass());
-        }
-    }
-    
     /**
      * add text to chat window, threadsafe
      * @param text
