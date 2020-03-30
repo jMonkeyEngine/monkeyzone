@@ -98,6 +98,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         Util.setLogLevels(true);
         app = new ClientMain();
         app.setSettings(settings);
+        app.setShowSettings(false);
         app.setPauseOnLostFocus(false);
         app.start();
     }
@@ -124,7 +125,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         getStateManager().attach(bulletState);
         bulletState.getPhysicsSpace().setAccuracy(Globals.PHYSICS_FPS);
         if(Globals.PHYSICS_DEBUG){
-            bulletState.getPhysicsSpace().enableDebug(assetManager);
+            bulletState.setDebugEnabled(true);
         }
         inputManager.setCursorVisible(true);
         flyCam.setEnabled(false);
@@ -187,7 +188,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        statusText = nifty.getScreen("load_game").findElementByName("layer").findElementByName("panel").findElementByName("status_text").getRenderer(TextRenderer.class);
+        statusText = nifty.getScreen("load_game").findElementById("layer").findElementById("panel").findElementById("status_text").getRenderer(TextRenderer.class);
         guiViewPort.addProcessor(niftyDisplay);
     }
 
@@ -214,9 +215,12 @@ public class ClientMain extends SimpleApplication implements ScreenController {
 
             public Void call() throws Exception {
                 Screen screen = nifty.getScreen("lobby");
-                Element panel = screen.findElementByName("layer").findElementByName("panel").findElementByName("players_panel").findElementByName("players_list").findElementByName("panel");
+                Element panel = screen.findElementById("layer").findElementById("panel").findElementById("players_panel").findElementById("players_list").findElementById("panel");
                 List<PlayerData> players = PlayerData.getHumanPlayers();
-                for (Iterator<Element> it = new LinkedList<Element>(panel.getElements()).iterator(); it.hasNext();) {
+                if(panel == null){
+                    System.out.println("Panel is null!");
+                }
+                for (Iterator<Element> it = new LinkedList<Element>(panel.getChildren()).iterator(); it.hasNext();) {
                     Element element = it.next();
                     element.markForRemoval();//disable();
                 }
@@ -242,7 +246,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
 
             public Void call() throws Exception {
                 Screen screen = nifty.getScreen("lobby");
-                Element panel = screen.findElementByName("layer").findElementByName("bottom_panel").findElementByName("chat_panel").findElementByName("chat_list").findElementByName("chat_list_panel");
+                Element panel = screen.findElementById("layer").findElementById("bottom_panel").findElementById("chat_panel").findElementById("chat_list").findElementById("chat_list_panel");
                 TextCreator labelCreator = new TextCreator(text);
                 labelCreator.setStyle("my-listbox-item-style");
                 labelCreator.create(nifty, screen, panel);
@@ -260,7 +264,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
 
             public Void call() throws Exception {
                 Screen screen = nifty.getScreen("lobby");
-                TextFieldControl control = screen.findElementByName("layer").findElementByName("bottom_panel").findElementByName("chat_panel").findElementByName("chat_bottom_bar").findElementByName("chat_text").getControl(TextFieldControl.class);
+                TextFieldControl control = screen.findElementById("layer").findElementById("bottom_panel").findElementById("chat_panel").findElementById("chat_bottom_bar").findElementById("chat_text").getControl(TextFieldControl.class);
                 String text = control.getText();
                 sendMessage(text);
                 control.setText("");
@@ -279,7 +283,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
      */
     public void connect() {
         //TODO: not connect when already trying..
-        final String userName = nifty.getScreen("load_game").findElementByName("layer").findElementByName("panel").findElementByName("username_text").getControl(TextFieldControl.class).getText();
+        final String userName = nifty.getScreen("load_game").findElementById("layer").findElementById("panel").findElementById("username_text").getControl(TextFieldControl.class).getText();
         if (userName.trim().length() == 0) {
             setStatusText("Username invalid");
             return;
@@ -319,7 +323,7 @@ public class ClientMain extends SimpleApplication implements ScreenController {
      * @param modelNames
      */
     public void loadLevel(final String name, final String[] modelNames) {
-        final TextRenderer statusText = nifty.getScreen("load_level").findElementByName("layer").findElementByName("panel").findElementByName("status_text").getRenderer(TextRenderer.class);
+        final TextRenderer statusText = nifty.getScreen("load_level").findElementById("layer").findElementById("panel").findElementById("status_text").getRenderer(TextRenderer.class);
         if (name.equals("null")) {
             enqueue(new Callable<Void>() {
 

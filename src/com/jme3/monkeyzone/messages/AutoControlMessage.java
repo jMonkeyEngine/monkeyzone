@@ -65,7 +65,7 @@ public class AutoControlMessage extends PhysicsSyncMessage {
         NetworkedAutonomousControl netControl = ((Spatial) object).getControl(NetworkedAutonomousControl.class);
         assert (netControl != null);
         if(netControl==null){
-            Logger.getLogger(AutoControlMessage.class.getName()).log(Level.SEVERE, "Entity {0} has to Autonomous Control, message not accepted", ((Spatial)object).getUserData("entity_id"));
+            Logger.getLogger(AutoControlMessage.class.getName()).log(Level.SEVERE, "Entity {0} has to Autonomous Control, message not accepted", ((Spatial)object).getUserData("entity_id").toString());
             return;
         }
         netControl.doAimAt(aimAt);

@@ -94,8 +94,8 @@ public class UserCommandControl implements Control, ActionListener {
         this(inputManager);
         this.screen = screen;
         for (int i = 0; i < 10; i++) {
-            selectionTexts[i] = screen.findElementByName("layer").findElementByName("panel_bottom").findElementByName("bottom_panel_right").findElementByName("status_text_0" + i).getRenderer(TextRenderer.class);
-            commandTexts[i] = screen.findElementByName("layer").findElementByName("panel_top").findElementByName("top_panel_left").findElementByName("status_text_0" + i).getRenderer(TextRenderer.class);
+            selectionTexts[i] = screen.findElementById("layer").findElementById("panel_bottom").findElementById("bottom_panel_right").findElementById("status_text_0" + i).getRenderer(TextRenderer.class);
+            commandTexts[i] = screen.findElementById("layer").findElementById("panel_top").findElementById("top_panel_left").findElementById("status_text_0" + i).getRenderer(TextRenderer.class);
         }
         setSelectionMenu(SelectionMenu.Main);
         updateCommandMenu();

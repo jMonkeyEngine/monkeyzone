@@ -227,10 +227,10 @@ public class NavMesh implements Savable {
                         // cannot fit directly.
                         // try to find point where we can
                         if (d1 < d2){
-                            intersectionPoint.interpolate(wall.getPointA(), wall.getPointB(), distBlend);
+                            intersectionPoint.interpolateLocal(wall.getPointA(), wall.getPointB(), distBlend);
                             newWayPoint = new Vector3f(intersectionPoint.x, 0, intersectionPoint.y);
                         }else{
-                            intersectionPoint.interpolate(wall.getPointB(), wall.getPointA(), distBlend);
+                            intersectionPoint.interpolateLocal(wall.getPointB(), wall.getPointA(), distBlend);
                             newWayPoint = new Vector3f(intersectionPoint.x, 0, intersectionPoint.y);
                         }
                     }
@@ -247,11 +247,11 @@ public class NavMesh implements Savable {
                     Vector2f normalB   = wall.getPointB().subtract(lastPt2d).normalizeLocal();
                     if (normalA.dot(normalEnd) < normalB.dot(normalEnd)){
                         // choose point b
-                        intersectionPoint.interpolate(wall.getPointB(), wall.getPointA(), distBlend);
+                        intersectionPoint.interpolateLocal(wall.getPointB(), wall.getPointA(), distBlend);
                         newWayPoint = new Vector3f(intersectionPoint.x, 0, intersectionPoint.y);
                     }else{
                         // choose point a
-                        intersectionPoint.interpolate(wall.getPointA(), wall.getPointB(), distBlend);
+                        intersectionPoint.interpolateLocal(wall.getPointA(), wall.getPointB(), distBlend);
                         newWayPoint = new Vector3f(intersectionPoint.x, 0, intersectionPoint.y);
                     }
                     currentCell.computeHeightOnCell(newWayPoint);

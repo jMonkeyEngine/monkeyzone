@@ -61,9 +61,9 @@ public class DefaultHUDControl implements HUDControl {
         if (screen == null) {
             throw new IllegalStateException("DefaultHUDControl nifty screen null!");
         }
-        hitPoints = screen.findElementByName("layer").findElementByName("panel_bottom").findElementByName("bottom_panel_left").findElementByName("status_text_01").getRenderer(TextRenderer.class);
-        speed = screen.findElementByName("layer").findElementByName("panel_bottom").findElementByName("bottom_panel_left").findElementByName("status_text_02").getRenderer(TextRenderer.class);
-        vehicle = screen.findElementByName("layer").findElementByName("panel_bottom").findElementByName("bottom_panel_left").findElementByName("status_text_03").getRenderer(TextRenderer.class);
+        hitPoints = screen.findElementByName("layer").findElementById("panel_bottom").findElementById("bottom_panel_left").findElementById("status_text_01").getRenderer(TextRenderer.class);
+        speed = screen.findElementByName("layer").findElementById("panel_bottom").findElementById("bottom_panel_left").findElementById("status_text_02").getRenderer(TextRenderer.class);
+        vehicle = screen.findElementByName("layer").findElementById("panel_bottom").findElementById("bottom_panel_left").findElementById("status_text_03").getRenderer(TextRenderer.class);
     }
 
     public void setSpatial(Spatial spatial) {
