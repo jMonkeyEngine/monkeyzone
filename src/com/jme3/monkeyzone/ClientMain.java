@@ -98,7 +98,6 @@ public class ClientMain extends SimpleApplication implements ScreenController {
         Util.setLogLevels(true);
         app = new ClientMain();
         app.setSettings(settings);
-        app.setShowSettings(false);
         app.setPauseOnLostFocus(false);
         app.start();
     }
