@@ -1,14 +1,6 @@
 # monkeyzone
 MonkeyZone is a multi-player demo game provided by the jME core developer team.
 
-    Download source code (Github Repository)
-
-    Watch pre-alpha video footage (YouTube Video)
-
-    Read "MonkeyZone – a jME3 game from the core" (news article)
-
-    Related forum thread: Open Game Finder
-
 This open-source demo:
 
     showcases one possible way to implement a game with jME3, and
