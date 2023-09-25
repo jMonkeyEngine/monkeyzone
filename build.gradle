@@ -6,12 +6,10 @@ plugins {
 group 'com.mygame'
 version '1.0'
 
-mainClassName = "com.mygame.Main"
+mainClassName = "com.jme3.monkeyzone.ClientMain"
 
 repositories {
     mavenCentral()
-    jcenter()
-    maven { url 'https://jitpack.io' }
 }
 
 project.ext {
@@ -74,4 +72,11 @@ java {
 
 wrapper {
     gradleVersion = '7.6'
+}
+
+task runServer(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    main = "com.jme3.monkeyzone.ServerMain"
+    jvmArgs '-Dlog4j.configurationFile=server-log4j2.xml'
+    standardInput = System.in
 }
