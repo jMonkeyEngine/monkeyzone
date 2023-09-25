@@ -77,6 +77,4 @@ wrapper {
 task runServer(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     main = "com.jme3.monkeyzone.ServerMain"
-    jvmArgs '-Dlog4j.configurationFile=server-log4j2.xml'
-    standardInput = System.in
 }
