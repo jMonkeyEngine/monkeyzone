@@ -1,0 +1,80 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'com.mygame'
+version '1.0'
+
+mainClassName = "com.jme3.monkeyzone.ClientMain"
+
+repositories {
+    mavenCentral()
+}
+
+project.ext {
+  jmeVer = '3.6.0-stable'
+}
+
+project(":assets") {
+    apply plugin: "java"
+
+    buildDir = rootProject.file("build/assets")
+
+    sourceSets {
+        main {
+            resources {
+                srcDir '.'
+            }
+        }
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
+}
+
+dependencies {
+
+  // Core JME
+  implementation "org.jmonkeyengine:jme3-core:$jmeVer"
+  implementation "org.jmonkeyengine:jme3-desktop:$jmeVer"
+  implementation "org.jmonkeyengine:jme3-lwjgl3:$jmeVer"
+  implementation "org.jmonkeyengine:jme3-terrain:$jmeVer"
+  implementation "org.jmonkeyengine:jme3-effects:$jmeVer"
+  implementation "org.jmonkeyengine:jme3-networking:$jmeVer"
+  implementation "org.jmonkeyengine:jme3-niftygui:$jmeVer"
+  // Suppress errors / warnings building in SDK
+  implementation "org.jmonkeyengine:jme3-jogg:$jmeVer"
+  implementation "org.jmonkeyengine:jme3-plugins:$jmeVer"
+  implementation "org.jmonkeyengine:jme3-jbullet:$jmeVer"
+
+  // Additional Libraries
+  implementation (files("lib/cai-nmgen-0.1.2.jar"))
+
+  // Assets sub-project
+  runtimeOnly project(':assets')
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': "$mainClassName"
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+wrapper {
+    gradleVersion = '7.6'
+}
+
+task runServer(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    main = "com.jme3.monkeyzone.ServerMain"
+}

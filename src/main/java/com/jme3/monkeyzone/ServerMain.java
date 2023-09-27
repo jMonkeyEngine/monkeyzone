@@ -108,6 +108,7 @@ public class ServerMain extends SimpleApplication {
         gameManager = new ServerGameManager();
         stateManager.attach(gameManager);
         listenerManager = new ServerNetListener(this, server, worldManager, gameManager);
+        Logger.getLogger(ServerMain.class.getName()).log(Level.INFO, "Server initialized. Waiting for connections...");
     }
 
     @Override
