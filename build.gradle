@@ -13,7 +13,7 @@ repositories {
 }
 
 project.ext {
-  jmeVer = '3.6.0-stable'
+  jmeVer = '3.7.0-stable'
 }
 
 project(":assets") {
@@ -31,7 +31,7 @@ project(":assets") {
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(17)
+            languageVersion = JavaLanguageVersion.of(21)
         }
     }
 }
@@ -66,12 +66,12 @@ jar {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
 wrapper {
-    gradleVersion = '7.6'
+    gradleVersion = '8.6'
 }
 
 task runServer(type: JavaExec) {
