@@ -3,10 +3,13 @@ plugins {
     id 'application'
 }
 
-group 'com.mygame'
-version '1.0'
+group = 'com.mygame'
+version = '1.0'
 
-mainClassName = "com.jme3.monkeyzone.ClientMain"
+application {
+    applicationName = '${name}'
+    mainClass = 'com.jme3.monkeyzone.ClientMain'
+}
 
 repositories {
     mavenCentral()
@@ -60,7 +63,7 @@ dependencies {
 
 jar {
     manifest {
-        attributes 'Main-Class': "$mainClassName"
+        attributes 'Main-Class': application.mainClass
     }
 }
 
@@ -74,7 +77,7 @@ wrapper {
     gradleVersion = '9.2.1'
 }
 
-task runServer(type: JavaExec) {
-    classpath sourceSets.main.runtimeClasspath
-    main = "com.jme3.monkeyzone.ServerMain"
+tasks.register('runServer', JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = "com.jme3.monkeyzone.ServerMain"
 }
