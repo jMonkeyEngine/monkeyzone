@@ -7,7 +7,7 @@ group = 'com.mygame'
 version = '1.0'
 
 application {
-    applicationName = '${name}'
+    applicationName = providers.provider { rootProject.name }
     mainClass = 'com.jme3.monkeyzone.ClientMain'
 }
 
